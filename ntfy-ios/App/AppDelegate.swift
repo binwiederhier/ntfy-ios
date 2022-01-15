@@ -15,10 +15,28 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     didFinishLaunchingWithOptions
       launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-      // Gonfiure / setup Firebase
-      FirebaseApp.configure()
-      FirebaseConfiguration.shared.setLoggerLevel(.max)
+    // Gonfiure / setup Firebase
+    FirebaseApp.configure()
+    FirebaseConfiguration.shared.setLoggerLevel(.max)
+    return true
+  }
+}
 
-      return true
+extension AppDelegate: UNUserNotificationCenterDelegate {
+  func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    willPresent notification: UNNotification,
+    withCompletionHandler completionHandler:
+    @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    completionHandler([[.banner, .sound]])
+  }
+
+  func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
+  ) {
+    completionHandler()
   }
 }
