@@ -25,6 +25,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     UNUserNotificationCenter.current().requestAuthorization(
       options: authOptions) { _, _ in }
     application.registerForRemoteNotifications()
+    
+    // Set self as messaging delegate
+    Messaging.messaging().delegate = self
 
     return true
   }
@@ -53,5 +56,18 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
     Messaging.messaging().apnsToken = deviceToken
+  }
+}
+
+extension AppDelegate: MessagingDelegate {
+  func messaging(
+    _ messaging: Messaging,
+    didReceiveRegistrationToken fcmToken: String?
+  ) {
+    let tokenDict = ["token": fcmToken ?? ""]
+    NotificationCenter.default.post(
+      name: Notification.Name("FCMToken"),
+      object: nil,
+      userInfo: tokenDict)
   }
 }
