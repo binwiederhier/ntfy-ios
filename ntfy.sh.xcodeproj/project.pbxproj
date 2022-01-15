@@ -22,6 +22,7 @@
 		80386E832793585C009B0480 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		80386E862793585C009B0480 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		80386E9027935937009B0480 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		80386E9C27935EE9009B0480 /* ntfy-sh-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ntfy-sh-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +75,7 @@
 		80386E8D279358E8009B0480 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				80386E9C27935EE9009B0480 /* ntfy-sh-Info.plist */,
 				80386E9027935937009B0480 /* GoogleService-Info.plist */,
 				80386E832793585C009B0480 /* Assets.xcassets */,
 			);
@@ -308,6 +310,7 @@
 				DEVELOPMENT_TEAM = D8Q555UR28;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ntfy-ios/Assets/ntfy-sh-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -337,6 +340,7 @@
 				DEVELOPMENT_TEAM = D8Q555UR28;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ntfy-ios/Assets/ntfy-sh-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
