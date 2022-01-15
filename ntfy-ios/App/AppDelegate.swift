@@ -57,6 +57,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
   ) {
     Messaging.messaging().apnsToken = deviceToken
   }
+
+  func application(
+    _ application: UIApplication,
+    didFailToRegisterForRemoteNotificationsWithError error: Error) {
+      // Debug error
+      print("Failed to register for notifications: \(error.localizedDescription)")
+    }
 }
 
 extension AppDelegate: MessagingDelegate {
