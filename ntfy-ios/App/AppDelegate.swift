@@ -60,10 +60,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
   func application(
     _ application: UIApplication,
-    didFailToRegisterForRemoteNotificationsWithError error: Error) {
-      // Debug error
-      print("Failed to register for notifications: \(error.localizedDescription)")
-    }
+    didFailToRegisterForRemoteNotificationsWithError error: Error
+  ) {
+    // Debug error
+    print("Failed to register for notifications: \(error.localizedDescription)")
+  }
 }
 
 extension AppDelegate: MessagingDelegate {
