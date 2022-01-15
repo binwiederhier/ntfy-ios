@@ -7,18 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		80386E802793585B009B0480 /* ntfy_iosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E7F2793585B009B0480 /* ntfy_iosApp.swift */; };
+		80386E802793585B009B0480 /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E7F2793585B009B0480 /* AppMain.swift */; };
 		80386E822793585B009B0480 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E812793585B009B0480 /* ContentView.swift */; };
 		80386E842793585C009B0480 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80386E832793585C009B0480 /* Assets.xcassets */; };
 		80386E872793585C009B0480 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80386E862793585C009B0480 /* Preview Assets.xcassets */; };
+		80386E9127935937009B0480 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 80386E9027935937009B0480 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		80386E7C2793585B009B0480 /* ntfy-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ntfy-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		80386E7F2793585B009B0480 /* ntfy_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ntfy_iosApp.swift; sourceTree = "<group>"; };
+		80386E7C2793585B009B0480 /* ntfy.sh.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.sh.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		80386E7F2793585B009B0480 /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
 		80386E812793585B009B0480 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		80386E832793585C009B0480 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		80386E862793585C009B0480 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		80386E9027935937009B0480 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,7 +45,7 @@
 		80386E7D2793585B009B0480 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				80386E7C2793585B009B0480 /* ntfy-ios.app */,
+				80386E7C2793585B009B0480 /* ntfy.sh.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -51,9 +53,9 @@
 		80386E7E2793585B009B0480 /* ntfy-ios */ = {
 			isa = PBXGroup;
 			children = (
-				80386E7F2793585B009B0480 /* ntfy_iosApp.swift */,
-				80386E812793585B009B0480 /* ContentView.swift */,
-				80386E832793585C009B0480 /* Assets.xcassets */,
+				80386E9327935982009B0480 /* Views */,
+				80386E922793597C009B0480 /* App */,
+				80386E8D279358E8009B0480 /* Assets */,
 				80386E852793585C009B0480 /* Preview Content */,
 			);
 			path = "ntfy-ios";
@@ -67,12 +69,37 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		80386E8D279358E8009B0480 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				80386E9027935937009B0480 /* GoogleService-Info.plist */,
+				80386E832793585C009B0480 /* Assets.xcassets */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+		80386E922793597C009B0480 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				80386E7F2793585B009B0480 /* AppMain.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		80386E9327935982009B0480 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				80386E812793585B009B0480 /* ContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		80386E7B2793585B009B0480 /* ntfy-ios */ = {
+		80386E7B2793585B009B0480 /* ntfy.sh */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 80386E8A2793585C009B0480 /* Build configuration list for PBXNativeTarget "ntfy-ios" */;
+			buildConfigurationList = 80386E8A2793585C009B0480 /* Build configuration list for PBXNativeTarget "ntfy.sh" */;
 			buildPhases = (
 				80386E782793585B009B0480 /* Sources */,
 				80386E792793585B009B0480 /* Frameworks */,
@@ -82,9 +109,9 @@
 			);
 			dependencies = (
 			);
-			name = "ntfy-ios";
+			name = ntfy.sh;
 			productName = "ntfy-ios";
-			productReference = 80386E7C2793585B009B0480 /* ntfy-ios.app */;
+			productReference = 80386E7C2793585B009B0480 /* ntfy.sh.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -102,7 +129,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 80386E772793585B009B0480 /* Build configuration list for PBXProject "ntfy-ios" */;
+			buildConfigurationList = 80386E772793585B009B0480 /* Build configuration list for PBXProject "ntfy.sh" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -115,7 +142,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				80386E7B2793585B009B0480 /* ntfy-ios */,
+				80386E7B2793585B009B0480 /* ntfy.sh */,
 			);
 		};
 /* End PBXProject section */
@@ -127,6 +154,7 @@
 			files = (
 				80386E872793585C009B0480 /* Preview Assets.xcassets in Resources */,
 				80386E842793585C009B0480 /* Assets.xcassets in Resources */,
+				80386E9127935937009B0480 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,7 +166,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				80386E822793585B009B0480 /* ContentView.swift in Sources */,
-				80386E802793585B009B0480 /* ntfy_iosApp.swift in Sources */,
+				80386E802793585B009B0480 /* AppMain.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,7 +311,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.copephobia.ntfy-ios";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = ntfy.sh;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -312,7 +340,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.copephobia.ntfy-ios";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = ntfy.sh;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -322,7 +350,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		80386E772793585B009B0480 /* Build configuration list for PBXProject "ntfy-ios" */ = {
+		80386E772793585B009B0480 /* Build configuration list for PBXProject "ntfy.sh" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				80386E882793585C009B0480 /* Debug */,
@@ -331,7 +359,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		80386E8A2793585C009B0480 /* Build configuration list for PBXNativeTarget "ntfy-ios" */ = {
+		80386E8A2793585C009B0480 /* Build configuration list for PBXNativeTarget "ntfy.sh" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				80386E8B2793585C009B0480 /* Debug */,
