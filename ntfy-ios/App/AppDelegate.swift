@@ -18,6 +18,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     // Gonfiure / setup Firebase
     FirebaseApp.configure()
     FirebaseConfiguration.shared.setLoggerLevel(.max)
+    
+    // Register app permissions for push notifications
+    UNUserNotificationCenter.current().delegate = self
+    let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+    UNUserNotificationCenter.current().requestAuthorization(
+      options: authOptions) { _, _ in }
+    application.registerForRemoteNotifications()
+
     return true
   }
 }
@@ -38,5 +46,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     withCompletionHandler completionHandler: @escaping () -> Void
   ) {
     completionHandler()
+  }
+  
+  func application(
+    _ application: UIApplication,
+    didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+  ) {
+    Messaging.messaging().apnsToken = deviceToken
   }
 }
