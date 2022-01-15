@@ -15,6 +15,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     didFinishLaunchingWithOptions
       launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    return true
+      // Gonfiure / setup Firebase
+      FirebaseApp.configure()
+      FirebaseConfiguration.shared.setLoggerLevel(.max)
+
+      return true
   }
 }
