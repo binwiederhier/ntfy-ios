@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8015C3DC2793AB1500E6F001 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8015C3DB2793AB1400E6F001 /* Database.swift */; };
 		80386E802793585B009B0480 /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E7F2793585B009B0480 /* AppMain.swift */; };
 		80386E822793585B009B0480 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E812793585B009B0480 /* ContentView.swift */; };
 		80386E842793585C009B0480 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80386E832793585C009B0480 /* Assets.xcassets */; };
@@ -15,9 +16,12 @@
 		80386E9927935CC9009B0480 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 80386E9827935CC9009B0480 /* FirebaseMessaging */; };
 		80386E9F27936087009B0480 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E9E27936087009B0480 /* AppDelegate.swift */; };
 		80386EA92793A7AC009B0480 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 80386EA82793A7AC009B0480 /* SQLite */; };
+		80A313F52793B1CF00F1A639 /* NtfySubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F42793B1CF00F1A639 /* NtfySubscription.swift */; };
+		80A313F72793B56800F1A639 /* NtfyNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F62793B56800F1A639 /* NtfyNotification.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8015C3DB2793AB1400E6F001 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 		80386E7C2793585B009B0480 /* ntfy.sh.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.sh.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		80386E7F2793585B009B0480 /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
 		80386E812793585B009B0480 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -27,6 +31,8 @@
 		80386E9C27935EE9009B0480 /* ntfy-sh-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ntfy-sh-Info.plist"; sourceTree = "<group>"; };
 		80386E9E27936087009B0480 /* AppDelegate.swift */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; tabWidth = 2; };
 		80386EA0279363A2009B0480 /* ntfy.sh.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfy.sh.entitlements; sourceTree = "<group>"; };
+		80A313F42793B1CF00F1A639 /* NtfySubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfySubscription.swift; sourceTree = "<group>"; };
+		80A313F62793B56800F1A639 /* NtfyNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyNotification.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,6 +48,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8015C3DA2793AB0300E6F001 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				8015C3DB2793AB1400E6F001 /* Database.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		80386E732793585B009B0480 = {
 			isa = PBXGroup;
 			children = (
@@ -62,6 +76,8 @@
 		80386E7E2793585B009B0480 /* ntfy-ios */ = {
 			isa = PBXGroup;
 			children = (
+				80A313F32793B1BE00F1A639 /* Models */,
+				8015C3DA2793AB0300E6F001 /* Utils */,
 				80386E9327935982009B0480 /* Views */,
 				80386E922793597C009B0480 /* App */,
 				80386E8D279358E8009B0480 /* Assets */,
@@ -103,6 +119,15 @@
 				80386E812793585B009B0480 /* ContentView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		80A313F32793B1BE00F1A639 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				80A313F42793B1CF00F1A639 /* NtfySubscription.swift */,
+				80A313F62793B56800F1A639 /* NtfyNotification.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -186,7 +211,10 @@
 			files = (
 				80386E9F27936087009B0480 /* AppDelegate.swift in Sources */,
 				80386E822793585B009B0480 /* ContentView.swift in Sources */,
+				8015C3DC2793AB1500E6F001 /* Database.swift in Sources */,
 				80386E802793585B009B0480 /* AppMain.swift in Sources */,
+				80A313F72793B56800F1A639 /* NtfyNotification.swift in Sources */,
+				80A313F52793B1CF00F1A639 /* NtfySubscription.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,6 +330,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
