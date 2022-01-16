@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		8015C3DC2793AB1500E6F001 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8015C3DB2793AB1400E6F001 /* Database.swift */; };
 		80386E802793585B009B0480 /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E7F2793585B009B0480 /* AppMain.swift */; };
-		80386E822793585B009B0480 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E812793585B009B0480 /* ContentView.swift */; };
+		80386E822793585B009B0480 /* SubscriptionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E812793585B009B0480 /* SubscriptionsList.swift */; };
 		80386E842793585C009B0480 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80386E832793585C009B0480 /* Assets.xcassets */; };
 		80386E872793585C009B0480 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80386E862793585C009B0480 /* Preview Assets.xcassets */; };
 		80386E9127935937009B0480 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 80386E9027935937009B0480 /* GoogleService-Info.plist */; };
@@ -18,13 +18,16 @@
 		80386EA92793A7AC009B0480 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 80386EA82793A7AC009B0480 /* SQLite */; };
 		80A313F52793B1CF00F1A639 /* NtfySubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F42793B1CF00F1A639 /* NtfySubscription.swift */; };
 		80A313F72793B56800F1A639 /* NtfyNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F62793B56800F1A639 /* NtfyNotification.swift */; };
+		80A313F92793C0D800F1A639 /* SubscriptionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F82793C0D800F1A639 /* SubscriptionRow.swift */; };
+		80A313FB2793C2EA00F1A639 /* SubscriptionDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313FA2793C2EA00F1A639 /* SubscriptionDetail.swift */; };
+		80A313FD2793C42000F1A639 /* NotificationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313FC2793C42000F1A639 /* NotificationRow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		8015C3DB2793AB1400E6F001 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 		80386E7C2793585B009B0480 /* ntfy.sh.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.sh.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		80386E7F2793585B009B0480 /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
-		80386E812793585B009B0480 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		80386E812793585B009B0480 /* SubscriptionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsList.swift; sourceTree = "<group>"; };
 		80386E832793585C009B0480 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		80386E862793585C009B0480 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		80386E9027935937009B0480 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -33,6 +36,9 @@
 		80386EA0279363A2009B0480 /* ntfy.sh.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfy.sh.entitlements; sourceTree = "<group>"; };
 		80A313F42793B1CF00F1A639 /* NtfySubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfySubscription.swift; sourceTree = "<group>"; };
 		80A313F62793B56800F1A639 /* NtfyNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyNotification.swift; sourceTree = "<group>"; };
+		80A313F82793C0D800F1A639 /* SubscriptionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRow.swift; sourceTree = "<group>"; };
+		80A313FA2793C2EA00F1A639 /* SubscriptionDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionDetail.swift; sourceTree = "<group>"; };
+		80A313FC2793C42000F1A639 /* NotificationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,7 +122,10 @@
 		80386E9327935982009B0480 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				80386E812793585B009B0480 /* ContentView.swift */,
+				80386E812793585B009B0480 /* SubscriptionsList.swift */,
+				80A313F82793C0D800F1A639 /* SubscriptionRow.swift */,
+				80A313FA2793C2EA00F1A639 /* SubscriptionDetail.swift */,
+				80A313FC2793C42000F1A639 /* NotificationRow.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -210,8 +219,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				80386E9F27936087009B0480 /* AppDelegate.swift in Sources */,
-				80386E822793585B009B0480 /* ContentView.swift in Sources */,
+				80386E822793585B009B0480 /* SubscriptionsList.swift in Sources */,
 				8015C3DC2793AB1500E6F001 /* Database.swift in Sources */,
+				80A313FD2793C42000F1A639 /* NotificationRow.swift in Sources */,
+				80A313FB2793C2EA00F1A639 /* SubscriptionDetail.swift in Sources */,
+				80A313F92793C0D800F1A639 /* SubscriptionRow.swift in Sources */,
 				80386E802793585B009B0480 /* AppMain.swift in Sources */,
 				80A313F72793B56800F1A639 /* NtfyNotification.swift in Sources */,
 				80A313F52793B1CF00F1A639 /* NtfySubscription.swift in Sources */,

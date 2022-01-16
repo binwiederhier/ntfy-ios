@@ -14,7 +14,7 @@ struct AppMain: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SubscriptionsList()
         }
     }
 }

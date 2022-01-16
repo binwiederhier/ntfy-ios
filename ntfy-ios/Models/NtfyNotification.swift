@@ -7,7 +7,7 @@
 
 import Foundation
 
-class NtfyNotification {
+class NtfyNotification: Identifiable {
 
     // Properties
     var id: Int64!

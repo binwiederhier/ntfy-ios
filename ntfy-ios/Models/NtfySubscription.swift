@@ -7,7 +7,7 @@
 
 import Foundation
 
-class NtfySubscription {
+class NtfySubscription: Identifiable {
     
     // Properties
     var id: Int64!
@@ -19,5 +19,9 @@ class NtfySubscription {
         self.id = id
         self.baseUrl = baseUrl
         self.topic = topic
+    }
+
+    func displayName() -> String {
+        return self.baseUrl + "/" + self.topic
     }
 }
