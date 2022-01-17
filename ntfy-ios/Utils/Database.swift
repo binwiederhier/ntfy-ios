@@ -74,6 +74,22 @@ class Database {
         return list
     }
 
+    func getSubscription(topic: String) -> NtfySubscription? {
+        do {
+            print("Looking for subscription for topic " + topic)
+            if let subscription = try db?.pluck(subscriptions.filter(subscription_topic == topic)) {
+                print("Found subscription")
+                return NtfySubscription(id: try subscription.get(subscription_id), baseUrl: try subscription.get(subscription_base_url), topic: try subscription.get(subscription_topic))
+            } else {
+                print("Did not find subscription")
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        return nil
+    }
+
     func addSubscription(subscription: NtfySubscription) -> NtfySubscription {
         do {
             let id = try db?.run(subscriptions.insert(subscription_base_url <- subscription.baseUrl, subscription_topic <- subscription.topic))

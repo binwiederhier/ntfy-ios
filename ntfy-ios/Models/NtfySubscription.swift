@@ -5,6 +5,7 @@
 //  Created by Andrew Cope on 1/15/22.
 //
 
+import FirebaseMessaging
 import Foundation
 
 class NtfySubscription: Identifiable {
@@ -23,5 +24,22 @@ class NtfySubscription: Identifiable {
 
     func displayName() -> String {
         return self.baseUrl + "/" + self.topic
+    }
+
+    func save() -> NtfySubscription {
+        Database.current.addSubscription(subscription: self)
+    }
+
+    func subscribe(to topic: String) {
+        Messaging.messaging().subscribe(toTopic: topic)
+    }
+
+    func delete() {
+        Database.current.deleteSubscription(subscription: self)
+        self.unsubscribe(from: self.topic)
+    }
+
+    func unsubscribe(from topic: String) {
+        Messaging.messaging().unsubscribe(fromTopic: topic)
     }
 }

@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct SubscriptionsList: View {
-    let subscriptions = Database.current.getSubscriptions()
+    @State var subscriptions = Database.current.getSubscriptions()
+
+    @Binding var addingSubscription: Bool
 
     var body: some View {
         NavigationView {
@@ -18,14 +20,23 @@ struct SubscriptionsList: View {
                 } label: {
                     SubscriptionRow(subscription: subscription)
                 }
-                .navigationTitle("Subscribed topics")
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        subscription.delete()
+                        subscriptions = Database.current.getSubscriptions()
+                    } label: {
+                        Label("Delete", systemImage: "trash.circle")
+                    }
+                }
+            }
+            .navigationTitle("Subscribed topics")
+            .toolbar {
+                Button(action: {
+                    addingSubscription = true
+                }) {
+                    Image(systemName: "plus")
+                }
             }
         }
-    }
-}
-
-struct SubscriptionsList_Previews: PreviewProvider {
-    static var previews: some View {
-        SubscriptionsList()
     }
 }

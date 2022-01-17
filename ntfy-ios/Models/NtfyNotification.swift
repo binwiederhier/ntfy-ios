@@ -24,4 +24,8 @@ class NtfyNotification: Identifiable {
         self.title = title
         self.message = message
     }
+
+    func save() -> NtfyNotification {
+        return Database.current.addNotification(notification: self)
+    }
 }
