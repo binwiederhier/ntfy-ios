@@ -82,7 +82,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
       print("Attempting to create notification")
       if let subscription = Database.current.getSubscription(topic: notificationTopic) {
         let ntfyNotification = NtfyNotification(id: Int64(1), subscriptionId: subscription.id, timestamp: Int64(0), title: notificationTitle, message: notificationMessage)
-        ntfyNotification.save()
+        //ntfyNotification.save()
         print("Created notification")
       }
     } else {

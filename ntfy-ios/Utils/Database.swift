@@ -33,9 +33,10 @@ class Database {
     // Initialize
     init() {
         do {
-            if let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first {
+            let fileManager = FileManager.default
+            if let path = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.ntfy") {
                 // Connect to the database
-                db = try Connection("\(path)/ntfy.sh.sqlite3")
+                db = try Connection("\(path.path)/ntfy.sh.sqlite3")
 
                 // Initialize Subscriptions table
                 try db?.run(subscriptions.create(ifNotExists: true) { table in
@@ -75,6 +76,7 @@ class Database {
     }
 
     func getSubscription(topic: String) -> NtfySubscription? {
+        print("Getting subscription")
         do {
             print("Looking for subscription for topic " + topic)
             if let subscription = try db?.pluck(subscriptions.filter(subscription_topic == topic)) {

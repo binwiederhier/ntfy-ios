@@ -7,7 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		800FA49627B19CA0005D05B9 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 800FA49527B19CA0005D05B9 /* NotificationService.swift */; };
+		800FA49A27B19CA0005D05B9 /* NotificationService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 800FA49327B19CA0005D05B9 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8015C3DC2793AB1500E6F001 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8015C3DB2793AB1400E6F001 /* Database.swift */; };
+		802D626927B1A36E00DDD3AF /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 802D626827B1A36E00DDD3AF /* FirebaseMessaging */; };
+		802D626B27B1A37400DDD3AF /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 802D626A27B1A37400DDD3AF /* SQLite */; };
+		802D626C27B1A37700DDD3AF /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8015C3DB2793AB1400E6F001 /* Database.swift */; };
+		802D626D27B1A37900DDD3AF /* NtfyNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F62793B56800F1A639 /* NtfyNotification.swift */; };
+		802D626E27B1A37C00DDD3AF /* NtfySubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F42793B1CF00F1A639 /* NtfySubscription.swift */; };
 		80386E802793585B009B0480 /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E7F2793585B009B0480 /* AppMain.swift */; };
 		80386E822793585B009B0480 /* SubscriptionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E812793585B009B0480 /* SubscriptionsList.swift */; };
 		80386E842793585C009B0480 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80386E832793585C009B0480 /* Assets.xcassets */; };
@@ -25,7 +32,35 @@
 		80A313FD2793C42000F1A639 /* NotificationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313FC2793C42000F1A639 /* NotificationRow.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		800FA49827B19CA0005D05B9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 80386E742793585B009B0480 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 800FA49227B19CA0005D05B9;
+			remoteInfo = NotificationService;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		800FA49B27B19CA0005D05B9 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				800FA49A27B19CA0005D05B9 /* NotificationService.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		800FA49327B19CA0005D05B9 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		800FA49527B19CA0005D05B9 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		800FA49727B19CA0005D05B9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		800FA49F27B19D2F005D05B9 /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
 		8015C3DB2793AB1400E6F001 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 		80386E7C2793585B009B0480 /* ntfy.sh.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.sh.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		80386E7F2793585B009B0480 /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
@@ -46,6 +81,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		800FA49027B19CA0005D05B9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				802D626B27B1A37400DDD3AF /* SQLite in Frameworks */,
+				802D626927B1A36E00DDD3AF /* FirebaseMessaging in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		80386E792793585B009B0480 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -58,6 +102,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		800FA49427B19CA0005D05B9 /* NotificationService */ = {
+			isa = PBXGroup;
+			children = (
+				800FA49F27B19D2F005D05B9 /* NotificationService.entitlements */,
+				800FA49527B19CA0005D05B9 /* NotificationService.swift */,
+				800FA49727B19CA0005D05B9 /* Info.plist */,
+			);
+			path = NotificationService;
+			sourceTree = "<group>";
+		};
 		8015C3DA2793AB0300E6F001 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -66,12 +120,21 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		802D626327B19FFE00DDD3AF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		80386E732793585B009B0480 = {
 			isa = PBXGroup;
 			children = (
 				80386EA0279363A2009B0480 /* ntfy.sh.entitlements */,
 				80386E7E2793585B009B0480 /* ntfy-ios */,
+				800FA49427B19CA0005D05B9 /* NotificationService */,
 				80386E7D2793585B009B0480 /* Products */,
+				802D626327B19FFE00DDD3AF /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -79,6 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				80386E7C2793585B009B0480 /* ntfy.sh.app */,
+				800FA49327B19CA0005D05B9 /* NotificationService.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -148,6 +212,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		800FA49227B19CA0005D05B9 /* NotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 800FA49E27B19CA0005D05B9 /* Build configuration list for PBXNativeTarget "NotificationService" */;
+			buildPhases = (
+				800FA48F27B19CA0005D05B9 /* Sources */,
+				800FA49027B19CA0005D05B9 /* Frameworks */,
+				800FA49127B19CA0005D05B9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NotificationService;
+			packageProductDependencies = (
+				802D626827B1A36E00DDD3AF /* FirebaseMessaging */,
+				802D626A27B1A37400DDD3AF /* SQLite */,
+			);
+			productName = NotificationService;
+			productReference = 800FA49327B19CA0005D05B9 /* NotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		80386E7B2793585B009B0480 /* ntfy.sh */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 80386E8A2793585C009B0480 /* Build configuration list for PBXNativeTarget "ntfy.sh" */;
@@ -155,10 +240,12 @@
 				80386E782793585B009B0480 /* Sources */,
 				80386E792793585B009B0480 /* Frameworks */,
 				80386E7A2793585B009B0480 /* Resources */,
+				800FA49B27B19CA0005D05B9 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				800FA49927B19CA0005D05B9 /* PBXTargetDependency */,
 			);
 			name = ntfy.sh;
 			packageProductDependencies = (
@@ -176,9 +263,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1310;
+				LastSwiftUpdateCheck = 1320;
 				LastUpgradeCheck = 1310;
 				TargetAttributes = {
+					800FA49227B19CA0005D05B9 = {
+						CreatedOnToolsVersion = 13.2.1;
+					};
 					80386E7B2793585B009B0480 = {
 						CreatedOnToolsVersion = 13.1;
 					};
@@ -202,11 +292,19 @@
 			projectRoot = "";
 			targets = (
 				80386E7B2793585B009B0480 /* ntfy.sh */,
+				800FA49227B19CA0005D05B9 /* NotificationService */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		800FA49127B19CA0005D05B9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		80386E7A2793585B009B0480 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -220,6 +318,17 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		800FA48F27B19CA0005D05B9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				802D626C27B1A37700DDD3AF /* Database.swift in Sources */,
+				802D626D27B1A37900DDD3AF /* NtfyNotification.swift in Sources */,
+				800FA49627B19CA0005D05B9 /* NotificationService.swift in Sources */,
+				802D626E27B1A37C00DDD3AF /* NtfySubscription.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		80386E782793585B009B0480 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -240,7 +349,69 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		800FA49927B19CA0005D05B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 800FA49227B19CA0005D05B9 /* NotificationService */;
+			targetProxy = 800FA49827B19CA0005D05B9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		800FA49C27B19CA0005D05B9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D8Q555UR28;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.copephobia.ntfy-ios.NotificationService";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		800FA49D27B19CA0005D05B9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D8Q555UR28;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.copephobia.ntfy-ios.NotificationService";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		80386E882793585C009B0480 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -361,6 +532,7 @@
 		80386E8B2793585C009B0480 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ntfy.sh.entitlements;
@@ -392,6 +564,7 @@
 		80386E8C2793585C009B0480 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ntfy.shRelease.entitlements;
@@ -423,6 +596,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		800FA49E27B19CA0005D05B9 /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				800FA49C27B19CA0005D05B9 /* Debug */,
+				800FA49D27B19CA0005D05B9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		80386E772793585B009B0480 /* Build configuration list for PBXProject "ntfy.sh" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -463,6 +645,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		802D626827B1A36E00DDD3AF /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 80386E9727935CC9009B0480 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		802D626A27B1A37400DDD3AF /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 80386EA72793A7AC009B0480 /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
+		};
 		80386E9827935CC9009B0480 /* FirebaseMessaging */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 80386E9727935CC9009B0480 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
