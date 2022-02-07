@@ -62,6 +62,7 @@
 		800FA49727B19CA0005D05B9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		800FA49F27B19D2F005D05B9 /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
 		8015C3DB2793AB1400E6F001 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
+		802D626F27B1C86B00DDD3AF /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		80386E7C2793585B009B0480 /* ntfy.sh.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.sh.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		80386E7F2793585B009B0480 /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
 		80386E812793585B009B0480 /* SubscriptionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsList.swift; sourceTree = "<group>"; };
@@ -130,6 +131,7 @@
 		80386E732793585B009B0480 = {
 			isa = PBXGroup;
 			children = (
+				802D626F27B1C86B00DDD3AF /* README.md */,
 				80386EA0279363A2009B0480 /* ntfy.sh.entitlements */,
 				80386E7E2793585B009B0480 /* ntfy-ios */,
 				800FA49427B19CA0005D05B9 /* NotificationService */,
