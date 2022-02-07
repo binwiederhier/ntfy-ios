@@ -21,16 +21,18 @@ class NotificationService: UNNotificationServiceExtension {
             bestAttemptContent.title = "\(bestAttemptContent.title) [modified]"
             
             let userInfo = bestAttemptContent.userInfo
-            print(userInfo)
+            print("USER INFO")
+            dump(userInfo)
             
-            if //let notificationId = userInfo["id"] as? Int64,
+            if let notificationId = userInfo["id"] as? String,
                let notificationTopic = userInfo["topic"] as? String,
-               //let notificationTimestamp = userInfo["time"] as? Int64,
+               let notificationTimestamp = userInfo["time"] as? String,
+               let notiticationTimestampInt = Int64(notificationTimestamp),
                let notificationTitle = userInfo["title"] as? String,
                let notificationMessage = userInfo["message"] as? String {
               print("Attempting to create notification")
               if let subscription = Database.current.getSubscription(topic: notificationTopic) {
-                let ntfyNotification = NtfyNotification(id: Int64(1), subscriptionId: subscription.id, timestamp: Int64(0), title: notificationTitle, message: notificationMessage)
+                let ntfyNotification = NtfyNotification(id: notificationId, subscriptionId: subscription.id, timestamp: notiticationTimestampInt, title: notificationTitle, message: notificationMessage)
                 ntfyNotification.save()
                 print("Created notification")
               }

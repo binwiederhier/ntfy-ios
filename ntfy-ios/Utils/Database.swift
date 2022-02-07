@@ -24,7 +24,7 @@ class Database {
 
     // Notifications Table
     let notifications = Table("Notifications")
-    let notification_id = Expression<Int64>("id")
+    let notification_id = Expression<String>("id")
     let notification_subscription_id = Expression<Int64>("subscriptionId")
     let notification_timestamp = Expression<Int64>("timestamp")
     let notification_title = Expression<String>("title")
@@ -47,7 +47,7 @@ class Database {
 
                 // Initialize Notifications Table
                 try db?.run(notifications.create(ifNotExists: true) { table in
-                    table.column(notification_id, primaryKey: .autoincrement)
+                    table.column(notification_id)
                     table.column(notification_subscription_id)
                     table.column(notification_timestamp)
                     table.column(notification_title)
@@ -136,9 +136,7 @@ class Database {
 
     func addNotification(notification: NtfyNotification) -> NtfyNotification {
         do {
-            let id = try db?.run(notifications.insert(notification_subscription_id <- notification.subscriptionId, notification_timestamp <- notification.timestamp, notification_title <- notification.title, notification_message <- notification.message))
-
-            notification.id = id
+            try db?.run(notifications.insert(notification_id <- notification.id, notification_subscription_id <- notification.subscriptionId, notification_timestamp <- notification.timestamp, notification_title <- notification.title, notification_message <- notification.message))
         } catch {
             print(error.localizedDescription)
         }
@@ -148,7 +146,7 @@ class Database {
 
     func deleteNotification(notification: NtfyNotification) {
         do {
-            if notification.id == 0 {
+            if notification.id.isEmpty {
                 return
             }
 

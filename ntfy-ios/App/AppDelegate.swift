@@ -71,23 +71,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
   }
 
   private func processNotification(_ notification: UNNotification) {
-    let userInfo = notification.request.content.userInfo
-    // TODO: Figure out why id / time are not working
-    print(userInfo)
-    if //let notificationId = userInfo["id"] as? Int64,
-       let notificationTopic = userInfo["topic"] as? String,
-       //let notificationTimestamp = userInfo["time"] as? Int64,
-       let notificationTitle = userInfo["title"] as? String,
-       let notificationMessage = userInfo["message"] as? String {
-      print("Attempting to create notification")
-      if let subscription = Database.current.getSubscription(topic: notificationTopic) {
-        let ntfyNotification = NtfyNotification(id: Int64(1), subscriptionId: subscription.id, timestamp: Int64(0), title: notificationTitle, message: notificationMessage)
-        //ntfyNotification.save()
-        print("Created notification")
-      }
-    } else {
-      print("ERROR")
-    }
+
   }
 }
 

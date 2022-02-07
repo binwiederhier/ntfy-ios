@@ -10,13 +10,13 @@ import Foundation
 class NtfyNotification: Identifiable {
 
     // Properties
-    var id: Int64!
+    var id: String!
     var subscriptionId: Int64
     var timestamp: Int64
     var title: String
     var message: String
 
-    init(id: Int64, subscriptionId: Int64, timestamp: Int64, title: String, message: String) {
+    init(id: String, subscriptionId: Int64, timestamp: Int64, title: String, message: String) {
         // Initialize values
         self.id = id
         self.subscriptionId = subscriptionId
