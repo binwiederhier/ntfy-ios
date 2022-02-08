@@ -23,21 +23,21 @@ class NotificationService: UNNotificationServiceExtension {
             let userInfo = bestAttemptContent.userInfo
             print("USER INFO")
             dump(userInfo)
-            
+
             if let notificationId = userInfo["id"] as? String,
                let notificationTopic = userInfo["topic"] as? String,
                let notificationTimestamp = userInfo["time"] as? String,
                let notiticationTimestampInt = Int64(notificationTimestamp),
                let notificationTitle = userInfo["title"] as? String,
                let notificationMessage = userInfo["message"] as? String {
-              print("Attempting to create notification")
-              if let subscription = Database.current.getSubscription(topic: notificationTopic) {
-                let ntfyNotification = NtfyNotification(id: notificationId, subscriptionId: subscription.id, timestamp: notiticationTimestampInt, title: notificationTitle, message: notificationMessage)
-                ntfyNotification.save()
-                print("Created notification")
-              }
+                print("Attempting to create notification")
+                if let subscription = Database.current.getSubscription(topic: notificationTopic) {
+                    let ntfyNotification = NtfyNotification(id: notificationId, subscriptionId: subscription.id, timestamp: notiticationTimestampInt, title: notificationTitle, message: notificationMessage)
+                    ntfyNotification.save()
+                    print("Created notification")
+                }
             } else {
-              print("ERROR")
+                print("ERROR")
             }
             
             contentHandler(bestAttemptContent)
