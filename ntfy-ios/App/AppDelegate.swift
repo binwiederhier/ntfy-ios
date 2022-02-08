@@ -2,6 +2,8 @@
 //  AppDelegate.swift
 //  ntfy.sh
 //
+//  AppDelegate focuses on setting up Firebase and push notification handlers
+//
 //  Created by Andrew Cope on 1/15/22.
 //
 
@@ -34,18 +36,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
-    // Handler for when user receives notification
+    // Handler for when user receives notification while app is in foreground
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler:
         @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        processNotification(notification)
+        // TODO: Should this be handled differently than the below handler?
         completionHandler([[.banner, .sound]])
     }
 
-    // Handler for when user taps notification
+    // Handler for when user taps a notification / or performs any long-press actions
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
@@ -55,6 +57,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         completionHandler()
     }
 
+    // Mapping APNs token to the FCM registration token
     func application(
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
@@ -69,12 +72,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         // Debug error
         print("Failed to register for notifications: \(error.localizedDescription)")
     }
-
-    private func processNotification(_ notification: UNNotification) {
-
-    }
 }
 
+// Notify whenever FCM token is updated
 extension AppDelegate: MessagingDelegate {
     func messaging(
         _ messaging: Messaging,

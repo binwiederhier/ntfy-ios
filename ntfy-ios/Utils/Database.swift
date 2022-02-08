@@ -2,6 +2,9 @@
 //  Database.swift
 //  ntfy.sh
 //
+//  A SQLite database wrapper to handle insertion, searching,
+//  and deletion of notifications and subscrptions
+//
 //  Created by Andrew Cope on 1/15/22.
 //
 
@@ -34,6 +37,7 @@ class Database {
     init() {
         do {
             let fileManager = FileManager.default
+            // Get the App Group path, which is accessed by both the app and the notification service extension
             if let path = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.ntfy") {
                 // Connect to the database
                 db = try Connection("\(path.path)/ntfy.sh.sqlite3")

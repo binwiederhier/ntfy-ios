@@ -2,6 +2,9 @@
 //  NotificationService.swift
 //  NotificationService
 //
+//  A notification service extension to intercept all incoming remote notifications and
+//  storing the notification data in SQLite before displaying the notification to the user
+//
 //  Created by Andrew Cope on 2/7/22.
 //
 
