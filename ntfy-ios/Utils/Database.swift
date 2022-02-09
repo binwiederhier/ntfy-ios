@@ -122,11 +122,27 @@ class Database {
         }
     }
 
-    func getNotifications(subscription: NtfySubscription) -> [NtfyNotification] {
+    func getNotificationCount(subscription: NtfySubscription) -> Int {
+        do {
+            if let count = try db?.scalar(notifications.filter(notification_subscription_id == subscription.id).count) {
+                return count
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
+
+        return 0
+    }
+
+    func getNotifications(subscription: NtfySubscription, limit: Int = 0) -> [NtfyNotification] {
         var list = [NtfyNotification]()
 
         do {
-            if let result = try db?.prepare(notifications.filter(notification_subscription_id == subscription.id).order(subscription_id.asc)) {
+            var query = notifications.filter(notification_subscription_id == subscription.id).order(notification_timestamp.desc)
+            if limit > 0 {
+                query = query.limit(limit)
+            }
+            if let result = try db?.prepare(query) {
                 for line in result {
                     list.append(NtfyNotification(id: try line.get(notification_id), subscriptionId: try line.get(notification_subscription_id), timestamp: try line.get(notification_timestamp), title: try line.get(notification_title), message: try line.get(notification_message)))
                 }

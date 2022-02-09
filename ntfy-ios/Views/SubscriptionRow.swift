@@ -11,9 +11,20 @@ struct SubscriptionRow: View {
     var subscription: NtfySubscription
 
     var body: some View {
-        HStack {
-            Text(subscription.displayName())
+        let totalNotificationCount = subscription.notificationCount()
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text(subscription.displayName())
+                    .font(.headline)
+                    .bold()
+                Spacer()
+                Text(subscription.lastNotification()?.displayShortDateTime() ?? "")
+                    .font(.subheadline)
+            }
             Spacer()
+            Text("\(totalNotificationCount) notification\(totalNotificationCount != 1 ? "s" : "")")
+                .font(.subheadline)
+                .padding(.bottom, 4)
         }
     }
 }

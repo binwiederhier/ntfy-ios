@@ -42,4 +42,12 @@ class NtfySubscription: Identifiable {
     func unsubscribe(from topic: String) {
         Messaging.messaging().unsubscribe(fromTopic: topic)
     }
+
+    func notificationCount() -> Int {
+        Database.current.getNotificationCount(subscription: self)
+    }
+
+    func lastNotification() -> NtfyNotification? {
+        Database.current.getNotifications(subscription: self, limit: 1).first
+    }
 }

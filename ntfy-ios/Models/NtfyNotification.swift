@@ -28,4 +28,37 @@ class NtfyNotification: Identifiable {
     func save() -> NtfyNotification {
         return Database.current.addNotification(notification: self)
     }
+
+    func displayShortDateTime() -> String {
+        let date = Date(timeIntervalSince1970: TimeInterval(self.timestamp))
+        let calendar = Calendar.current
+
+        if calendar.isDateInYesterday(date) {
+            return "Yesterday"
+        }
+
+        let dateFormatter = DateFormatter()
+
+        if calendar.isDateInToday(date) {
+            dateFormatter.dateFormat = "h:mm a"
+            dateFormatter.amSymbol = "AM"
+            dateFormatter.pmSymbol = "PM"
+        } else {
+            dateFormatter.dateStyle = .medium
+            dateFormatter.timeStyle = .short
+        }
+
+        return dateFormatter.string(from: date)
+    }
+
+    func timestampString() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "h:mm a"
+        dateFormatter.amSymbol = "AM"
+        dateFormatter.pmSymbol = "PM"
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .short
+        dateFormatter.doesRelativeDateFormatting = true
+        return dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(timestamp)))
+    }
 }
