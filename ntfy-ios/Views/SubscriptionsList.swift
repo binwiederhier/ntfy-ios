@@ -26,6 +26,14 @@ struct SubscriptionsList: View {
 
                     SubscriptionRow(subscription: subscription)
                 }
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        subscription.delete()
+                        subscriptions = Database.current.getSubscriptions()
+                    } label: {
+                        Label("Delete", systemImage: "trash.circle")
+                    }
+                }
             }
             .navigationTitle("Subscribed topics")
             .toolbar {
