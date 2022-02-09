@@ -17,6 +17,7 @@ struct SubscriptionRow: View {
                 Text(subscription.displayName())
                     .font(.headline)
                     .bold()
+                    .lineLimit(1)
                 Spacer()
                 Text(subscription.lastNotification()?.displayShortDateTime() ?? "")
                     .font(.subheadline)
