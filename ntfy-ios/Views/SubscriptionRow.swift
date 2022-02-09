@@ -20,11 +20,13 @@ struct SubscriptionRow: View {
                 Spacer()
                 Text(subscription.lastNotification()?.displayShortDateTime() ?? "")
                     .font(.subheadline)
+                    .foregroundColor(.gray)
             }
             Spacer()
             Text("\(totalNotificationCount) notification\(totalNotificationCount != 1 ? "s" : "")")
                 .font(.subheadline)
                 .padding(.bottom, 4)
+                .foregroundColor(.gray)
         }
     }
 }

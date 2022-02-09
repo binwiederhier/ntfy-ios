@@ -15,18 +15,16 @@ struct SubscriptionsList: View {
     var body: some View {
         NavigationView {
             List(subscriptions) { subscription in
-                NavigationLink {
-                    SubscriptionDetail(subscription: subscription)
-                } label: {
-                    SubscriptionRow(subscription: subscription)
-                }
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        subscription.delete()
-                        subscriptions = Database.current.getSubscriptions()
-                    } label: {
-                        Label("Delete", systemImage: "trash.circle")
+                ZStack {
+                    NavigationLink(
+                        destination: SubscriptionDetail(subscription: subscription)
+                    ) {
+                        EmptyView()
                     }
+                    .opacity(0.0)
+                    .buttonStyle(PlainButtonStyle())
+
+                    SubscriptionRow(subscription: subscription)
                 }
             }
             .navigationTitle("Subscribed topics")
