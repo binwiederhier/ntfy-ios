@@ -35,6 +35,7 @@ struct SubscriptionsList: View {
                     }
                 }
             }
+            .listStyle(PlainListStyle())
             .navigationTitle("Subscribed topics")
             .toolbar {
                 Button(action: {

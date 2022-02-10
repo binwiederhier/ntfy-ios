@@ -22,12 +22,15 @@ struct SubscriptionRow: View {
                 Text(subscription.lastNotification()?.displayShortDateTime() ?? "")
                     .font(.subheadline)
                     .foregroundColor(.gray)
+                Image(systemName: "chevron.forward")
+                    .font(.system(size: 12.0))
+                    .foregroundColor(.gray)
             }
             Spacer()
             Text("\(totalNotificationCount) notification\(totalNotificationCount != 1 ? "s" : "")")
                 .font(.subheadline)
-                .padding(.bottom, 4)
                 .foregroundColor(.gray)
         }
+        .padding(.all, 4)
     }
 }
