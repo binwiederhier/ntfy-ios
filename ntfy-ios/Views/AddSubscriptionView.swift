@@ -18,23 +18,32 @@ struct AddSubscriptionView: View {
                 Section(header: Text("Topic Name")) {
                     TextField("Topic name", text: $topic)
                 }
-                Button(action: {
-                    if !topic.isEmpty {
-                        let subscription = NtfySubscription(id: 1, baseUrl: "192.168.1.135", topic: topic)
-                        subscription.save()
-                        subscription.subscribe(to: topic)
-                        addingSubscription = false
-                    }
-                }) {
-                    Text("Subscribe")
-                }
-                .disabled(topic.isEmpty)
             }
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("Subscribe to topic").font(.headline)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        addingSubscription = false
+                    }) {
+                        Text("Cancel")
+                    }
+                }
+                ToolbarItem(placement: .principal) {
+                    Text("New Topic").font(.headline)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        if !topic.isEmpty {
+                            let subscription = NtfySubscription(id: 1, baseUrl: "192.168.1.135", topic: topic)
+                            subscription.save()
+                            subscription.subscribe(to: topic)
+                            addingSubscription = false
+                        }
+                    }) {
+                        Text("Subscribe")
+                    }
+                    .disabled(topic.isEmpty)
+                }
             }
         }
     }
