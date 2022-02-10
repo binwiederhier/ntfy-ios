@@ -24,9 +24,11 @@ struct SubscriptionDetail: View {
             }
         }
         .overlay(Group {
-            Text("No Notifications")
-                .font(.headline)
-                .foregroundColor(.gray)
+            if notifications.isEmpty {
+                Text("No Notifications")
+                    .font(.headline)
+                    .foregroundColor(.gray)
+            }
         })
     }
 }
