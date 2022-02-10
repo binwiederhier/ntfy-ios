@@ -36,7 +36,7 @@ struct SubscriptionsList: View {
                 }
             }
             .listStyle(PlainListStyle())
-            .navigationTitle("Subscribed topics")
+            .navigationTitle("Subscribed Topics")
             .toolbar {
                 Button(action: {
                     addingSubscription = true
@@ -44,6 +44,13 @@ struct SubscriptionsList: View {
                     Image(systemName: "plus")
                 }
             }
+            .overlay(Group {
+                if subscriptions.isEmpty {
+                    Text("No Topics")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                }
+            })
         }
     }
 }
