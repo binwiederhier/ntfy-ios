@@ -21,6 +21,7 @@ class EmojiManager {
     private static var emojis: Dictionary<String, Emoji> = [:]
 
     init() {
+        // emojis.json pulled from https://github.com/github/gemoji/blob/master/db/emoji.json
         if let url = Bundle.main.url(forResource: "emojis", withExtension: "json") {
             do {
                 let jsonData = try Data(contentsOf: url)
