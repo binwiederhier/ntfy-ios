@@ -23,5 +23,10 @@ struct SubscriptionDetail: View {
                 Text(subscription.displayName()).font(.headline)
             }
         }
+        .overlay(Group {
+            Text("No Notifications")
+                .font(.headline)
+                .foregroundColor(.gray)
+        })
     }
 }
