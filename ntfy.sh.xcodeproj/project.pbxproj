@@ -72,6 +72,7 @@
 		80386E9C27935EE9009B0480 /* ntfy-sh-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ntfy-sh-Info.plist"; sourceTree = "<group>"; };
 		80386E9E27936087009B0480 /* AppDelegate.swift */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		80386EA0279363A2009B0480 /* ntfy.sh.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfy.sh.entitlements; sourceTree = "<group>"; };
+		8081A7F427B4CB67004A8986 /* FEATURE_PARITY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FEATURE_PARITY.md; sourceTree = "<group>"; };
 		8086EB232794630800C3628A /* AddSubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSubscriptionView.swift; sourceTree = "<group>"; };
 		8086EB2527946FCE00C3628A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		80A313F42793B1CF00F1A639 /* NtfySubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfySubscription.swift; sourceTree = "<group>"; };
@@ -131,6 +132,7 @@
 		80386E732793585B009B0480 = {
 			isa = PBXGroup;
 			children = (
+				8081A7F327B4CB21004A8986 /* docs */,
 				802D626F27B1C86B00DDD3AF /* README.md */,
 				80386EA0279363A2009B0480 /* ntfy.sh.entitlements */,
 				80386E7E2793585B009B0480 /* ntfy-ios */,
@@ -200,6 +202,14 @@
 				8086EB2527946FCE00C3628A /* ContentView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		8081A7F327B4CB21004A8986 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				8081A7F427B4CB67004A8986 /* FEATURE_PARITY.md */,
+			);
+			path = docs;
 			sourceTree = "<group>";
 		};
 		80A313F32793B1BE00F1A639 /* Models */ = {
