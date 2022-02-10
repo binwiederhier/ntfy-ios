@@ -17,6 +17,7 @@ struct SubscriptionDetail: View {
                 NotificationRow(notification: notification)
             }
         }
+        .listStyle(PlainListStyle())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {

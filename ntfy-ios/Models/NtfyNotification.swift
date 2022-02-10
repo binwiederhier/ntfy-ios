@@ -15,14 +15,18 @@ class NtfyNotification: Identifiable {
     var timestamp: Int64
     var title: String
     var message: String
+    var priority: Int
+    var tags: String
 
-    init(id: String, subscriptionId: Int64, timestamp: Int64, title: String, message: String) {
+    init(id: String, subscriptionId: Int64, timestamp: Int64, title: String, message: String, priority: Int = 3, tags: String = "") {
         // Initialize values
         self.id = id
         self.subscriptionId = subscriptionId
         self.timestamp = timestamp
         self.title = title
         self.message = message
+        self.priority = priority
+        self.tags = tags
     }
 
     func save() -> NtfyNotification {
@@ -60,5 +64,18 @@ class NtfyNotification: Identifiable {
         dateFormatter.timeStyle = .short
         dateFormatter.doesRelativeDateFormatting = true
         return dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(timestamp)))
+    }
+
+    func displayTitle() -> String {
+        return self.title
+    }
+
+    func displayTags() -> String {
+        var tagString = ""
+        let tags = self.tags.components(separatedBy: ",")
+        for tag in tags {
+            tagString += EmojiManager().getEmojiByAlias(alias: tag)?.getUnicode() ?? "" + " "
+        }
+        return tagString
     }
 }

@@ -34,8 +34,18 @@ class NotificationService: UNNotificationServiceExtension {
                let notificationTitle = userInfo["title"] as? String,
                let notificationMessage = userInfo["message"] as? String {
                 print("Attempting to create notification")
+                let notificationPriority = Int(userInfo["priority"] as? String ?? "")
+                let notificationTags = userInfo["tags"] as? String ?? ""
                 if let subscription = Database.current.getSubscription(topic: notificationTopic) {
-                    let ntfyNotification = NtfyNotification(id: notificationId, subscriptionId: subscription.id, timestamp: notiticationTimestampInt, title: notificationTitle, message: notificationMessage)
+                    let ntfyNotification = NtfyNotification(
+                        id: notificationId,
+                        subscriptionId: subscription.id,
+                        timestamp: notiticationTimestampInt,
+                        title: notificationTitle,
+                        message: notificationMessage,
+                        priority: Int(notificationPriority ?? 3),
+                        tags: notificationTags
+                    )
                     ntfyNotification.save()
                     print("Created notification")
                 }

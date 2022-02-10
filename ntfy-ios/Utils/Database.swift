@@ -32,6 +32,8 @@ class Database {
     let notification_timestamp = Expression<Int64>("timestamp")
     let notification_title = Expression<String>("title")
     let notification_message = Expression<String>("message")
+    let notification_priority = Expression<Int>("priority")
+    let notification_tags = Expression<String>("tags")
 
     // Initialize
     init() {
@@ -56,6 +58,8 @@ class Database {
                     table.column(notification_timestamp)
                     table.column(notification_title)
                     table.column(notification_message)
+                    table.column(notification_priority)
+                    table.column(notification_tags)
                 })
             }
         } catch {
@@ -144,7 +148,17 @@ class Database {
             }
             if let result = try db?.prepare(query) {
                 for line in result {
-                    list.append(NtfyNotification(id: try line.get(notification_id), subscriptionId: try line.get(notification_subscription_id), timestamp: try line.get(notification_timestamp), title: try line.get(notification_title), message: try line.get(notification_message)))
+                    list.append(
+                        NtfyNotification(
+                            id: try line.get(notification_id),
+                            subscriptionId: try line.get(notification_subscription_id),
+                            timestamp: try line.get(notification_timestamp),
+                            title: try line.get(notification_title),
+                            message: try line.get(notification_message),
+                            priority: try line.get(notification_priority),
+                            tags: try line.get(notification_tags)
+                        )
+                    )
                 }
             }
         } catch {
@@ -156,7 +170,15 @@ class Database {
 
     func addNotification(notification: NtfyNotification) -> NtfyNotification {
         do {
-            try db?.run(notifications.insert(notification_id <- notification.id, notification_subscription_id <- notification.subscriptionId, notification_timestamp <- notification.timestamp, notification_title <- notification.title, notification_message <- notification.message))
+            try db?.run(notifications.insert(
+                notification_id <- notification.id,
+                notification_subscription_id <- notification.subscriptionId,
+                notification_timestamp <- notification.timestamp,
+                notification_title <- notification.title,
+                notification_message <- notification.message,
+                notification_priority <- notification.priority,
+                notification_tags <- notification.tags
+            ))
         } catch {
             print(error.localizedDescription)
         }
