@@ -51,6 +51,6 @@ struct SubscriptionsList: View {
                         .foregroundColor(.gray)
                 }
             })
-        }
+        }.navigationViewStyle(StackNavigationViewStyle())
     }
 }
