@@ -24,6 +24,14 @@ struct NotificationRow: View {
                 Text(notification.displayShortDateTime())
                     .font(.subheadline)
                     .foregroundColor(.gray)
+                if notification.priority == 4 {
+                    Image(systemName: "exclamationmark")
+                        .foregroundColor(.red)
+                }
+                if notification.priority == 5 {
+                    Image(systemName: "exclamationmark.3")
+                        .foregroundColor(.red)
+                }
             }
             Spacer()
             Text(notification.message)
