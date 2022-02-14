@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct NotificationRow: View {
-    var notification: NtfyNotification
+    let notification: NtfyNotification
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -18,8 +18,8 @@ struct NotificationRow: View {
                     .bold()
                     .lineLimit(1)
                 Spacer()
-                if !notification.tags.isEmpty {
-                    Text(notification.displayTags())
+                if notification.hasEmojiTags() {
+                    Text(notification.displayEmojiTags())
                 }
                 Text(notification.displayShortDateTime())
                     .font(.subheadline)
@@ -28,6 +28,12 @@ struct NotificationRow: View {
             Spacer()
             Text(notification.message)
                 .font(.body)
+            if notification.hasNonEmojiTags() {
+                Spacer()
+                Text("Tags: " + notification.displayNonEmojiTags())
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
         }
         .padding(.all, 4)
     }
