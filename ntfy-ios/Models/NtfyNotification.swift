@@ -41,7 +41,10 @@ class NtfyNotification: Identifiable {
     }
 
     func setTags() {
-        let tags = self.tags.components(separatedBy: ",")
+        // Split tags string, ignoring empty tags
+        let tags = self.tags.components(separatedBy: ",").filter {
+            !$0.trimmingCharacters(in: .whitespaces).isEmpty
+        }
         for tag in tags {
             if let emoji = EmojiManager().getEmojiByAlias(alias: tag) {
                 self.emojiTags.append(emoji.getUnicode())
