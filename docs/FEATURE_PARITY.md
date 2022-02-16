@@ -20,3 +20,4 @@ This document is to keep track of the feature parity between the iOS and Android
 | User Authentication | :x: | :white_check_mark: | Not yet implemented |
 | Dark mode | :white_check_mark: | :white_check_mark: | Dependent on iOS dark mode, may add override in |
 | Logging | :x: | :white_check_mark: | Not yet implemented |
+| Share to topic | :x: | :white_check_mark: | Not yet implemented |
