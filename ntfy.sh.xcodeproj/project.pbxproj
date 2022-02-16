@@ -34,6 +34,8 @@
 		80E8CED827B56DB200FDC5E0 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E8CED627B56DB200FDC5E0 /* EmojiManager.swift */; };
 		80E8CEDA27B5736100FDC5E0 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 80E8CED927B5736100FDC5E0 /* emojis.json */; };
 		80E8CEDB27B5736100FDC5E0 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 80E8CED927B5736100FDC5E0 /* emojis.json */; };
+		80ED61BE27BCA36A00FCEA36 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80ED61BD27BCA36A00FCEA36 /* Configuration.swift */; };
+		80ED61BF27BCA36A00FCEA36 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80ED61BD27BCA36A00FCEA36 /* Configuration.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,6 +88,7 @@
 		80A313FC2793C42000F1A639 /* NotificationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRow.swift; sourceTree = "<group>"; };
 		80E8CED627B56DB200FDC5E0 /* EmojiManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiManager.swift; sourceTree = "<group>"; };
 		80E8CED927B5736100FDC5E0 /* emojis.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = emojis.json; sourceTree = "<group>"; };
+		80ED61BD27BCA36A00FCEA36 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +128,7 @@
 			children = (
 				8015C3DB2793AB1400E6F001 /* Database.swift */,
 				80E8CED627B56DB200FDC5E0 /* EmojiManager.swift */,
+				80ED61BD27BCA36A00FCEA36 /* Configuration.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -345,6 +349,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				802D626C27B1A37700DDD3AF /* Database.swift in Sources */,
+				80ED61BF27BCA36A00FCEA36 /* Configuration.swift in Sources */,
 				802D626D27B1A37900DDD3AF /* NtfyNotification.swift in Sources */,
 				800FA49627B19CA0005D05B9 /* NotificationService.swift in Sources */,
 				80E8CED827B56DB200FDC5E0 /* EmojiManager.swift in Sources */,
@@ -357,6 +362,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				80386E9F27936087009B0480 /* AppDelegate.swift in Sources */,
+				80ED61BE27BCA36A00FCEA36 /* Configuration.swift in Sources */,
 				8086EB2627946FCE00C3628A /* ContentView.swift in Sources */,
 				80386E822793585B009B0480 /* SubscriptionsList.swift in Sources */,
 				8015C3DC2793AB1500E6F001 /* Database.swift in Sources */,
@@ -440,6 +446,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				APP_BASE_URL = "http://192.168.1.135";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -501,6 +508,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				APP_BASE_URL = "http://ntfy.sh";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";

@@ -34,7 +34,7 @@ struct AddSubscriptionView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         if !topic.isEmpty {
-                            let subscription = NtfySubscription(id: 1, baseUrl: "192.168.1.135", topic: topic)
+                            let subscription = NtfySubscription(id: 1, baseUrl: Configuration.appBaseUrl, topic: topic)
                             subscription.save()
                             subscription.subscribe(to: topic)
                             addingSubscription = false
