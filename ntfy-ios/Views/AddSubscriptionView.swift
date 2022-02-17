@@ -15,8 +15,12 @@ struct AddSubscriptionView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Topic Name")) {
-                    TextField("Topic name", text: $topic)
+                Section(
+                    header: Text("Topic Name"),
+                    footer: Text("Topics may not be password protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
+                ) {
+                    TextField("Topic name, e.g. server_alerts", text: $topic)
+                        .textInputAutocapitalization(.never)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
