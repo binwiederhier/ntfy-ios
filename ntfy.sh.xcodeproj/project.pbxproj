@@ -23,6 +23,8 @@
 		80386E9927935CC9009B0480 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 80386E9827935CC9009B0480 /* FirebaseMessaging */; };
 		80386E9F27936087009B0480 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E9E27936087009B0480 /* AppDelegate.swift */; };
 		80386EA92793A7AC009B0480 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 80386EA82793A7AC009B0480 /* SQLite */; };
+		80856C7F27BDE0A7008AC8B8 /* ApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80856C7E27BDE0A7008AC8B8 /* ApiService.swift */; };
+		80856C8027BDE0A7008AC8B8 /* ApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80856C7E27BDE0A7008AC8B8 /* ApiService.swift */; };
 		8086EB242794630800C3628A /* AddSubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8086EB232794630800C3628A /* AddSubscriptionView.swift */; };
 		8086EB2627946FCE00C3628A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8086EB2527946FCE00C3628A /* ContentView.swift */; };
 		80A313F52793B1CF00F1A639 /* NtfySubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F42793B1CF00F1A639 /* NtfySubscription.swift */; };
@@ -79,6 +81,7 @@
 		80386E9E27936087009B0480 /* AppDelegate.swift */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		80386EA0279363A2009B0480 /* ntfy.sh.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfy.sh.entitlements; sourceTree = "<group>"; };
 		8081A7F427B4CB67004A8986 /* FEATURE_PARITY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FEATURE_PARITY.md; sourceTree = "<group>"; };
+		80856C7E27BDE0A7008AC8B8 /* ApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
 		8086EB232794630800C3628A /* AddSubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSubscriptionView.swift; sourceTree = "<group>"; };
 		8086EB2527946FCE00C3628A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		80A313F42793B1CF00F1A639 /* NtfySubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfySubscription.swift; sourceTree = "<group>"; };
@@ -129,6 +132,7 @@
 				8015C3DB2793AB1400E6F001 /* Database.swift */,
 				80E8CED627B56DB200FDC5E0 /* EmojiManager.swift */,
 				80ED61BD27BCA36A00FCEA36 /* Configuration.swift */,
+				80856C7E27BDE0A7008AC8B8 /* ApiService.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -353,6 +357,7 @@
 				802D626D27B1A37900DDD3AF /* NtfyNotification.swift in Sources */,
 				800FA49627B19CA0005D05B9 /* NotificationService.swift in Sources */,
 				80E8CED827B56DB200FDC5E0 /* EmojiManager.swift in Sources */,
+				80856C8027BDE0A7008AC8B8 /* ApiService.swift in Sources */,
 				802D626E27B1A37C00DDD3AF /* NtfySubscription.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -373,6 +378,7 @@
 				80A313F92793C0D800F1A639 /* SubscriptionRow.swift in Sources */,
 				80386E802793585B009B0480 /* AppMain.swift in Sources */,
 				80A313F72793B56800F1A639 /* NtfyNotification.swift in Sources */,
+				80856C7F27BDE0A7008AC8B8 /* ApiService.swift in Sources */,
 				80A313F52793B1CF00F1A639 /* NtfySubscription.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

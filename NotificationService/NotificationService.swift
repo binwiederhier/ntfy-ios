@@ -44,7 +44,7 @@ class NotificationService: UNNotificationServiceExtension {
                         title: notificationTitle,
                         message: notificationMessage,
                         priority: Int(notificationPriority ?? 3),
-                        tags: notificationTags
+                        tags: notificationTags.components(separatedBy: ",")
                     )
                     ntfyNotification.save()
                     print("Created notification")

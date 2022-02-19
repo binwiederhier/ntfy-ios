@@ -22,8 +22,13 @@ class NtfySubscription: Identifiable {
         self.topic = topic
     }
 
-    func displayName() -> String {
+    func urlString() -> String {
         return self.baseUrl + "/" + self.topic
+    }
+
+    func displayName() -> String {
+        let url = URL(string: urlString())
+        return url!.host! + url!.path
     }
 
     func save() -> NtfySubscription {

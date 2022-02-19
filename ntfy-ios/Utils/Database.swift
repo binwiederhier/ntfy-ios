@@ -11,6 +11,7 @@
 import Foundation
 import SQLite
 import StoreKit
+import SQLite3
 
 class Database {
     // Static instance
@@ -156,7 +157,7 @@ class Database {
                             title: try line.get(notification_title),
                             message: try line.get(notification_message),
                             priority: try line.get(notification_priority),
-                            tags: try line.get(notification_tags)
+                            tags: try line.get(notification_tags).components(separatedBy: ",")
                         )
                     )
                 }
@@ -177,9 +178,15 @@ class Database {
                 notification_title <- notification.title,
                 notification_message <- notification.message,
                 notification_priority <- notification.priority,
-                notification_tags <- notification.tags
+                notification_tags <- notification.tags.joined(separator: ",")
             ))
-        } catch {
+        } catch let Result.error(message, code, _) where code == SQLITE_CONSTRAINT {
+            // Likely means that the notification already exists
+            print("Constraint failed: \(message)")
+        } catch let Result.error(message, code, _) {
+            print(message)
+            print(code)
+        } catch let error {
             print(error.localizedDescription)
         }
 

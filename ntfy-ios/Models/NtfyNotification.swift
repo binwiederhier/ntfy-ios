@@ -7,7 +7,7 @@
 
 import Foundation
 
-class NtfyNotification: Identifiable {
+class NtfyNotification: Identifiable, Decodable {
 
     // Database Properties
     var id: String!
@@ -16,13 +16,13 @@ class NtfyNotification: Identifiable {
     var title: String
     var message: String
     var priority: Int
-    var tags: String
+    var tags: [String]
 
     // Object Properties
     var emojiTags: [String] = []
     var nonEmojiTags: [String] = []
 
-    init(id: String, subscriptionId: Int64, timestamp: Int64, title: String, message: String, priority: Int = 3, tags: String = "") {
+    init(id: String, subscriptionId: Int64, timestamp: Int64, title: String, message: String, priority: Int = 3, tags: [String] = []) {
         // Initialize values
         self.id = id
         self.subscriptionId = subscriptionId
@@ -36,19 +36,32 @@ class NtfyNotification: Identifiable {
         self.setTags()
     }
 
+    enum CodingKeys: String, CodingKey {
+        case id, topic, time, title, message, priority, tags
+    }
+
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.subscriptionId = try Int64((Database.current.getSubscription(topic: container.decode(String.self, forKey: .topic))?.id)!)
+        self.timestamp = try container.decode(Int64.self, forKey: .time)
+        self.title = try container.decode(String.self, forKey: .title)
+        self.message = try container.decode(String.self, forKey: .message)
+        self.priority = try container.decode(Int.self, forKey: .priority)
+        self.tags = try container.decode([String].self, forKey: .tags)
+
+        self.setTags()
+    }
+
     func save() -> NtfyNotification {
         return Database.current.addNotification(notification: self)
     }
 
     func setTags() {
-        // Split tags string, ignoring empty tags
-        let tags = self.tags.components(separatedBy: ",").filter {
-            !$0.trimmingCharacters(in: .whitespaces).isEmpty
-        }
-        for tag in tags {
+        for tag in self.tags {
             if let emoji = EmojiManager().getEmojiByAlias(alias: tag) {
                 self.emojiTags.append(emoji.getUnicode())
-            } else {
+            } else if !tag.isEmpty {
                 self.nonEmojiTags.append(tag)
             }
         }
