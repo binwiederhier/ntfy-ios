@@ -17,6 +17,21 @@ class ApiService {
         fetchJsonData(urlString: urlString, completionHandler: completionHandler)
     }
 
+    func publish(subscription: NtfySubscription, message: String, title: String, priority: Int = 3, tags: [String] = [], completionHandler: @escaping (NtfyNotification?, Error?) -> Void) {
+        guard let url = URL(string: subscription.urlString()) else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(title, forHTTPHeaderField: "Title")
+        request.setValue(String(priority), forHTTPHeaderField: "Priority")
+        request.setValue(tags.joined(separator: ","), forHTTPHeaderField: "Tags")
+        request.httpBody = message.data(using: String.Encoding.utf8)
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            print(data)
+            print(response)
+            print(error)
+        }.resume()
+    }
+
     private func fetchJsonData<T: Decodable>(urlString: String, completionHandler: @escaping ([T]?, Error?) -> ()) {
         guard let url = URL(string: urlString) else { return }
         URLSession.shared.dataTask(with: url) { (data, response, error) in

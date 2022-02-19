@@ -23,6 +23,21 @@ struct SubscriptionDetail: View {
             ToolbarItem(placement: .principal) {
                 Text(subscription.displayName()).font(.headline)
             }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu("Edit") {
+                    Button("Send Test Notification") {
+                        let priority = Int.random(in: 1..<6)
+                        ApiService.shared.publish(
+                            subscription: subscription,
+                            message: "This is a test notification from the Ntfy iOS app. It has a priority of \(priority).",
+                            title: "Test: You can set a title if you like",
+                            priority: priority
+                        ) { _,_ in
+                            print("Success")
+                        }
+                    }
+                }
+            }
         }
         .overlay(Group {
             if notifications.isEmpty {
