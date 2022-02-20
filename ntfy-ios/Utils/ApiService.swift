@@ -7,7 +7,7 @@
 
 import Foundation
 
-class ApiService {
+class ApiService: NSObject {
     static let shared = ApiService()
 
     func poll(subscription: NtfySubscription, completionHandler: @escaping ([NtfyNotification]?, Error?) -> Void) {
@@ -31,6 +31,20 @@ class ApiService {
             print(error)
         }.resume()
     }
+
+    /*func checkAuth(baseUrl: String, topic: String, user: NtfyUser?) -> Bool {
+        guard let url = URL(string: "\(baseUrl)/\(topic)/auth") else { return false }
+        var request = URLRequest(url: url)
+        if user != nil {
+            let credential = URLCredential(user: user!.username, password: user!.password, persistence: URLCredential.Persistence.none)
+            request
+        }
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+
+        }
+
+        return false
+    }*/
 
     private func fetchJsonData<T: Decodable>(urlString: String, completionHandler: @escaping ([T]?, Error?) -> ()) {
         guard let url = URL(string: urlString) else { return }

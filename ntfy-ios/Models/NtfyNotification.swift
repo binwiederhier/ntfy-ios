@@ -17,12 +17,13 @@ class NtfyNotification: Identifiable, Decodable {
     var message: String
     var priority: Int
     var tags: [String]
+    var attachment: NtfyAttachment?
 
     // Object Properties
     var emojiTags: [String] = []
     var nonEmojiTags: [String] = []
 
-    init(id: String, subscriptionId: Int64, timestamp: Int64, title: String, message: String, priority: Int = 3, tags: [String] = []) {
+    init(id: String, subscriptionId: Int64, timestamp: Int64, title: String, message: String, priority: Int = 3, tags: [String] = [], attachment: NtfyAttachment?) {
         // Initialize values
         self.id = id
         self.subscriptionId = subscriptionId
@@ -31,6 +32,7 @@ class NtfyNotification: Identifiable, Decodable {
         self.message = message
         self.priority = priority
         self.tags = tags
+        self.attachment = attachment
 
         // Set notification tags
         self.setTags()

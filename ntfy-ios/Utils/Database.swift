@@ -35,6 +35,17 @@ class Database {
     let notification_message = Expression<String>("message")
     let notification_priority = Expression<Int>("priority")
     let notification_tags = Expression<String>("tags")
+    let notification_attachment_id = Expression<Int64>("attachmentId")
+
+    // Attachments Table
+    let attachments = Table("Attachments")
+    var attachment_id = Expression<Int64>("id")
+    let attachment_name = Expression<String>("name")
+    let attachment_type = Expression<String>("type")
+    let attachment_size = Expression<Int64>("size")
+    let attachment_expires = Expression<Int64>("expires")
+    let attachment_url = Expression<String>("url")
+    let attachment_content_url = Expression<String>("contentUrl")
 
     // Initialize
     init() {
@@ -61,6 +72,18 @@ class Database {
                     table.column(notification_message)
                     table.column(notification_priority)
                     table.column(notification_tags)
+                    table.column(notification_attachment_id)
+                })
+
+                // Initialize Attachments Table
+                try db?.run(attachments.create(ifNotExists: true) { table in
+                    table.column(attachment_id, primaryKey: .autoincrement)
+                    table.column(attachment_name)
+                    table.column(attachment_type)
+                    table.column(attachment_size)
+                    table.column(attachment_expires)
+                    table.column(attachment_url)
+                    table.column(attachment_content_url)
                 })
             }
         } catch {
@@ -149,6 +172,21 @@ class Database {
             }
             if let result = try db?.prepare(query) {
                 for line in result {
+                    var attachment: NtfyAttachment? = nil
+                    let attachmentId = try line.get(notification_attachment_id)
+                    if attachmentId != 0 {
+                        if let attachmentResult = try db?.pluck(attachments.filter(attachment_id == attachmentId)) {
+                            attachment = NtfyAttachment(
+                                id: try attachmentResult.get(attachment_id),
+                                name: try attachmentResult.get(attachment_name),
+                                type: try attachmentResult.get(attachment_type),
+                                size: try attachmentResult.get(attachment_size),
+                                expires: try attachmentResult.get(attachment_expires),
+                                url: try attachmentResult.get(attachment_url),
+                                contentUrl: try attachmentResult.get(attachment_content_url)
+                            )
+                        }
+                    }
                     list.append(
                         NtfyNotification(
                             id: try line.get(notification_id),
@@ -157,7 +195,8 @@ class Database {
                             title: try line.get(notification_title),
                             message: try line.get(notification_message),
                             priority: try line.get(notification_priority),
-                            tags: try line.get(notification_tags).components(separatedBy: ",")
+                            tags: try line.get(notification_tags).components(separatedBy: ","),
+                            attachment: attachment
                         )
                     )
                 }
@@ -171,6 +210,10 @@ class Database {
 
     func addNotification(notification: NtfyNotification) -> NtfyNotification {
         do {
+            var attachmentId: Int64 = 0
+            if notification.attachment != nil {
+                attachmentId = addAttachment(attachment: notification.attachment!) ?? 0
+            }
             try db?.run(notifications.insert(
                 notification_id <- notification.id,
                 notification_subscription_id <- notification.subscriptionId,
@@ -178,7 +221,8 @@ class Database {
                 notification_title <- notification.title,
                 notification_message <- notification.message,
                 notification_priority <- notification.priority,
-                notification_tags <- notification.tags.joined(separator: ",")
+                notification_tags <- notification.tags.joined(separator: ","),
+                notification_attachment_id <- attachmentId
             ))
         } catch let Result.error(message, code, _) where code == SQLITE_CONSTRAINT {
             // Likely means that the notification already exists
@@ -218,6 +262,33 @@ class Database {
             try db?.run(lines.delete())
         } catch {
             print(error.localizedDescription)
+        }
+    }
+
+    func addAttachment(attachment: NtfyAttachment) -> Int64? {
+        do {
+            return try db?.run(attachments.insert(
+                attachment_name <- attachment.name,
+                attachment_type <- attachment.type,
+                attachment_size <- attachment.size,
+                attachment_expires <- attachment.expires,
+                attachment_url <- attachment.url,
+                attachment_content_url <- attachment.contentUrl
+            ))
+        } catch {
+            print("Error saving attachment: \(error)")
+            return nil
+        }
+    }
+
+    func updateAttachment(attachment: NtfyAttachment) {
+        do {
+            let dbAttachment = attachments.filter(attachment_id == attachment.id)
+            try db?.run(dbAttachment.update(
+                attachment_content_url <- attachment.contentUrl
+            ))
+        } catch {
+            print("Error updating attachment: \(error)")
         }
     }
 }

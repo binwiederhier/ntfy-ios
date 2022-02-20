@@ -42,7 +42,18 @@ struct NotificationRow: View {
                     .font(.subheadline)
                     .foregroundColor(.gray)
             }
+            if let attachment = notification.attachment {
+                Spacer()
+                NotificationAttachmentView(attachment: attachment)
+            }
         }
         .padding(.all, 4)
+        .onTapGesture {
+            if let attachment = notification.attachment {
+                if !attachment.isDownloaded() {
+                    attachment.download()
+                }
+            }
+        }
     }
 }

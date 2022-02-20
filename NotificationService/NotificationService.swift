@@ -31,12 +31,33 @@ class NotificationService: UNNotificationServiceExtension {
                let notificationTopic = userInfo["topic"] as? String,
                let notificationTimestamp = userInfo["time"] as? String,
                let notiticationTimestampInt = Int64(notificationTimestamp),
-               let notificationTitle = userInfo["title"] as? String,
                let notificationMessage = userInfo["message"] as? String {
+
                 print("Attempting to create notification")
+                let notificationTitle = userInfo["title"] as? String ?? ""
                 let notificationPriority = Int(userInfo["priority"] as? String ?? "")
                 let notificationTags = userInfo["tags"] as? String ?? ""
+
+                let attachmentName = userInfo["attachment_name"] as? String ?? "attachment.bin"
+                let attachmentType = userInfo["attachment_type"] as? String ?? ""
+                let attachmentSize = Int64(userInfo["attachment_size"] as? String ?? "0") ?? 0
+                let attachmentUrl = userInfo["attachment_url"] as? String ?? ""
+                let attachmentExpires = Int64(userInfo["attachment_expires"] as? String ?? "0") ?? 0
+
                 if let subscription = Database.current.getSubscription(topic: notificationTopic) {
+                    var attachment: NtfyAttachment? = nil
+                    if !attachmentUrl.isEmpty {
+                        attachment = NtfyAttachment(
+                            id: 0,
+                            name: attachmentName,
+                            type: attachmentType,
+                            size: attachmentSize,
+                            expires: attachmentExpires,
+                            url: attachmentUrl,
+                            contentUrl: ""
+                        )
+                    }
+
                     let ntfyNotification = NtfyNotification(
                         id: notificationId,
                         subscriptionId: subscription.id,
@@ -44,7 +65,8 @@ class NotificationService: UNNotificationServiceExtension {
                         title: notificationTitle,
                         message: notificationMessage,
                         priority: Int(notificationPriority ?? 3),
-                        tags: notificationTags.components(separatedBy: ",")
+                        tags: notificationTags.components(separatedBy: ","),
+                        attachment: attachment
                     )
                     ntfyNotification.save()
                     print("Created notification")
