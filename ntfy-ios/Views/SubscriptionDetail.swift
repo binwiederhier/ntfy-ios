@@ -27,12 +27,15 @@ struct SubscriptionDetail: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu("Edit") {
                     Button("Send Test Notification") {
+                        let possibleTags = ["warning", "skull", "success", "triangular_flag_on_post", "de", "us", "dog", "cat", "rotating_light", "bike", "backup", "rsync", "this-s-a-tag", "ios"]
                         let priority = Int.random(in: 1..<6)
+                        let tags = Array(possibleTags.shuffled().prefix(Int.random(in: 0..<4)))
                         ApiService.shared.publish(
                             subscription: subscription,
-                            message: "This is a test notification from the Ntfy iOS app. It has a priority of \(priority).",
+                            message: "This is a test notification from the Ntfy iOS app. It has a priority of \(priority). If you send another one, it may look different.",
                             title: "Test: You can set a title if you like",
                             priority: priority,
+                            tags: tags,
                             user: user
                         ) { _,_ in
                             print("Success")
