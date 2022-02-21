@@ -2,7 +2,7 @@
 
 This document is to keep track of the feature parity between the iOS and Android ntfy.sh apps.
 
-**Last Updated: 2021-02-16**
+**Last Updated: 2021-02-20**
 
 | Feature | iOS | Android | Notes |
 | --- | --- | --- | --- |
@@ -16,8 +16,8 @@ This document is to keep track of the feature parity between the iOS and Android
 | Notification priority | :warning: | :white_check_mark: | Displays an exclamation mark in notification row for high.max priority, no changes to the actual push notification (sounds, vibrations), no  prioirty filtering |
 | Tags and emojis | :white_check_mark: | :white_check_mark: |
 | Click action | :x: | :white_check_mark: | Not yet implemented |
-| Attachments | :x: | :white_check_mark: | Not yet implemented |
-| User Authentication | :x: | :white_check_mark: | Not yet implemented |
+| Attachments | :warning: | :white_check_mark: | Not fully implemented |
+| User Authentication | :warning: | :white_check_mark: | Not fully implemented |
 | Dark mode | :white_check_mark: | :white_check_mark: | Dependent on iOS dark mode, may add override in |
 | Logging | :x: | :white_check_mark: | Not yet implemented |
 | Share to topic | :x: | :white_check_mark: | Not yet implemented |
