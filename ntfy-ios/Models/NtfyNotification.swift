@@ -7,7 +7,7 @@
 
 import Foundation
 
-class NtfyNotification: Identifiable, Decodable {
+class NtfyNotification: Identifiable, Decodable, Hashable {
 
     // Database Properties
     var id: String!
@@ -54,6 +54,14 @@ class NtfyNotification: Identifiable, Decodable {
         self.attachment = try container.decodeIfPresent(NtfyAttachment.self, forKey: .attachment)
 
         self.setTags()
+    }
+
+    static func == (lhs: NtfyNotification, rhs: NtfyNotification) -> Bool {
+        return lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 
     func save() -> NtfyNotification {
