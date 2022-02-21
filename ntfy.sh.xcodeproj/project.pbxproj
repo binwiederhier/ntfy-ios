@@ -95,6 +95,8 @@
 		80856C7E27BDE0A7008AC8B8 /* ApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
 		8086EB232794630800C3628A /* AddSubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSubscriptionView.swift; sourceTree = "<group>"; };
 		8086EB2527946FCE00C3628A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		80910E1127C420B50074B05A /* GETTING_STARTED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GETTING_STARTED.md; sourceTree = "<group>"; };
+		80910E1227C422140074B05A /* TECHNICAL_LIMITATIONS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TECHNICAL_LIMITATIONS.md; sourceTree = "<group>"; };
 		80A313F42793B1CF00F1A639 /* NtfySubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfySubscription.swift; sourceTree = "<group>"; };
 		80A313F62793B56800F1A639 /* NtfyNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyNotification.swift; sourceTree = "<group>"; };
 		80A313F82793C0D800F1A639 /* SubscriptionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRow.swift; sourceTree = "<group>"; };
@@ -237,6 +239,8 @@
 			isa = PBXGroup;
 			children = (
 				8081A7F427B4CB67004A8986 /* FEATURE_PARITY.md */,
+				80910E1127C420B50074B05A /* GETTING_STARTED.md */,
+				80910E1227C422140074B05A /* TECHNICAL_LIMITATIONS.md */,
 			);
 			path = docs;
 			sourceTree = "<group>";
