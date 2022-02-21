@@ -10,6 +10,9 @@ import SwiftUI
 struct AddSubscriptionView: View {
     @State private var topic: String = ""
     @State private var baseUrl: String = Configuration.appBaseUrl
+    @State private var showLogin: Bool = false
+    @State private var username: String = ""
+    @State private var password: String = ""
 
     @Binding var addingSubscription: Bool
 
@@ -22,6 +25,16 @@ struct AddSubscriptionView: View {
                 ) {
                     TextField("Topic name, e.g. server_alerts", text: $topic)
                         .textInputAutocapitalization(.never)
+                }
+                if showLogin {
+                    Section(
+                        header: Text("Login")
+                    ) {
+                        TextField("Username", text: $username)
+                            .textInputAutocapitalization(.none)
+                            .disableAutocorrection(true)
+                        SecureField("Password", text: $password)
+                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -66,19 +79,40 @@ struct AddSubscriptionView: View {
                              4. Fetch cached messages
                              5. Switch to SubscriptionDetail view
                              */
-                            let subscription = NtfySubscription(id: Int64(arc4random()), baseUrl: baseUrl, topic: topic)
-                            subscription.save()
-                            if baseUrl == Configuration.appBaseUrl {
-                                subscription.subscribe(to: topic)
-                            }
-                            ApiService.shared.poll(subscription: subscription) { (notifications, error) in
-                                if let notifications = notifications {
-                                    for notification in notifications {
-                                        notification.save()
-                                    }
+                            var user = Database.current.findUser(baseUrl: baseUrl)
+                            if showLogin {
+                                print("Authorization via UI forms")
+                                if (user != nil) {
+                                    user!.username = username
+                                    user!.password = password
+                                } else {
+                                    user = NtfyUser(baseUrl: baseUrl, username: username, password: password)
                                 }
                             }
-                            addingSubscription = false
+                            ApiService.shared.checkAuth(baseUrl: baseUrl, topic: topic, user: user) { authResponse, error in
+                                if let authorized = authResponse?.success {
+                                    if user != nil {
+                                        Database.current.addUser(user: user!)
+                                    }
+                                    showLogin = false
+                                    let subscription = NtfySubscription(id: Int64(arc4random()), baseUrl: baseUrl, topic: topic)
+                                    subscription.save()
+                                    if baseUrl == Configuration.appBaseUrl {
+                                        subscription.subscribe(to: topic)
+                                    }
+                                    ApiService.shared.poll(subscription: subscription, user: user) { (notifications, error) in
+                                        if let notifications = notifications {
+                                            for notification in notifications {
+                                                notification.save()
+                                            }
+                                        }
+                                    }
+                                    addingSubscription = false
+                                } else {
+                                    print("Auth failed")
+                                    showLogin = true
+                                }
+                            }
                         }
                     }) {
                         Text("Subscribe")

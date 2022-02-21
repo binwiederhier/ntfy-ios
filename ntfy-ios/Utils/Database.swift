@@ -47,6 +47,12 @@ class Database {
     let attachment_url = Expression<String>("url")
     let attachment_content_url = Expression<String>("contentUrl")
 
+    // Users Table
+    let users = Table("Users")
+    let user_base_url = Expression<String>("baseUrl")
+    let user_username = Expression<String>("username")
+    let user_password = Expression<String>("password")
+
     // Initialize
     init() {
         do {
@@ -84,6 +90,14 @@ class Database {
                     table.column(attachment_expires)
                     table.column(attachment_url)
                     table.column(attachment_content_url)
+                })
+
+                // Initialize Users Table
+                try db?.run(users.create(ifNotExists: true) { table in
+                    table.column(user_base_url)
+                    table.column(user_username)
+                    table.column(user_password)
+                    table.primaryKey(user_base_url)
                 })
             }
         } catch {
@@ -290,5 +304,32 @@ class Database {
         } catch {
             print("Error updating attachment: \(error)")
         }
+    }
+
+    func addUser(user: NtfyUser) {
+        do {
+            try db?.run(users.insert(
+                user_base_url <- user.baseUrl,
+                user_username <- user.username,
+                user_password <- user.password
+            ))
+        } catch {
+            print(error)
+        }
+    }
+
+    func findUser(baseUrl: String) -> NtfyUser? {
+        do {
+            if let result = try db?.pluck(users.filter(user_base_url == baseUrl)) {
+                return NtfyUser(
+                    baseUrl: try result.get(user_base_url),
+                    username: try result.get(user_username),
+                    password: try result.get(user_password)
+                )
+            }
+        } catch {
+            print(error)
+        }
+        return nil
     }
 }

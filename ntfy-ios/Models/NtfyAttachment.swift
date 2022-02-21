@@ -7,7 +7,7 @@
 
 import Foundation
 
-class NtfyAttachment {
+class NtfyAttachment: Codable {
     var id: Int64!
     var name: String
     var type: String
@@ -24,6 +24,20 @@ class NtfyAttachment {
         self.expires = expires
         self.url = url
         self.contentUrl = contentUrl
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case name, type, size, expires, url
+    }
+
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.size = try container.decode(Int64.self, forKey: .size)
+        self.expires = try container.decode(Int64.self, forKey: .expires)
+        self.url = try container.decode(String.self, forKey: .url)
+        self.contentUrl = ""
     }
 
     func save() {

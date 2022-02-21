@@ -39,7 +39,7 @@ class NtfyNotification: Identifiable, Decodable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, topic, time, title, message, priority, tags
+        case id, topic, time, title, message, priority, tags, attachment
     }
 
     required init(from decoder: Decoder) throws {
@@ -47,10 +47,11 @@ class NtfyNotification: Identifiable, Decodable {
         self.id = try container.decode(String.self, forKey: .id)
         self.subscriptionId = try Int64((Database.current.getSubscription(topic: container.decode(String.self, forKey: .topic))?.id)!)
         self.timestamp = try container.decode(Int64.self, forKey: .time)
-        self.title = try container.decode(String.self, forKey: .title)
+        self.title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
         self.message = try container.decode(String.self, forKey: .message)
-        self.priority = try container.decode(Int.self, forKey: .priority)
-        self.tags = try container.decode([String].self, forKey: .tags)
+        self.priority = try container.decodeIfPresent(Int.self, forKey: .priority) ?? 3
+        self.tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
+        self.attachment = try container.decodeIfPresent(NtfyAttachment.self, forKey: .attachment)
 
         self.setTags()
     }

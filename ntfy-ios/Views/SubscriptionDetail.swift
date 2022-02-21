@@ -12,6 +12,7 @@ struct SubscriptionDetail: View {
 
     var body: some View {
         let notifications = Database.current.getNotifications(subscription: subscription)
+        let user = Database.current.findUser(baseUrl: subscription.baseUrl)
         NavigationView {
             List(notifications) { notification in
                 NotificationRow(notification: notification)
@@ -31,7 +32,8 @@ struct SubscriptionDetail: View {
                             subscription: subscription,
                             message: "This is a test notification from the Ntfy iOS app. It has a priority of \(priority).",
                             title: "Test: You can set a title if you like",
-                            priority: priority
+                            priority: priority,
+                            user: user
                         ) { _,_ in
                             print("Success")
                         }
@@ -47,7 +49,7 @@ struct SubscriptionDetail: View {
             }
         })
         .refreshable {
-            ApiService.shared.poll(subscription: subscription) { (notifications, error) in
+            ApiService.shared.poll(subscription: subscription, user: user) { (notifications, error) in
                 if let notifications = notifications {
                     for notification in notifications {
                         notification.save()
