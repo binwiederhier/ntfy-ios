@@ -19,7 +19,6 @@
 		80386E822793585B009B0480 /* SubscriptionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E812793585B009B0480 /* SubscriptionsList.swift */; };
 		80386E842793585C009B0480 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80386E832793585C009B0480 /* Assets.xcassets */; };
 		80386E872793585C009B0480 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80386E862793585C009B0480 /* Preview Assets.xcassets */; };
-		80386E9127935937009B0480 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 80386E9027935937009B0480 /* GoogleService-Info.plist */; };
 		80386E9927935CC9009B0480 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 80386E9827935CC9009B0480 /* FirebaseMessaging */; };
 		80386E9F27936087009B0480 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E9E27936087009B0480 /* AppDelegate.swift */; };
 		80386EA92793A7AC009B0480 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 80386EA82793A7AC009B0480 /* SQLite */; };
@@ -83,7 +82,7 @@
 		80386E812793585B009B0480 /* SubscriptionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsList.swift; sourceTree = "<group>"; };
 		80386E832793585C009B0480 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		80386E862793585C009B0480 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		80386E9027935937009B0480 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		80386E9027935937009B0480 /* GoogleService-Info-dev.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-dev.plist"; sourceTree = "<group>"; };
 		80386E9C27935EE9009B0480 /* ntfy-sh-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ntfy-sh-Info.plist"; sourceTree = "<group>"; };
 		80386E9E27936087009B0480 /* AppDelegate.swift */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		80386EA0279363A2009B0480 /* ntfy.sh.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfy.sh.entitlements; sourceTree = "<group>"; };
@@ -97,6 +96,7 @@
 		8086EB2527946FCE00C3628A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		80910E1127C420B50074B05A /* GETTING_STARTED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GETTING_STARTED.md; sourceTree = "<group>"; };
 		80910E1227C422140074B05A /* TECHNICAL_LIMITATIONS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TECHNICAL_LIMITATIONS.md; sourceTree = "<group>"; };
+		809D244827C5E0A900F1FC21 /* GoogleService-Info-prod.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-prod.plist"; sourceTree = "<group>"; };
 		80A313F42793B1CF00F1A639 /* NtfySubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfySubscription.swift; sourceTree = "<group>"; };
 		80A313F62793B56800F1A639 /* NtfyNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyNotification.swift; sourceTree = "<group>"; };
 		80A313F82793C0D800F1A639 /* SubscriptionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRow.swift; sourceTree = "<group>"; };
@@ -204,8 +204,8 @@
 		80386E8D279358E8009B0480 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				809D244627C5DD5000F1FC21 /* Firebase */,
 				80386E9C27935EE9009B0480 /* ntfy-sh-Info.plist */,
-				80386E9027935937009B0480 /* GoogleService-Info.plist */,
 				80386E832793585C009B0480 /* Assets.xcassets */,
 				80E8CED927B5736100FDC5E0 /* emojis.json */,
 			);
@@ -243,6 +243,15 @@
 				80910E1227C422140074B05A /* TECHNICAL_LIMITATIONS.md */,
 			);
 			path = docs;
+			sourceTree = "<group>";
+		};
+		809D244627C5DD5000F1FC21 /* Firebase */ = {
+			isa = PBXGroup;
+			children = (
+				80386E9027935937009B0480 /* GoogleService-Info-dev.plist */,
+				809D244827C5E0A900F1FC21 /* GoogleService-Info-prod.plist */,
+			);
+			path = Firebase;
 			sourceTree = "<group>";
 		};
 		80A313F32793B1BE00F1A639 /* Models */ = {
@@ -288,6 +297,7 @@
 				80386E792793585B009B0480 /* Frameworks */,
 				80386E7A2793585B009B0480 /* Resources */,
 				800FA49B27B19CA0005D05B9 /* Embed App Extensions */,
+				809D244727C5DF4700F1FC21 /* GoogleService-Info plist */,
 			);
 			buildRules = (
 			);
@@ -360,11 +370,31 @@
 				80386E872793585C009B0480 /* Preview Assets.xcassets in Resources */,
 				80386E842793585C009B0480 /* Assets.xcassets in Resources */,
 				80E8CEDA27B5736100FDC5E0 /* emojis.json in Resources */,
-				80386E9127935937009B0480 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		809D244727C5DF4700F1FC21 /* GoogleService-Info plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "GoogleService-Info plist";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "PATH_TO_GOOGLE_PLISTS=\"${PROJECT_DIR}/ntfy-ios/Assets/Firebase\"\n\ncase \"${CONFIGURATION}\" in\n\n   \"Debug\" )\n        cp -r \"$PATH_TO_GOOGLE_PLISTS/GoogleService-Info-dev.plist\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\" ;;\n\n   \"Release\" )\n        cp -r \"$PATH_TO_GOOGLE_PLISTS/GoogleService-Info-prod.plist\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\" ;;\n\n    *)\n        ;;\nesac\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		800FA48F27B19CA0005D05B9 /* Sources */ = {
