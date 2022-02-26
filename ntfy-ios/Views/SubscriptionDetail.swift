@@ -132,7 +132,6 @@ struct SubscriptionDetail: View {
         })
         .refreshable {
             viewModel.fetchNewNotifications(subscription: subscription, user: user)
-            // TODO: Refresh view with updated notifications list
         }
         .onAppear {
             viewModel.loadNotifications(subscription: subscription)

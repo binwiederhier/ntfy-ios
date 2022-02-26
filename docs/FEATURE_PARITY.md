@@ -2,7 +2,7 @@
 
 This document is to keep track of the feature parity between the iOS and Android ntfy.sh apps.
 
-**Last Updated: 2021-02-21**
+**Last Updated: 2021-02-26**
 
 | Feature | iOS | Android | Notes |
 | --- | --- | --- | --- |
@@ -12,7 +12,7 @@ This document is to keep track of the feature parity between the iOS and Android
 | Pause notifications | :x: | :white_check_mark: | Will likely require [Filtering](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_developer_usernotifications_filtering) to prevent displaying notifications while still receiving them |
 | Send test notification | :white_check_mark: | :white_check_mark: | Not fully implemented |
 | Unsubscribe from topic | :white_check_mark: | :white_check_mark: |
-| Delete notifications | :warning: | :white_check_mark: | Implemented, but needs improvement |
+| Delete notifications | :white_check_mark: | :white_check_mark: |
 | Notification priority | :warning: | :white_check_mark: | Displays an exclamation mark in notification row for high.max priority, no changes to the actual push notification (sounds, vibrations), no  prioirty filtering |
 | Tags and emojis | :white_check_mark: | :white_check_mark: |
 | Click action | :x: | :white_check_mark: | Not yet implemented |
