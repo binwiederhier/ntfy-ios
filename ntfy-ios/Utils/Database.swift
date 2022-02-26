@@ -71,7 +71,7 @@ class Database {
 
                 // Initialize Notifications Table
                 try db?.run(notifications.create(ifNotExists: true) { table in
-                    table.column(notification_id)
+                    table.column(notification_id, primaryKey: true)
                     table.column(notification_subscription_id)
                     table.column(notification_timestamp)
                     table.column(notification_title)
@@ -157,8 +157,9 @@ class Database {
             }
 
             let line = subscriptions.filter(subscription_id == subscription.id)
-
             try db?.run(line.delete())
+
+            deleteNotificationsForSubscription(subscription: subscription)
         } catch {
             print(error.localizedDescription)
         }
