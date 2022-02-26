@@ -118,6 +118,7 @@ struct SubscriptionDetail: View {
                         Text("Delete"),
                         action: {
                             deleteSelectedNotifications(notifications: viewModel.notifications)
+                            self.editMode = .inactive
                         }),
                     secondaryButton: .cancel())
             }
