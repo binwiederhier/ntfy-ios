@@ -15,7 +15,7 @@ struct AddSubscriptionView: View {
     @State private var password: String = ""
 
     @State private var showAlert = false
-    @State private var activeAlert: AddSubscriptionView.ActiveAlert = .requiresAuth
+    @State private var activeAlert: AddSubscriptionView.ActiveAlert = .invalidTopic
 
     @Binding var addingSubscription: Bool
 
@@ -121,6 +121,8 @@ struct AddSubscriptionView: View {
                             }
                         } else {
                             print("Invalid topic")
+                            showAlert = true
+                            activeAlert = .invalidTopic
                         }
                     }) {
                         Text("Subscribe")
@@ -134,6 +136,12 @@ struct AddSubscriptionView: View {
                     return Alert(
                         title: Text("Authentication Required"),
                         message: Text("This topic is password protected. Please enter a username and password to continue."),
+                        dismissButton: .default(Text("OK"))
+                    )
+                case .invalidTopic:
+                    return Alert(
+                        title: Text("Invalid Topic"),
+                        message: Text("Please choose another topic name"),
                         dismissButton: .default(Text("OK"))
                     )
                 }
@@ -152,6 +160,6 @@ struct AddSubscriptionView: View {
 
 extension AddSubscriptionView {
     enum ActiveAlert {
-        case requiresAuth
+        case requiresAuth, invalidTopic
     }
 }
