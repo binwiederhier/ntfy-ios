@@ -223,7 +223,7 @@ class Database {
         return list
     }
 
-    func addNotification(notification: NtfyNotification) -> NtfyNotification {
+    func addNotification(notification: NtfyNotification) -> NtfyNotification? {
         do {
             var attachmentId: Int64 = 0
             if notification.attachment != nil {
@@ -239,17 +239,19 @@ class Database {
                 notification_tags <- notification.tags.joined(separator: ","),
                 notification_attachment_id <- attachmentId
             ))
+            return notification
         } catch let Result.error(message, code, _) where code == SQLITE_CONSTRAINT {
             // Likely means that the notification already exists
             print("Constraint failed: \(message)")
+            return nil
         } catch let Result.error(message, code, _) {
             print(message)
             print(code)
+            return nil
         } catch let error {
             print(error.localizedDescription)
+            return nil
         }
-
-        return notification
     }
 
     func deleteNotification(notification: NtfyNotification) {

@@ -64,7 +64,7 @@ class NtfyNotification: Identifiable, Decodable, Hashable {
         hasher.combine(id)
     }
 
-    func save() -> NtfyNotification {
+    func save() -> NtfyNotification? {
         return Database.current.addNotification(notification: self)
     }
 

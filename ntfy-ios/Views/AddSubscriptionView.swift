@@ -105,7 +105,7 @@ struct AddSubscriptionView: View {
                                         if baseUrl == Configuration.appBaseUrl {
                                             subscription.subscribe(to: sanitizedTopic)
                                         }
-                                        subscription.fetchNewNotifications(user: user)
+                                        subscription.fetchNewNotifications(user: user, completionHandler: nil)
                                         addingSubscription = false
                                         showLogin = false
                                     } else {

@@ -56,16 +56,20 @@ class NtfySubscription: Identifiable {
         Database.current.getNotifications(subscription: self, limit: 1).first
     }
 
-    func fetchNewNotifications(user: NtfyUser?) -> [NtfyNotification] {
+    func fetchNewNotifications(user: NtfyUser?, completionHandler: ( ([NtfyNotification]?, Error?) -> Void)?) {
         var newNotifications = [NtfyNotification]()
         ApiService.shared.poll(subscription: self, user: user) { (notifications, error) in
             if let notifications = notifications {
                 for notification in notifications {
-                    notification.save()
-                    newNotifications.append(notification)
+                    if (notification.save() != nil) {
+                        newNotifications.append(notification)
+                    }
                 }
             }
+
+            if let completionHandler = completionHandler {
+                completionHandler(newNotifications, nil)
+            }
         }
-        return newNotifications
     }
 }

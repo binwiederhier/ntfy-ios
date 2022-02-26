@@ -20,14 +20,15 @@ struct SubscriptionDetail: View {
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
 
+    @ObservedObject var viewModel = SubscriptionDetailViewModel()
+
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        var notifications = Database.current.getNotifications(subscription: subscription)
         let user = Database.current.findUser(baseUrl: subscription.baseUrl)
         NavigationView {
             List(selection: $selection) {
-                ForEach(notifications, id: \.self) { notification in
+                ForEach(viewModel.notifications, id: \.self) { notification in
                     NotificationRow(notification: notification)
                 }
             }
@@ -95,7 +96,7 @@ struct SubscriptionDetail: View {
                         Text("Permanently Delete"),
                         action: {
                             Database.current.deleteNotificationsForSubscription(subscription: subscription)
-                            notifications = Database.current.getNotifications(subscription: subscription)
+                            viewModel.notifications = Database.current.getNotifications(subscription: subscription)
                         }),
                     secondaryButton: .cancel())
             case .unsubscribe:
@@ -116,21 +117,24 @@ struct SubscriptionDetail: View {
                     primaryButton: .destructive(
                         Text("Delete"),
                         action: {
-                            deleteSelectedNotifications(notifications: notifications)
+                            deleteSelectedNotifications(notifications: viewModel.notifications)
                         }),
                     secondaryButton: .cancel())
             }
         }
         .overlay(Group {
-            if notifications.isEmpty {
+            if viewModel.notifications.isEmpty {
                 Text("No Notifications")
                     .font(.headline)
                     .foregroundColor(.gray)
             }
         })
         .refreshable {
-            subscription.fetchNewNotifications(user: user)
+            viewModel.fetchNewNotifications(subscription: subscription, user: user)
             // TODO: Refresh view with updated notifications list
+        }
+        .onAppear {
+            viewModel.loadNotifications(subscription: subscription)
         }
     }
 
@@ -155,10 +159,24 @@ struct SubscriptionDetail: View {
     private func deleteSelectedNotifications(notifications: [NtfyNotification]) {
         for id in selection {
             if let index = notifications.lastIndex(where: { $0 == id }) {
-                //notifications.remove(at: index)
+                viewModel.notifications.remove(at: index)
                 Database.current.deleteNotification(notification: notifications[index])
             }
         }
         selection = Set<NtfyNotification>()
+    }
+}
+
+class SubscriptionDetailViewModel: ObservableObject {
+    @Published var notifications = [NtfyNotification]()
+
+    func loadNotifications(subscription: NtfySubscription) {
+        notifications = Database.current.getNotifications(subscription: subscription)
+    }
+
+    func fetchNewNotifications(subscription: NtfySubscription, user: NtfyUser?) {
+        subscription.fetchNewNotifications(user: user) { (_, _) in
+            self.loadNotifications(subscription: subscription)
+        }
     }
 }
