@@ -55,4 +55,17 @@ class NtfySubscription: Identifiable {
     func lastNotification() -> NtfyNotification? {
         Database.current.getNotifications(subscription: self, limit: 1).first
     }
+
+    func fetchNewNotifications(user: NtfyUser?) -> [NtfyNotification] {
+        var newNotifications = [NtfyNotification]()
+        ApiService.shared.poll(subscription: self, user: user) { (notifications, error) in
+            if let notifications = notifications {
+                for notification in notifications {
+                    notification.save()
+                    newNotifications.append(notification)
+                }
+            }
+        }
+        return newNotifications
+    }
 }

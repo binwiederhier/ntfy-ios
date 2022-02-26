@@ -105,13 +105,7 @@ struct AddSubscriptionView: View {
                                         if baseUrl == Configuration.appBaseUrl {
                                             subscription.subscribe(to: sanitizedTopic)
                                         }
-                                        ApiService.shared.poll(subscription: subscription, user: user) { (notifications, error) in
-                                            if let notifications = notifications {
-                                                for notification in notifications {
-                                                    notification.save()
-                                                }
-                                            }
-                                        }
+                                        subscription.fetchNewNotifications(user: user)
                                         addingSubscription = false
                                         showLogin = false
                                     } else {

@@ -129,13 +129,7 @@ struct SubscriptionDetail: View {
             }
         })
         .refreshable {
-            ApiService.shared.poll(subscription: subscription, user: user) { (notifications, error) in
-                if let notifications = notifications {
-                    for notification in notifications {
-                        notification.save()
-                    }
-                }
-            }
+            subscription.fetchNewNotifications(user: user)
             // TODO: Refresh view with updated notifications list
         }
     }
