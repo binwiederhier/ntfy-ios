@@ -57,6 +57,7 @@ class ApiService: NSObject {
                     completionHandler(result, nil)
                 } catch {
                     print("Error handling auth response: \(error)")
+                    completionHandler(nil, error)
                 }
             }
         }.resume()

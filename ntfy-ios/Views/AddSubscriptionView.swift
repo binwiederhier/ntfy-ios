@@ -16,6 +16,7 @@ struct AddSubscriptionView: View {
 
     @State private var showAlert = false
     @State private var activeAlert: AddSubscriptionView.ActiveAlert = .invalidTopic
+    @State private var authFailureError = ""
 
     @Binding var addingSubscription: Bool
 
@@ -94,29 +95,37 @@ struct AddSubscriptionView: View {
                                 }
                             }
                             ApiService.shared.checkAuth(baseUrl: baseUrl, topic: sanitizedTopic, user: user) { authResponse, error in
-                                if let authorized = authResponse?.success {
-                                    if user != nil {
-                                        Database.current.addUser(user: user!)
-                                    }
-                                    showLogin = false
-                                    let subscription = NtfySubscription(id: Int64(arc4random()), baseUrl: baseUrl, topic: sanitizedTopic)
-                                    subscription.save()
-                                    if baseUrl == Configuration.appBaseUrl {
-                                        subscription.subscribe(to: sanitizedTopic)
-                                    }
-                                    ApiService.shared.poll(subscription: subscription, user: user) { (notifications, error) in
-                                        if let notifications = notifications {
-                                            for notification in notifications {
-                                                notification.save()
+                                if let authResponse = authResponse {
+                                    if let success = authResponse.success, success {
+                                        if user != nil {
+                                            Database.current.addUser(user: user!)
+                                        }
+                                        let subscription = NtfySubscription(id: Int64(arc4random()), baseUrl: baseUrl, topic: sanitizedTopic)
+                                        subscription.save()
+                                        if baseUrl == Configuration.appBaseUrl {
+                                            subscription.subscribe(to: sanitizedTopic)
+                                        }
+                                        ApiService.shared.poll(subscription: subscription, user: user) { (notifications, error) in
+                                            if let notifications = notifications {
+                                                for notification in notifications {
+                                                    notification.save()
+                                                }
                                             }
                                         }
+                                        addingSubscription = false
+                                        showLogin = false
+                                    } else {
+                                        showLogin = true
+                                        showAlert = true
+                                        activeAlert = .requiresAuth
                                     }
-                                    addingSubscription = false
-                                } else {
-                                    print("Auth failed")
-                                    showLogin = true
+                                } else if let error = error {
                                     showAlert = true
-                                    activeAlert = .requiresAuth
+                                    activeAlert = .authFailure
+                                    authFailureError = error.localizedDescription
+                                } else {
+                                    showAlert = true
+                                    activeAlert = .unknownFailure
                                 }
                             }
                         } else {
@@ -127,7 +136,7 @@ struct AddSubscriptionView: View {
                     }) {
                         Text("Subscribe")
                     }
-                    .disabled(!isTopicValid(topic: sanitizeTopic(topic: topic)))
+                    .disabled(!isTopicValid(topic: sanitizeTopic(topic: topic)) && addingSubscription)
                 }
             }
             .alert(isPresented: $showAlert) {
@@ -142,6 +151,18 @@ struct AddSubscriptionView: View {
                     return Alert(
                         title: Text("Invalid Topic"),
                         message: Text("Please choose another topic name"),
+                        dismissButton: .default(Text("OK"))
+                    )
+                case .authFailure:
+                    return Alert(
+                        title: Text("Authorization Failure"),
+                        message: Text(authFailureError),
+                        dismissButton: .default(Text("OK"))
+                    )
+                case .unknownFailure:
+                    return Alert(
+                        title: Text("Authorization Failure"),
+                        message: Text("Unknown Error"),
                         dismissButton: .default(Text("OK"))
                     )
                 }
@@ -160,6 +181,6 @@ struct AddSubscriptionView: View {
 
 extension AddSubscriptionView {
     enum ActiveAlert {
-        case requiresAuth, invalidTopic
+        case requiresAuth, invalidTopic, authFailure, unknownFailure
     }
 }
