@@ -14,6 +14,9 @@ struct AddSubscriptionView: View {
     @State private var username: String = ""
     @State private var password: String = ""
 
+    @State private var showAlert = false
+    @State private var activeAlert: AddSubscriptionView.ActiveAlert = .requiresAuth
+
     @Binding var addingSubscription: Bool
 
     var body: some View {
@@ -51,7 +54,8 @@ struct AddSubscriptionView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
-                        if !topic.isEmpty {
+                        let sanitizedTopic = sanitizeTopic(topic: topic)
+                        if isTopicValid(topic: sanitizedTopic) {
                             /*
                              Validation function:
                              1. Topic is not empty
@@ -89,16 +93,16 @@ struct AddSubscriptionView: View {
                                     user = NtfyUser(baseUrl: baseUrl, username: username, password: password)
                                 }
                             }
-                            ApiService.shared.checkAuth(baseUrl: baseUrl, topic: topic, user: user) { authResponse, error in
+                            ApiService.shared.checkAuth(baseUrl: baseUrl, topic: sanitizedTopic, user: user) { authResponse, error in
                                 if let authorized = authResponse?.success {
                                     if user != nil {
                                         Database.current.addUser(user: user!)
                                     }
                                     showLogin = false
-                                    let subscription = NtfySubscription(id: Int64(arc4random()), baseUrl: baseUrl, topic: topic)
+                                    let subscription = NtfySubscription(id: Int64(arc4random()), baseUrl: baseUrl, topic: sanitizedTopic)
                                     subscription.save()
                                     if baseUrl == Configuration.appBaseUrl {
-                                        subscription.subscribe(to: topic)
+                                        subscription.subscribe(to: sanitizedTopic)
                                     }
                                     ApiService.shared.poll(subscription: subscription, user: user) { (notifications, error) in
                                         if let notifications = notifications {
@@ -111,15 +115,43 @@ struct AddSubscriptionView: View {
                                 } else {
                                     print("Auth failed")
                                     showLogin = true
+                                    showAlert = true
+                                    activeAlert = .requiresAuth
                                 }
                             }
+                        } else {
+                            print("Invalid topic")
                         }
                     }) {
                         Text("Subscribe")
                     }
-                    .disabled(topic.isEmpty)
+                    .disabled(!isTopicValid(topic: sanitizeTopic(topic: topic)))
+                }
+            }
+            .alert(isPresented: $showAlert) {
+                switch activeAlert {
+                case .requiresAuth:
+                    return Alert(
+                        title: Text("Authentication Required"),
+                        message: Text("This topic is password protected. Please enter a username and password to continue."),
+                        dismissButton: .default(Text("OK"))
+                    )
                 }
             }
         }
+    }
+
+    private func sanitizeTopic(topic: String) -> String {
+        return topic.trimmingCharacters(in: [" "])
+    }
+
+    private func isTopicValid(topic: String) -> Bool {
+        return !topic.isEmpty && (topic.range(of: "^[-_A-Za-z0-9]{1,64}$", options: .regularExpression, range: nil, locale: nil) != nil)
+    }
+}
+
+extension AddSubscriptionView {
+    enum ActiveAlert {
+        case requiresAuth
     }
 }
