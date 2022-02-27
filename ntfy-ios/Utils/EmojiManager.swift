@@ -20,6 +20,8 @@ struct Emoji: Decodable {
 class EmojiManager {
     private static var emojis: Dictionary<String, Emoji> = [:]
 
+    static let current = EmojiManager()
+
     init() {
         // emojis.json pulled from https://github.com/github/gemoji/blob/master/db/emoji.json
         if let url = Bundle.main.url(forResource: "emojis", withExtension: "json") {

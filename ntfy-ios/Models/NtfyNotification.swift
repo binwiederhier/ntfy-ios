@@ -70,7 +70,7 @@ class NtfyNotification: Identifiable, Decodable, Hashable {
 
     func setTags() {
         for tag in self.tags {
-            if let emoji = EmojiManager().getEmojiByAlias(alias: tag) {
+            if let emoji = EmojiManager.current.getEmojiByAlias(alias: tag) {
                 self.emojiTags.append(emoji.getUnicode())
             } else if !tag.isEmpty {
                 self.nonEmojiTags.append(tag)
