@@ -80,7 +80,7 @@ class NtfySubscription: ObservableObject, Identifiable {
                     }
                 }
 
-                self.notifications = newNotifications + self.notifications
+                self.notifications = newNotifications.reversed() + self.notifications
             }
 
             if let completionHandler = completionHandler {
