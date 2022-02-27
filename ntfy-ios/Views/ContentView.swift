@@ -9,14 +9,21 @@ import SwiftUI
 
 struct ContentView: View {
     @State var addingSubscription = false
+    @State var managingUsers = false
+    @State var currentView = CurrentView.subscriptionList
 
     var body: some View {
-        return Group {
-            if addingSubscription {
-                AddSubscriptionView(addingSubscription: $addingSubscription)
-            } else {
-                SubscriptionsList(addingSubscription: $addingSubscription)
-            }
+        switch (currentView) {
+        case .managingUsers:
+            UserManagementView(currentView: $currentView)
+        case .addingSubscription:
+            AddSubscriptionView(currentView: $currentView)
+        case .subscriptionList:
+            SubscriptionsList(currentView: $currentView)
         }
     }
+}
+
+enum CurrentView {
+    case addingSubscription, managingUsers, subscriptionList
 }

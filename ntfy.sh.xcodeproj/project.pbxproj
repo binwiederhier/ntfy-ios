@@ -33,6 +33,7 @@
 		80856C8027BDE0A7008AC8B8 /* ApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80856C7E27BDE0A7008AC8B8 /* ApiService.swift */; };
 		8086EB242794630800C3628A /* AddSubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8086EB232794630800C3628A /* AddSubscriptionView.swift */; };
 		8086EB2627946FCE00C3628A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8086EB2527946FCE00C3628A /* ContentView.swift */; };
+		808833B427CC32010098927E /* UserManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808833B327CC32010098927E /* UserManagementView.swift */; };
 		80A313F52793B1CF00F1A639 /* NtfySubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F42793B1CF00F1A639 /* NtfySubscription.swift */; };
 		80A313F72793B56800F1A639 /* NtfyNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F62793B56800F1A639 /* NtfyNotification.swift */; };
 		80A313F92793C0D800F1A639 /* SubscriptionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F82793C0D800F1A639 /* SubscriptionRow.swift */; };
@@ -94,6 +95,7 @@
 		80856C7E27BDE0A7008AC8B8 /* ApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
 		8086EB232794630800C3628A /* AddSubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSubscriptionView.swift; sourceTree = "<group>"; };
 		8086EB2527946FCE00C3628A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		808833B327CC32010098927E /* UserManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManagementView.swift; sourceTree = "<group>"; };
 		80910E1127C420B50074B05A /* GETTING_STARTED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GETTING_STARTED.md; sourceTree = "<group>"; };
 		80910E1227C422140074B05A /* TECHNICAL_LIMITATIONS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TECHNICAL_LIMITATIONS.md; sourceTree = "<group>"; };
 		809D244827C5E0A900F1FC21 /* GoogleService-Info-prod.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-prod.plist"; sourceTree = "<group>"; };
@@ -231,6 +233,7 @@
 				8086EB232794630800C3628A /* AddSubscriptionView.swift */,
 				8086EB2527946FCE00C3628A /* ContentView.swift */,
 				8079FF4E27C29D3300FB3D18 /* NotificationAttachmentView.swift */,
+				808833B327CC32010098927E /* UserManagementView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -426,6 +429,7 @@
 				80E8CED727B56DB200FDC5E0 /* EmojiManager.swift in Sources */,
 				8086EB242794630800C3628A /* AddSubscriptionView.swift in Sources */,
 				8079FF5227C2C38700FB3D18 /* NtfyUser.swift in Sources */,
+				808833B427CC32010098927E /* UserManagementView.swift in Sources */,
 				80A313FD2793C42000F1A639 /* NotificationRow.swift in Sources */,
 				80A313FB2793C2EA00F1A639 /* SubscriptionDetail.swift in Sources */,
 				8079FF4C27C2874A00FB3D18 /* NtfyAttachment.swift in Sources */,

@@ -7,7 +7,7 @@
 
 import Foundation
 
-class NtfyUser {
+class NtfyUser: Identifiable {
     var baseUrl: String
     var username: String
     var password: String

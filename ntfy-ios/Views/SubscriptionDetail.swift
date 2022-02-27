@@ -25,7 +25,7 @@ struct SubscriptionDetail: View {
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        let user = Database.current.findUser(baseUrl: subscription.baseUrl)
+        let user = Database.current.findUsers(baseUrl: subscription.baseUrl).first
         NavigationView {
             List(selection: $selection) {
                 ForEach(subscription.notifications, id: \.self) { notification in

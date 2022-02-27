@@ -321,18 +321,32 @@ class Database {
         }
     }
 
-    func findUser(baseUrl: String) -> NtfyUser? {
+    func deleteUser(user: NtfyUser) {
         do {
-            if let result = try db?.pluck(users.filter(user_base_url == baseUrl)) {
-                return NtfyUser(
-                    baseUrl: try result.get(user_base_url),
-                    username: try result.get(user_username),
-                    password: try result.get(user_password)
-                )
+            let line = users.filter(user_base_url == user.baseUrl && user_username == user.username)
+            try db?.run(line.delete())
+        } catch {
+            print(error)
+        }
+    }
+
+    func findUsers(baseUrl: String) -> [NtfyUser] {
+        var ntfyUsers = [NtfyUser]()
+        do {
+            let query = users.filter(user_base_url == baseUrl)
+            if let result = try db?.prepare(query) {
+                for line in result {
+                    let user =  NtfyUser(
+                        baseUrl: try line.get(user_base_url),
+                        username: try line.get(user_username),
+                        password: try line.get(user_password)
+                    )
+                    ntfyUsers.append(user)
+                }
             }
         } catch {
             print(error)
         }
-        return nil
+        return ntfyUsers
     }
 }

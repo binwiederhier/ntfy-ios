@@ -18,7 +18,7 @@ struct AddSubscriptionView: View {
     @State private var activeAlert: AddSubscriptionView.ActiveAlert = .invalidTopic
     @State private var authFailureError = ""
 
-    @Binding var addingSubscription: Bool
+    @Binding var currentView: CurrentView
 
     var body: some View {
         NavigationView {
@@ -45,7 +45,7 @@ struct AddSubscriptionView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
-                        addingSubscription = false
+                        currentView = .subscriptionList
                     }) {
                         Text("Cancel")
                     }
@@ -84,7 +84,7 @@ struct AddSubscriptionView: View {
                              4. Fetch cached messages
                              5. Switch to SubscriptionDetail view
                              */
-                            var user = Database.current.findUser(baseUrl: baseUrl)
+                            var user = Database.current.findUsers(baseUrl: baseUrl).first
                             if showLogin {
                                 print("Authorization via UI forms")
                                 if (user != nil) {
@@ -106,7 +106,7 @@ struct AddSubscriptionView: View {
                                             subscription.subscribe(to: sanitizedTopic)
                                         }
                                         subscription.fetchNewNotifications(user: user, completionHandler: nil)
-                                        addingSubscription = false
+                                        currentView = .subscriptionList
                                         showLogin = false
                                     } else {
                                         showLogin = true
@@ -130,7 +130,7 @@ struct AddSubscriptionView: View {
                     }) {
                         Text("Subscribe")
                     }
-                    .disabled(!isTopicValid(topic: sanitizeTopic(topic: topic)) && addingSubscription)
+                    .disabled(!isTopicValid(topic: sanitizeTopic(topic: topic)) && currentView == CurrentView.addingSubscription)
                 }
             }
             .alert(isPresented: $showAlert) {

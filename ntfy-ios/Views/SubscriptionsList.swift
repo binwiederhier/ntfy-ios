@@ -10,7 +10,7 @@ import SwiftUI
 struct SubscriptionsList: View {
     @ObservedObject var subscriptions = NtfySUbscriptionList()
 
-    @Binding var addingSubscription: Bool
+    @Binding var currentView: CurrentView
 
     var body: some View {
         NavigationView {
@@ -40,10 +40,19 @@ struct SubscriptionsList: View {
             .listStyle(PlainListStyle())
             .navigationTitle("Subscribed Topics")
             .toolbar {
-                Button(action: {
-                    addingSubscription = true
-                }) {
-                    Image(systemName: "plus")
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        currentView = .addingSubscription
+                    }) {
+                        Image(systemName: "plus")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        currentView = .managingUsers
+                    }) {
+                        Text("Users")
+                    }
                 }
             }
             .overlay(Group {
