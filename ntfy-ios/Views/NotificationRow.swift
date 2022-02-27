@@ -50,7 +50,7 @@ struct NotificationRow: View {
         .padding(.all, 4)
         .onTapGesture {
             if let attachment = notification.attachment {
-                if !attachment.isDownloaded() {
+                if !attachment.isDownloaded() && !attachment.isExpired() {
                     attachment.download()
                 }
             }

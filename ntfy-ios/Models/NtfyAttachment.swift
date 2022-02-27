@@ -56,8 +56,21 @@ class NtfyAttachment: Codable {
         return !contentUrl.isEmpty
     }
 
+    func downloadedString() -> String {
+        return self.isDownloaded() ? "Downloaded" : "Not downloaded"
+    }
+
+    func isExpired() -> Bool {
+        return TimeInterval(self.expires) < NSDate().timeIntervalSince1970
+    }
+
     func expiresString() -> String {
-        return "Expires \(self.expires)"
+        if (self.isExpired()) {
+            return "Expired"
+        }
+        let date = NSDate(timeIntervalSince1970: TimeInterval(self.expires))
+        let formatter = RelativeDateTimeFormatter()
+        return "Expires \(formatter.localizedString(for: date as Date, relativeTo: Date()))"
     }
 
     func download() {

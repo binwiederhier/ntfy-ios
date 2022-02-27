@@ -15,39 +15,21 @@ struct NotificationAttachmentView: View {
     @State private var isAttachmentOpen = false
 
     var body: some View {
-        if attachment.isDownloaded() {
-            if let imageUrl = UIImage(contentsOfFile: attachment.contentUrl) {
-                let image = Image(uiImage: imageUrl)
-                    .resizable()
-                    .scaledToFit()
-                ZStack {
-                    image
-                }
-                .onTapGesture {
-                    isAttachmentOpen.toggle()
-                }
-                .fullScreenCover(isPresented: $isAttachmentOpen, onDismiss: {
-                    // Dismiss logic here
-                }, content: {
-                    VStack {
-                        image
-                    }
-                    .onTapGesture {
-                        isAttachmentOpen.toggle()
-                    }
-                })
-            }
-        } else {
-            HStack {
-                // TODO: Replace paperclip here with mimetype icon
-                Image(systemName: "paperclip")
-                VStack(alignment: .leading) {
-                    Text(attachment.name)
+        HStack {
+            // TODO: Replace paperclip here with mimetype icon
+            Image(systemName: "paperclip")
+            VStack(alignment: .leading) {
+                Text(attachment.name)
+                    .font(.footnote)
+                HStack {
+                    Text(attachment.sizeString())
                         .font(.footnote)
-                    HStack {
-                        Text(attachment.sizeString())
+                        .foregroundColor(.gray)
+                    if (attachment.isDownloaded()) {
+                        Text("Downloaded")
                             .font(.footnote)
                             .foregroundColor(.gray)
+                    } else {
                         Text("Not downloaded")
                             .font(.footnote)
                             .foregroundColor(.gray)
