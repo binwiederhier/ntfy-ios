@@ -15,6 +15,9 @@ class NtfySubscription: ObservableObject, Identifiable {
     var baseUrl: String
     var topic: String
 
+    @Published var notifications = [NtfyNotification]()
+    var notificationsLoaded = false
+
     init(id: Int64, baseUrl: String, topic: String) {
         // Initialize values
         self.id = id
@@ -48,12 +51,23 @@ class NtfySubscription: ObservableObject, Identifiable {
         Messaging.messaging().unsubscribe(fromTopic: topic)
     }
 
+    func loadNotifications() {
+        self.notifications = Database.current.getNotifications(subscription: self)
+        self.notificationsLoaded = true
+    }
+
     func notificationCount() -> Int {
-        Database.current.getNotificationCount(subscription: self)
+        if (!notificationsLoaded) {
+            self.loadNotifications()
+        }
+        return notifications.count
     }
 
     func lastNotification() -> NtfyNotification? {
-        Database.current.getNotifications(subscription: self, limit: 1).first
+        if (!notificationsLoaded) {
+            self.loadNotifications()
+        }
+        return notifications.first
     }
 
     func fetchNewNotifications(user: NtfyUser?, completionHandler: ( ([NtfyNotification]?, Error?) -> Void)?) {
@@ -65,6 +79,8 @@ class NtfySubscription: ObservableObject, Identifiable {
                         newNotifications.append(notification)
                     }
                 }
+
+                self.notifications = newNotifications + self.notifications
             }
 
             if let completionHandler = completionHandler {
