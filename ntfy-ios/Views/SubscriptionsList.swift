@@ -8,30 +8,32 @@
 import SwiftUI
 
 struct SubscriptionsList: View {
-    @State var subscriptions = Database.current.getSubscriptions()
+    @ObservedObject var subscriptions = NtfySUbscriptionList()
 
     @Binding var addingSubscription: Bool
 
     var body: some View {
         NavigationView {
-            List(subscriptions) { subscription in
-                ZStack {
-                    NavigationLink(
-                        destination: SubscriptionDetail(subscription: subscription)
-                    ) {
-                        EmptyView()
-                    }
-                    .opacity(0.0)
-                    .buttonStyle(PlainButtonStyle())
+            List{
+                ForEach(subscriptions.subscriptions) { subscription in
+                    ZStack {
+                        NavigationLink(
+                            destination: SubscriptionDetail(subscription: subscription)
+                        ) {
+                            EmptyView()
+                        }
+                        .opacity(0.0)
+                        .buttonStyle(PlainButtonStyle())
 
-                    SubscriptionRow(subscription: subscription)
-                }
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        subscription.delete()
-                        subscriptions = Database.current.getSubscriptions()
-                    } label: {
-                        Label("Delete", systemImage: "trash.circle")
+                        SubscriptionRow(subscription: subscription)
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            subscription.delete()
+                            subscriptions.subscriptions = Database.current.getSubscriptions()
+                        } label: {
+                            Label("Delete", systemImage: "trash.circle")
+                        }
                     }
                 }
             }
@@ -45,12 +47,16 @@ struct SubscriptionsList: View {
                 }
             }
             .overlay(Group {
-                if subscriptions.isEmpty {
+                if subscriptions.subscriptions.isEmpty {
                     Text("No Topics")
                         .font(.headline)
                         .foregroundColor(.gray)
                 }
             })
-        }.navigationViewStyle(StackNavigationViewStyle())
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            self.subscriptions.objectWillChange.send()
+        }
     }
 }

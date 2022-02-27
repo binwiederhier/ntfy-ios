@@ -12,7 +12,7 @@ enum ActiveAlert {
 }
 
 struct SubscriptionDetail: View {
-    var subscription: NtfySubscription
+    @ObservedObject var subscription: NtfySubscription
 
     @State private var editMode = EditMode.inactive
     @State private var selection = Set<NtfyNotification>()

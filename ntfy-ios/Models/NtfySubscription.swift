@@ -8,7 +8,7 @@
 import FirebaseMessaging
 import Foundation
 
-class NtfySubscription: Identifiable {
+class NtfySubscription: ObservableObject, Identifiable {
     
     // Properties
     var id: Int64!
@@ -71,5 +71,13 @@ class NtfySubscription: Identifiable {
                 completionHandler(newNotifications, nil)
             }
         }
+    }
+}
+
+class NtfySUbscriptionList: ObservableObject {
+    @Published var subscriptions = [NtfySubscription]()
+
+    init() {
+        self.subscriptions = Database.current.getSubscriptions()
     }
 }

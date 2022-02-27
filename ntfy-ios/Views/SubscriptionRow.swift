@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SubscriptionRow: View {
-    var subscription: NtfySubscription
+    @ObservedObject var subscription: NtfySubscription
 
     var body: some View {
         let totalNotificationCount = subscription.notificationCount()
