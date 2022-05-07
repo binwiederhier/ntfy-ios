@@ -47,12 +47,6 @@ class Database {
     let attachment_url = Expression<String>("url")
     let attachment_content_url = Expression<String>("contentUrl")
 
-    // Users Table
-    let users = Table("Users")
-    let user_base_url = Expression<String>("baseUrl")
-    let user_username = Expression<String>("username")
-    let user_password = Expression<String>("password")
-
     // Initialize
     init() {
         do {
@@ -60,7 +54,7 @@ class Database {
             // Get the App Group path, which is accessed by both the app and the notification service extension
             if let path = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.ntfy") {
                 // Connect to the database
-                db = try Connection("\(path.path)/ntfy.sh.sqlite3")
+                db = try Connection("\(path.path)/ntfy.sqlite3")
 
                 // Initialize Subscriptions table
                 try db?.run(subscriptions.create(ifNotExists: true) { table in
@@ -90,14 +84,6 @@ class Database {
                     table.column(attachment_expires)
                     table.column(attachment_url)
                     table.column(attachment_content_url)
-                })
-
-                // Initialize Users Table
-                try db?.run(users.create(ifNotExists: true) { table in
-                    table.column(user_base_url)
-                    table.column(user_username)
-                    table.column(user_password)
-                    table.primaryKey(user_base_url)
                 })
             }
         } catch {
@@ -307,46 +293,5 @@ class Database {
         } catch {
             print("Error updating attachment: \(error)")
         }
-    }
-
-    func addUser(user: NtfyUser) {
-        do {
-            try db?.run(users.insert(
-                user_base_url <- user.baseUrl,
-                user_username <- user.username,
-                user_password <- user.password
-            ))
-        } catch {
-            print(error)
-        }
-    }
-
-    func deleteUser(user: NtfyUser) {
-        do {
-            let line = users.filter(user_base_url == user.baseUrl && user_username == user.username)
-            try db?.run(line.delete())
-        } catch {
-            print(error)
-        }
-    }
-
-    func findUsers(baseUrl: String) -> [NtfyUser] {
-        var ntfyUsers = [NtfyUser]()
-        do {
-            let query = users.filter(user_base_url == baseUrl)
-            if let result = try db?.prepare(query) {
-                for line in result {
-                    let user =  NtfyUser(
-                        baseUrl: try line.get(user_base_url),
-                        username: try line.get(user_username),
-                        password: try line.get(user_password)
-                    )
-                    ntfyUsers.append(user)
-                }
-            }
-        } catch {
-            print(error)
-        }
-        return ntfyUsers
     }
 }

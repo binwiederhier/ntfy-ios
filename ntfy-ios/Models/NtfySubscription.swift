@@ -70,9 +70,9 @@ class NtfySubscription: ObservableObject, Identifiable {
         return notifications.first
     }
 
-    func fetchNewNotifications(user: NtfyUser?, completionHandler: ( ([NtfyNotification]?, Error?) -> Void)?) {
+    func fetchNewNotifications(completionHandler: ( ([NtfyNotification]?, Error?) -> Void)?) {
         var newNotifications = [NtfyNotification]()
-        ApiService.shared.poll(subscription: self, user: user) { (notifications, error) in
+        ApiService.shared.poll(subscription: self) { (notifications, error) in
             if let notifications = notifications {
                 for notification in notifications {
                     if (notification.save() != nil) {
@@ -94,6 +94,10 @@ class NtfySubscriptionList: ObservableObject {
     @Published var subscriptions = [NtfySubscription]()
 
     init() {
+        self.subscriptions = Database.current.getSubscriptions()
+    }
+    
+    func refresh() {
         self.subscriptions = Database.current.getSubscriptions()
     }
 }

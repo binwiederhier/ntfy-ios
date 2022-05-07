@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct SubscriptionsList: View {
-    @StateObject var subscriptions = NtfySubscriptionList()
-
+    @ObservedObject var subscriptions: NtfySubscriptionList
     @Binding var currentView: CurrentView
 
     var body: some View {
@@ -47,13 +46,6 @@ struct SubscriptionsList: View {
                         Image(systemName: "plus")
                     }
                 }
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        currentView = .managingUsers
-                    }) {
-                        Text("Users")
-                    }
-                }
             }
             .overlay(Group {
                 if subscriptions.subscriptions.isEmpty {
@@ -65,7 +57,7 @@ struct SubscriptionsList: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
-            self.subscriptions.objectWillChange.send()
+            subscriptions.objectWillChange.send()
         }
     }
 }

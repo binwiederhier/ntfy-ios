@@ -8,22 +8,19 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var addingSubscription = false
-    @State var managingUsers = false
+    @ObservedObject var subscriptions: NtfySubscriptionList
     @State var currentView = CurrentView.subscriptionList
-
+    
     var body: some View {
         switch (currentView) {
-        case .managingUsers:
-            UserManagementView(currentView: $currentView)
         case .addingSubscription:
-            AddSubscriptionView(currentView: $currentView)
+            AddSubscriptionView(subscriptions: subscriptions, currentView: $currentView)
         case .subscriptionList:
-            SubscriptionsList(currentView: $currentView)
+            SubscriptionsList(subscriptions: subscriptions, currentView: $currentView)
         }
     }
 }
 
 enum CurrentView {
-    case addingSubscription, managingUsers, subscriptionList
+    case addingSubscription, subscriptionList
 }

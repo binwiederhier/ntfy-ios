@@ -8,18 +8,16 @@
 import SwiftUI
 
 struct AddSubscriptionView: View {
+    @ObservedObject var subscriptions: NtfySubscriptionList
     @State private var topic: String = ""
     @State private var baseUrl: String = Configuration.appBaseUrl
-    @State private var showLogin: Bool = false
-    @State private var username: String = ""
-    @State private var password: String = ""
-
+    
     @State private var showAlert = false
     @State private var activeAlert: AddSubscriptionView.ActiveAlert = .invalidTopic
     @State private var authFailureError = ""
-
+    
     @Binding var currentView: CurrentView
-
+    
     var body: some View {
         NavigationView {
             Form {
@@ -29,16 +27,6 @@ struct AddSubscriptionView: View {
                 ) {
                     TextField("Topic name, e.g. server_alerts", text: $topic)
                         .textInputAutocapitalization(.never)
-                }
-                if showLogin {
-                    Section(
-                        header: Text("Login")
-                    ) {
-                        TextField("Username", text: $username)
-                            .textInputAutocapitalization(.none)
-                            .disableAutocorrection(true)
-                        SecureField("Password", text: $password)
-                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -61,7 +49,7 @@ struct AddSubscriptionView: View {
                              Validation function:
                              1. Topic is not empty
                              2. Topic matches regex? Should match Firebase topic regex
-
+                             
                              Authentication function:
                              1. Get baseUrl
                              2. Get user for baseUrl
@@ -69,14 +57,14 @@ struct AddSubscriptionView: View {
                              3. If authorized, continue to subscribe
                              4. Else if user != null, access not allowed to topic but user exists
                              5. Else (user is null), access not allowed, show login view
-
+                             
                              Login function:
                              1. Login user / pass view
                              2. api.checkAuth(baseUrl, topic, user -> user / pass)
                              3. If authorized, save user to database, continue to subscribe
                              4. Else access not allowed, show login view again
-
-
+                             
+                             
                              Subscribe function:
                              1. Create subscription
                              2. Add subscription to database
@@ -84,32 +72,18 @@ struct AddSubscriptionView: View {
                              4. Fetch cached messages
                              5. Switch to SubscriptionDetail view
                              */
-                            var user = Database.current.findUsers(baseUrl: baseUrl).first
-                            if showLogin {
-                                print("Authorization via UI forms")
-                                if (user != nil) {
-                                    user!.username = username
-                                    user!.password = password
-                                } else {
-                                    user = NtfyUser(baseUrl: baseUrl, username: username, password: password)
-                                }
-                            }
-                            ApiService.shared.checkAuth(baseUrl: baseUrl, topic: sanitizedTopic, user: user) { authResponse, error in
+                            ApiService.shared.checkAuth(baseUrl: baseUrl, topic: sanitizedTopic) { authResponse, error in
                                 if let authResponse = authResponse {
                                     if let success = authResponse.success, success {
-                                        if user != nil {
-                                            Database.current.addUser(user: user!)
-                                        }
                                         let subscription = NtfySubscription(id: Int64(arc4random()), baseUrl: baseUrl, topic: sanitizedTopic)
                                         subscription.save()
                                         if baseUrl == Configuration.appBaseUrl {
                                             subscription.subscribe(to: sanitizedTopic)
                                         }
-                                        subscription.fetchNewNotifications(user: user, completionHandler: nil)
+                                        subscriptions.refresh()
+                                        subscription.fetchNewNotifications( completionHandler: nil)
                                         currentView = .subscriptionList
-                                        showLogin = false
                                     } else {
-                                        showLogin = true
                                         showAlert = true
                                         activeAlert = .requiresAuth
                                     }
@@ -163,11 +137,11 @@ struct AddSubscriptionView: View {
             }
         }
     }
-
+    
     private func sanitizeTopic(topic: String) -> String {
         return topic.trimmingCharacters(in: [" "])
     }
-
+    
     private func isTopicValid(topic: String) -> Bool {
         return !topic.isEmpty && (topic.range(of: "^[-_A-Za-z0-9]{1,64}$", options: .regularExpression, range: nil, locale: nil) != nil)
     }

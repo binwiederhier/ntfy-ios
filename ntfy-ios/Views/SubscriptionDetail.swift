@@ -25,7 +25,6 @@ struct SubscriptionDetail: View {
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        let user = Database.current.findUsers(baseUrl: subscription.baseUrl).first
         NavigationView {
             List(selection: $selection) {
                 ForEach(subscription.notifications, id: \.self) { notification in
@@ -56,8 +55,7 @@ struct SubscriptionDetail: View {
                                 message: "This is a test notification from the Ntfy iOS app. It has a priority of \(priority). If you send another one, it may look different.",
                                 title: "Test: You can set a title if you like",
                                 priority: priority,
-                                tags: tags,
-                                user: user
+                                tags: tags
                             ) { _,_ in
                                 print("Success")
                             }
@@ -132,7 +130,7 @@ struct SubscriptionDetail: View {
             }
         })
         .refreshable {
-            subscription.fetchNewNotifications(user: user, completionHandler: nil)
+            subscription.fetchNewNotifications(completionHandler: nil)
         }
         .onAppear {
             subscription.loadNotifications()
@@ -175,8 +173,8 @@ class SubscriptionDetailViewModel: ObservableObject {
         notifications = Database.current.getNotifications(subscription: subscription)
     }
 
-    func fetchNewNotifications(subscription: NtfySubscription, user: NtfyUser?) {
-        subscription.fetchNewNotifications(user: user) { (_, _) in
+    func fetchNewNotifications(subscription: NtfySubscription) {
+        subscription.fetchNewNotifications { (_, _) in
             self.loadNotifications(subscription: subscription)
         }
     }

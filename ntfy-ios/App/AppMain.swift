@@ -12,9 +12,11 @@ struct AppMain: App {
     // Set App Delegate
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
+    @StateObject private var subscriptions = NtfySubscriptionList()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(subscriptions: subscriptions)
         }
     }
 }
