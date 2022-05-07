@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct SubscriptionsList: View {
-    @ObservedObject var subscriptions = NtfySUbscriptionList()
+    @StateObject var subscriptions = NtfySubscriptionList()
 
     @Binding var currentView: CurrentView
 
     var body: some View {
         NavigationView {
-            List{
+            List {
                 ForEach(subscriptions.subscriptions) { subscription in
                     ZStack {
                         NavigationLink(
@@ -38,7 +38,7 @@ struct SubscriptionsList: View {
                 }
             }
             .listStyle(PlainListStyle())
-            .navigationTitle("Subscribed Topics")
+            .navigationTitle("Topics")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -59,7 +59,7 @@ struct SubscriptionsList: View {
                 if subscriptions.subscriptions.isEmpty {
                     Text("No Topics")
                         .font(.headline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.secondary)
                 }
             })
         }
@@ -69,3 +69,14 @@ struct SubscriptionsList: View {
         }
     }
 }
+
+/*
+struct SubscriptionsList_Previews: PreviewProvider {
+    static var previews: some View {
+        SubscriptionsList(
+            subscriptions: NtfySubscriptionList,
+            currentView: (.subscriptionList)
+        )
+    }
+}
+*/

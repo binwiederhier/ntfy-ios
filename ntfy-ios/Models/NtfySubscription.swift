@@ -90,7 +90,7 @@ class NtfySubscription: ObservableObject, Identifiable {
     }
 }
 
-class NtfySUbscriptionList: ObservableObject {
+class NtfySubscriptionList: ObservableObject {
     @Published var subscriptions = [NtfySubscription]()
 
     init() {
