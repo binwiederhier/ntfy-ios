@@ -14,7 +14,33 @@
 		9474F1D0282F2BB600CDE4DD /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 9474F1CF282F2BB600CDE4DD /* FirebaseMessaging */; };
 		9474F1D2282F2D2C00CDE4DD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1D1282F2D2C00CDE4DD /* AppDelegate.swift */; };
 		9474F1DC282F30B500CDE4DD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */; };
+		9474F1E7282F3FFD00CDE4DD /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1E6282F3FFD00CDE4DD /* NotificationService.swift */; };
+		9474F1EB282F3FFD00CDE4DD /* ntfyNSE.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9474F1E9282F3FFD00CDE4DD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9474F1B5282F2AA700CDE4DD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9474F1E3282F3FFD00CDE4DD;
+			remoteInfo = ntfyNSE;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9474F1EF282F3FFD00CDE4DD /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				9474F1EB282F3FFD00CDE4DD /* ntfyNSE.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		9474F1BD282F2AA700CDE4DD /* ntfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -26,6 +52,9 @@
 		9474F1D5282F2FED00CDE4DD /* ntfy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfy.entitlements; sourceTree = "<group>"; };
 		9474F1D6282F2FF700CDE4DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ntfyNSE.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9474F1E6282F3FFD00CDE4DD /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		9474F1E8282F3FFD00CDE4DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,6 +66,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9474F1E1282F3FFD00CDE4DD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -44,6 +80,7 @@
 			isa = PBXGroup;
 			children = (
 				9474F1BF282F2AA700CDE4DD /* ntfy */,
+				9474F1E5282F3FFD00CDE4DD /* ntfyNSE */,
 				9474F1BE282F2AA700CDE4DD /* Products */,
 				9474F1DD282F3A2E00CDE4DD /* Frameworks */,
 			);
@@ -53,6 +90,7 @@
 			isa = PBXGroup;
 			children = (
 				9474F1BD282F2AA700CDE4DD /* ntfy.app */,
+				9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -87,6 +125,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		9474F1E5282F3FFD00CDE4DD /* ntfyNSE */ = {
+			isa = PBXGroup;
+			children = (
+				9474F1E6282F3FFD00CDE4DD /* NotificationService.swift */,
+				9474F1E8282F3FFD00CDE4DD /* Info.plist */,
+			);
+			path = ntfyNSE;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -97,10 +144,12 @@
 				9474F1B9282F2AA700CDE4DD /* Sources */,
 				9474F1BA282F2AA700CDE4DD /* Frameworks */,
 				9474F1BB282F2AA700CDE4DD /* Resources */,
+				9474F1EF282F3FFD00CDE4DD /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				9474F1EA282F3FFD00CDE4DD /* PBXTargetDependency */,
 			);
 			name = ntfy;
 			packageProductDependencies = (
@@ -109,6 +158,23 @@
 			productName = ntfy;
 			productReference = 9474F1BD282F2AA700CDE4DD /* ntfy.app */;
 			productType = "com.apple.product-type.application";
+		};
+		9474F1E3282F3FFD00CDE4DD /* ntfyNSE */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9474F1EC282F3FFD00CDE4DD /* Build configuration list for PBXNativeTarget "ntfyNSE" */;
+			buildPhases = (
+				9474F1E0282F3FFD00CDE4DD /* Sources */,
+				9474F1E1282F3FFD00CDE4DD /* Frameworks */,
+				9474F1E2282F3FFD00CDE4DD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ntfyNSE;
+			productName = ntfyNSE;
+			productReference = 9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -121,6 +187,9 @@
 				LastUpgradeCheck = 1330;
 				TargetAttributes = {
 					9474F1BC282F2AA700CDE4DD = {
+						CreatedOnToolsVersion = 13.3.1;
+					};
+					9474F1E3282F3FFD00CDE4DD = {
 						CreatedOnToolsVersion = 13.3.1;
 					};
 				};
@@ -142,6 +211,7 @@
 			projectRoot = "";
 			targets = (
 				9474F1BC282F2AA700CDE4DD /* ntfy */,
+				9474F1E3282F3FFD00CDE4DD /* ntfyNSE */,
 			);
 		};
 /* End PBXProject section */
@@ -154,6 +224,13 @@
 				9474F1C8282F2AA800CDE4DD /* Preview Assets.xcassets in Resources */,
 				9474F1C5282F2AA800CDE4DD /* Assets.xcassets in Resources */,
 				9474F1DC282F30B500CDE4DD /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9474F1E2282F3FFD00CDE4DD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -170,7 +247,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9474F1E0282F3FFD00CDE4DD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9474F1E7282F3FFD00CDE4DD /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9474F1EA282F3FFD00CDE4DD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9474F1E3282F3FFD00CDE4DD /* ntfyNSE */;
+			targetProxy = 9474F1E9282F3FFD00CDE4DD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9474F1C9282F2AA800CDE4DD /* Debug */ = {
@@ -290,6 +383,7 @@
 		9474F1CC282F2AA800CDE4DD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
@@ -321,6 +415,7 @@
 		9474F1CD282F2AA800CDE4DD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
@@ -349,6 +444,58 @@
 			};
 			name = Release;
 		};
+		9474F1ED282F3FFD00CDE4DD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ntfyNSE/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ntfyNSE;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyNSE;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9474F1EE282F3FFD00CDE4DD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ntfyNSE/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ntfyNSE;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyNSE;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -366,6 +513,15 @@
 			buildConfigurations = (
 				9474F1CC282F2AA800CDE4DD /* Debug */,
 				9474F1CD282F2AA800CDE4DD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9474F1EC282F3FFD00CDE4DD /* Build configuration list for PBXNativeTarget "ntfyNSE" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9474F1ED282F3FFD00CDE4DD /* Debug */,
+				9474F1EE282F3FFD00CDE4DD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

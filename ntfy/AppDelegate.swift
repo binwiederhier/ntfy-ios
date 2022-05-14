@@ -24,6 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     Messaging.messaging().delegate = self
     
     registerForPushNotifications()
+      UNUserNotificationCenter.current().delegate = self
     
     // Check if launched from notification
     let notificationOption = launchOptions?[.remoteNotification]
@@ -49,7 +50,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     print("didReceiveRemoteNotification")
     print(userInfo)
-      completionHandler(.newData)
   }
   
 
@@ -111,7 +111,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 // [START ios_10_message_handling]
-@available(iOS 10, *)
+//@available(iOS 10, *)
 extension AppDelegate: UNUserNotificationCenterDelegate {
   // Receive displayed notifications for iOS 10 devices.
   func userNotificationCenter(_ center: UNUserNotificationCenter,
@@ -139,6 +139,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
   func userNotificationCenter(_ center: UNUserNotificationCenter,
                               didReceive response: UNNotificationResponse,
                               withCompletionHandler completionHandler: @escaping () -> Void) {
+      print("didReceive")
     let userInfo = response.notification.request.content.userInfo
 
     // [START_EXCLUDE]
