@@ -12,6 +12,8 @@
 		9474F1C5282F2AA800CDE4DD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9474F1C4282F2AA800CDE4DD /* Assets.xcassets */; };
 		9474F1C8282F2AA800CDE4DD /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9474F1C7282F2AA800CDE4DD /* Preview Assets.xcassets */; };
 		9474F1D0282F2BB600CDE4DD /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 9474F1CF282F2BB600CDE4DD /* FirebaseMessaging */; };
+		9474F1D2282F2D2C00CDE4DD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1D1282F2D2C00CDE4DD /* AppDelegate.swift */; };
+		9474F1DC282F30B500CDE4DD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +22,10 @@
 		9474F1C2282F2AA700CDE4DD /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9474F1C4282F2AA800CDE4DD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9474F1C7282F2AA800CDE4DD /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		9474F1D1282F2D2C00CDE4DD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		9474F1D5282F2FED00CDE4DD /* ntfy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfy.entitlements; sourceTree = "<group>"; };
+		9474F1D6282F2FF700CDE4DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +45,7 @@
 			children = (
 				9474F1BF282F2AA700CDE4DD /* ntfy */,
 				9474F1BE282F2AA700CDE4DD /* Products */,
+				9474F1DD282F3A2E00CDE4DD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -53,10 +60,14 @@
 		9474F1BF282F2AA700CDE4DD /* ntfy */ = {
 			isa = PBXGroup;
 			children = (
+				9474F1D6282F2FF700CDE4DD /* Info.plist */,
+				9474F1D5282F2FED00CDE4DD /* ntfy.entitlements */,
 				9474F1C0282F2AA700CDE4DD /* ntfyApp.swift */,
 				9474F1C2282F2AA700CDE4DD /* ContentView.swift */,
+				9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */,
 				9474F1C4282F2AA800CDE4DD /* Assets.xcassets */,
 				9474F1C6282F2AA800CDE4DD /* Preview Content */,
+				9474F1D1282F2D2C00CDE4DD /* AppDelegate.swift */,
 			);
 			path = ntfy;
 			sourceTree = "<group>";
@@ -67,6 +78,13 @@
 				9474F1C7282F2AA800CDE4DD /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		9474F1DD282F3A2E00CDE4DD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -135,6 +153,7 @@
 			files = (
 				9474F1C8282F2AA800CDE4DD /* Preview Assets.xcassets in Resources */,
 				9474F1C5282F2AA800CDE4DD /* Assets.xcassets in Resources */,
+				9474F1DC282F30B500CDE4DD /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -145,6 +164,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9474F1D2282F2D2C00CDE4DD /* AppDelegate.swift in Sources */,
 				9474F1C3282F2AA700CDE4DD /* ContentView.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* ntfyApp.swift in Sources */,
 			);
@@ -203,7 +223,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -257,7 +277,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -272,15 +292,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Preview Content\"";
 				DEVELOPMENT_TEAM = YXQ4AMS4B4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_FILE = ntfy/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -301,15 +323,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Preview Content\"";
 				DEVELOPMENT_TEAM = YXQ4AMS4B4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_FILE = ntfy/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (

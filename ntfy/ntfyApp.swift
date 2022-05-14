@@ -6,12 +6,21 @@
 //
 
 import SwiftUI
+import Firebase
+
 
 @main
 struct ntfyApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate: AppDelegate
+    
+    init() {
+        FirebaseApp.configure()
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
     }
 }
+
