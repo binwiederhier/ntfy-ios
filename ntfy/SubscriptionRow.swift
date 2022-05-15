@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-extension Subscription {
-    func displayName() -> String {
-        return topic ?? "<unknown>"
-    }
-}
-
 struct SubscriptionRow: View {
     @ObservedObject var subscription: Subscription
 

@@ -42,18 +42,12 @@ struct SubscriptionsList: View {
             .navigationTitle("Subscribed topics")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-//                        currentView = .addingSubscription
-                        let firstNames = ["Ginny", "Harry", "Hermione", "Luna", "Ron"]
-                        let chosenFirstName = firstNames.randomElement()!
-
-                        let subscription = Subscription(context: context)
-                        subscription.baseUrl = "https://ntfy.sh"
-                        subscription.topic = chosenFirstName
-                        try? context.save()
-                    }) {
+                    NavigationLink(
+                        destination: AddSubscriptionView()
+                    ) {
                         Image(systemName: "plus")
                     }
+                    
                 }
             }
             .overlay(Group {
@@ -65,23 +59,8 @@ struct SubscriptionsList: View {
             })
         }
         .navigationViewStyle(StackNavigationViewStyle())
-        /*
-        
-        VStack {
-            List(subscriptions) { subscription in
-                Text("\(subscription.topic ?? "")")
-            }
-            Button("Add") {
-                let firstNames = ["Ginny", "Harry", "Hermione", "Luna", "Ron"]
-                let chosenFirstName = firstNames.randomElement()!
-
-                let subscription = Subscription(context: context)
-                subscription.baseUrl = "https://ntfy.sh"
-                subscription.topic = chosenFirstName
-                try? context.save()
-            }
-        }*/
     }
+    
 }
 
 /*
