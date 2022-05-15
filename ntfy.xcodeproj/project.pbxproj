@@ -1,0 +1,757 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		800FA49627B19CA0005D05B9 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 800FA49527B19CA0005D05B9 /* NotificationService.swift */; };
+		800FA49A27B19CA0005D05B9 /* NotificationService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 800FA49327B19CA0005D05B9 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8015C3DC2793AB1500E6F001 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8015C3DB2793AB1400E6F001 /* Database.swift */; };
+		802D626927B1A36E00DDD3AF /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 802D626827B1A36E00DDD3AF /* FirebaseMessaging */; };
+		802D626B27B1A37400DDD3AF /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 802D626A27B1A37400DDD3AF /* SQLite */; };
+		802D626C27B1A37700DDD3AF /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8015C3DB2793AB1400E6F001 /* Database.swift */; };
+		802D626D27B1A37900DDD3AF /* NtfyNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F62793B56800F1A639 /* NtfyNotification.swift */; };
+		802D626E27B1A37C00DDD3AF /* NtfySubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F42793B1CF00F1A639 /* NtfySubscription.swift */; };
+		80386E802793585B009B0480 /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E7F2793585B009B0480 /* AppMain.swift */; };
+		80386E822793585B009B0480 /* SubscriptionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E812793585B009B0480 /* SubscriptionsList.swift */; };
+		80386E842793585C009B0480 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80386E832793585C009B0480 /* Assets.xcassets */; };
+		80386E872793585C009B0480 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 80386E862793585C009B0480 /* Preview Assets.xcassets */; };
+		80386E9927935CC9009B0480 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 80386E9827935CC9009B0480 /* FirebaseMessaging */; };
+		80386E9F27936087009B0480 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80386E9E27936087009B0480 /* AppDelegate.swift */; };
+		80386EA92793A7AC009B0480 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 80386EA82793A7AC009B0480 /* SQLite */; };
+		8079FF4C27C2874A00FB3D18 /* NtfyAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8079FF4B27C2874A00FB3D18 /* NtfyAttachment.swift */; };
+		8079FF4D27C2874A00FB3D18 /* NtfyAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8079FF4B27C2874A00FB3D18 /* NtfyAttachment.swift */; };
+		8079FF4F27C29D3300FB3D18 /* NotificationAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8079FF4E27C29D3300FB3D18 /* NotificationAttachmentView.swift */; };
+		80856C7F27BDE0A7008AC8B8 /* ApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80856C7E27BDE0A7008AC8B8 /* ApiService.swift */; };
+		80856C8027BDE0A7008AC8B8 /* ApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80856C7E27BDE0A7008AC8B8 /* ApiService.swift */; };
+		8086EB242794630800C3628A /* AddSubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8086EB232794630800C3628A /* AddSubscriptionView.swift */; };
+		8086EB2627946FCE00C3628A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8086EB2527946FCE00C3628A /* ContentView.swift */; };
+		80A313F52793B1CF00F1A639 /* NtfySubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F42793B1CF00F1A639 /* NtfySubscription.swift */; };
+		80A313F72793B56800F1A639 /* NtfyNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F62793B56800F1A639 /* NtfyNotification.swift */; };
+		80A313F92793C0D800F1A639 /* SubscriptionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313F82793C0D800F1A639 /* SubscriptionRow.swift */; };
+		80A313FB2793C2EA00F1A639 /* SubscriptionDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313FA2793C2EA00F1A639 /* SubscriptionDetail.swift */; };
+		80A313FD2793C42000F1A639 /* NotificationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A313FC2793C42000F1A639 /* NotificationRow.swift */; };
+		80E8CED727B56DB200FDC5E0 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E8CED627B56DB200FDC5E0 /* EmojiManager.swift */; };
+		80E8CED827B56DB200FDC5E0 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E8CED627B56DB200FDC5E0 /* EmojiManager.swift */; };
+		80E8CEDA27B5736100FDC5E0 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 80E8CED927B5736100FDC5E0 /* emojis.json */; };
+		80E8CEDB27B5736100FDC5E0 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 80E8CED927B5736100FDC5E0 /* emojis.json */; };
+		80ED61BE27BCA36A00FCEA36 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80ED61BD27BCA36A00FCEA36 /* Configuration.swift */; };
+		80ED61BF27BCA36A00FCEA36 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80ED61BD27BCA36A00FCEA36 /* Configuration.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		800FA49827B19CA0005D05B9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 80386E742793585B009B0480 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 800FA49227B19CA0005D05B9;
+			remoteInfo = NotificationService;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		800FA49B27B19CA0005D05B9 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				800FA49A27B19CA0005D05B9 /* NotificationService.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		800FA49327B19CA0005D05B9 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		800FA49527B19CA0005D05B9 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		800FA49727B19CA0005D05B9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		800FA49F27B19D2F005D05B9 /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
+		8015C3DB2793AB1400E6F001 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
+		802D626F27B1C86B00DDD3AF /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		80386E7C2793585B009B0480 /* ntfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		80386E7F2793585B009B0480 /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
+		80386E812793585B009B0480 /* SubscriptionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsList.swift; sourceTree = "<group>"; };
+		80386E832793585C009B0480 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		80386E862793585C009B0480 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		80386E9C27935EE9009B0480 /* ntfy-sh-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ntfy-sh-Info.plist"; sourceTree = "<group>"; };
+		80386E9E27936087009B0480 /* AppDelegate.swift */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		80386EA0279363A2009B0480 /* ntfy.sh.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfy.sh.entitlements; sourceTree = "<group>"; };
+		8079FF4B27C2874A00FB3D18 /* NtfyAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyAttachment.swift; sourceTree = "<group>"; };
+		8079FF4E27C29D3300FB3D18 /* NotificationAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationAttachmentView.swift; sourceTree = "<group>"; };
+		8081A7F427B4CB67004A8986 /* FEATURE_PARITY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FEATURE_PARITY.md; sourceTree = "<group>"; };
+		80856C7E27BDE0A7008AC8B8 /* ApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
+		8086EB232794630800C3628A /* AddSubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSubscriptionView.swift; sourceTree = "<group>"; };
+		8086EB2527946FCE00C3628A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		80910E1127C420B50074B05A /* GETTING_STARTED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GETTING_STARTED.md; sourceTree = "<group>"; };
+		80910E1227C422140074B05A /* TECHNICAL_LIMITATIONS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TECHNICAL_LIMITATIONS.md; sourceTree = "<group>"; };
+		80A313F42793B1CF00F1A639 /* NtfySubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfySubscription.swift; sourceTree = "<group>"; };
+		80A313F62793B56800F1A639 /* NtfyNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyNotification.swift; sourceTree = "<group>"; };
+		80A313F82793C0D800F1A639 /* SubscriptionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRow.swift; sourceTree = "<group>"; };
+		80A313FA2793C2EA00F1A639 /* SubscriptionDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionDetail.swift; sourceTree = "<group>"; };
+		80A313FC2793C42000F1A639 /* NotificationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRow.swift; sourceTree = "<group>"; };
+		80E8CED627B56DB200FDC5E0 /* EmojiManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiManager.swift; sourceTree = "<group>"; };
+		80E8CED927B5736100FDC5E0 /* emojis.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = emojis.json; sourceTree = "<group>"; };
+		80ED61BD27BCA36A00FCEA36 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		94A4ACC528258C6F00A44C66 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		800FA49027B19CA0005D05B9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				802D626B27B1A37400DDD3AF /* SQLite in Frameworks */,
+				802D626927B1A36E00DDD3AF /* FirebaseMessaging in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		80386E792793585B009B0480 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				80386EA92793A7AC009B0480 /* SQLite in Frameworks */,
+				80386E9927935CC9009B0480 /* FirebaseMessaging in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		800FA49427B19CA0005D05B9 /* NotificationService */ = {
+			isa = PBXGroup;
+			children = (
+				800FA49F27B19D2F005D05B9 /* NotificationService.entitlements */,
+				800FA49527B19CA0005D05B9 /* NotificationService.swift */,
+				800FA49727B19CA0005D05B9 /* Info.plist */,
+			);
+			path = NotificationService;
+			sourceTree = "<group>";
+		};
+		8015C3DA2793AB0300E6F001 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				8015C3DB2793AB1400E6F001 /* Database.swift */,
+				80E8CED627B56DB200FDC5E0 /* EmojiManager.swift */,
+				80ED61BD27BCA36A00FCEA36 /* Configuration.swift */,
+				80856C7E27BDE0A7008AC8B8 /* ApiService.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		802D626327B19FFE00DDD3AF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		80386E732793585B009B0480 = {
+			isa = PBXGroup;
+			children = (
+				8081A7F327B4CB21004A8986 /* docs */,
+				802D626F27B1C86B00DDD3AF /* README.md */,
+				80386EA0279363A2009B0480 /* ntfy.sh.entitlements */,
+				80386E7E2793585B009B0480 /* ntfy-ios */,
+				800FA49427B19CA0005D05B9 /* NotificationService */,
+				80386E7D2793585B009B0480 /* Products */,
+				802D626327B19FFE00DDD3AF /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		80386E7D2793585B009B0480 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				80386E7C2793585B009B0480 /* ntfy.app */,
+				800FA49327B19CA0005D05B9 /* NotificationService.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		80386E7E2793585B009B0480 /* ntfy-ios */ = {
+			isa = PBXGroup;
+			children = (
+				80A313F32793B1BE00F1A639 /* Models */,
+				8015C3DA2793AB0300E6F001 /* Utils */,
+				80386E9327935982009B0480 /* Views */,
+				80386E922793597C009B0480 /* App */,
+				80386E8D279358E8009B0480 /* Assets */,
+				80386E852793585C009B0480 /* Preview Content */,
+			);
+			path = "ntfy-ios";
+			sourceTree = "<group>";
+		};
+		80386E852793585C009B0480 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				80386E862793585C009B0480 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		80386E8D279358E8009B0480 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				809D244627C5DD5000F1FC21 /* Firebase */,
+				80386E9C27935EE9009B0480 /* ntfy-sh-Info.plist */,
+				80386E832793585C009B0480 /* Assets.xcassets */,
+				80E8CED927B5736100FDC5E0 /* emojis.json */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+		80386E922793597C009B0480 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				80386E7F2793585B009B0480 /* AppMain.swift */,
+				80386E9E27936087009B0480 /* AppDelegate.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		80386E9327935982009B0480 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				80386E812793585B009B0480 /* SubscriptionsList.swift */,
+				80A313F82793C0D800F1A639 /* SubscriptionRow.swift */,
+				80A313FA2793C2EA00F1A639 /* SubscriptionDetail.swift */,
+				80A313FC2793C42000F1A639 /* NotificationRow.swift */,
+				8086EB232794630800C3628A /* AddSubscriptionView.swift */,
+				8086EB2527946FCE00C3628A /* ContentView.swift */,
+				8079FF4E27C29D3300FB3D18 /* NotificationAttachmentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		8081A7F327B4CB21004A8986 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				8081A7F427B4CB67004A8986 /* FEATURE_PARITY.md */,
+				80910E1127C420B50074B05A /* GETTING_STARTED.md */,
+				80910E1227C422140074B05A /* TECHNICAL_LIMITATIONS.md */,
+			);
+			path = docs;
+			sourceTree = "<group>";
+		};
+		809D244627C5DD5000F1FC21 /* Firebase */ = {
+			isa = PBXGroup;
+			children = (
+				94A4ACC528258C6F00A44C66 /* GoogleService-Info.plist */,
+			);
+			path = Firebase;
+			sourceTree = "<group>";
+		};
+		80A313F32793B1BE00F1A639 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				80A313F42793B1CF00F1A639 /* NtfySubscription.swift */,
+				80A313F62793B56800F1A639 /* NtfyNotification.swift */,
+				8079FF4B27C2874A00FB3D18 /* NtfyAttachment.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		800FA49227B19CA0005D05B9 /* NotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 800FA49E27B19CA0005D05B9 /* Build configuration list for PBXNativeTarget "NotificationService" */;
+			buildPhases = (
+				800FA48F27B19CA0005D05B9 /* Sources */,
+				800FA49027B19CA0005D05B9 /* Frameworks */,
+				800FA49127B19CA0005D05B9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NotificationService;
+			packageProductDependencies = (
+				802D626827B1A36E00DDD3AF /* FirebaseMessaging */,
+				802D626A27B1A37400DDD3AF /* SQLite */,
+			);
+			productName = NotificationService;
+			productReference = 800FA49327B19CA0005D05B9 /* NotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		80386E7B2793585B009B0480 /* ntfy */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 80386E8A2793585C009B0480 /* Build configuration list for PBXNativeTarget "ntfy" */;
+			buildPhases = (
+				80386E782793585B009B0480 /* Sources */,
+				80386E792793585B009B0480 /* Frameworks */,
+				80386E7A2793585B009B0480 /* Resources */,
+				800FA49B27B19CA0005D05B9 /* Embed App Extensions */,
+				809D244727C5DF4700F1FC21 /* GoogleService-Info plist */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				800FA49927B19CA0005D05B9 /* PBXTargetDependency */,
+			);
+			name = ntfy;
+			packageProductDependencies = (
+				80386E9827935CC9009B0480 /* FirebaseMessaging */,
+				80386EA82793A7AC009B0480 /* SQLite */,
+			);
+			productName = "ntfy-ios";
+			productReference = 80386E7C2793585B009B0480 /* ntfy.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		80386E742793585B009B0480 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1320;
+				LastUpgradeCheck = 1330;
+				TargetAttributes = {
+					800FA49227B19CA0005D05B9 = {
+						CreatedOnToolsVersion = 13.2.1;
+					};
+					80386E7B2793585B009B0480 = {
+						CreatedOnToolsVersion = 13.1;
+					};
+				};
+			};
+			buildConfigurationList = 80386E772793585B009B0480 /* Build configuration list for PBXProject "ntfy" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 80386E732793585B009B0480;
+			packageReferences = (
+				80386E9727935CC9009B0480 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				80386EA72793A7AC009B0480 /* XCRemoteSwiftPackageReference "SQLite.swift" */,
+			);
+			productRefGroup = 80386E7D2793585B009B0480 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				80386E7B2793585B009B0480 /* ntfy */,
+				800FA49227B19CA0005D05B9 /* NotificationService */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		800FA49127B19CA0005D05B9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				80E8CEDB27B5736100FDC5E0 /* emojis.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		80386E7A2793585B009B0480 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				80386E872793585C009B0480 /* Preview Assets.xcassets in Resources */,
+				80386E842793585C009B0480 /* Assets.xcassets in Resources */,
+				80E8CEDA27B5736100FDC5E0 /* emojis.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		809D244727C5DF4700F1FC21 /* GoogleService-Info plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "GoogleService-Info plist";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "PATH_TO_GOOGLE_PLISTS=\"${PROJECT_DIR}/ntfy-ios/Assets/Firebase\"\ncp -r \"$PATH_TO_GOOGLE_PLISTS/GoogleService-Info.plist\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		800FA48F27B19CA0005D05B9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				802D626C27B1A37700DDD3AF /* Database.swift in Sources */,
+				8079FF4D27C2874A00FB3D18 /* NtfyAttachment.swift in Sources */,
+				80ED61BF27BCA36A00FCEA36 /* Configuration.swift in Sources */,
+				802D626D27B1A37900DDD3AF /* NtfyNotification.swift in Sources */,
+				800FA49627B19CA0005D05B9 /* NotificationService.swift in Sources */,
+				80E8CED827B56DB200FDC5E0 /* EmojiManager.swift in Sources */,
+				80856C8027BDE0A7008AC8B8 /* ApiService.swift in Sources */,
+				802D626E27B1A37C00DDD3AF /* NtfySubscription.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		80386E782793585B009B0480 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				80386E9F27936087009B0480 /* AppDelegate.swift in Sources */,
+				80ED61BE27BCA36A00FCEA36 /* Configuration.swift in Sources */,
+				8086EB2627946FCE00C3628A /* ContentView.swift in Sources */,
+				80386E822793585B009B0480 /* SubscriptionsList.swift in Sources */,
+				8015C3DC2793AB1500E6F001 /* Database.swift in Sources */,
+				80E8CED727B56DB200FDC5E0 /* EmojiManager.swift in Sources */,
+				8086EB242794630800C3628A /* AddSubscriptionView.swift in Sources */,
+				80A313FD2793C42000F1A639 /* NotificationRow.swift in Sources */,
+				80A313FB2793C2EA00F1A639 /* SubscriptionDetail.swift in Sources */,
+				8079FF4C27C2874A00FB3D18 /* NtfyAttachment.swift in Sources */,
+				80A313F92793C0D800F1A639 /* SubscriptionRow.swift in Sources */,
+				80386E802793585B009B0480 /* AppMain.swift in Sources */,
+				8079FF4F27C29D3300FB3D18 /* NotificationAttachmentView.swift in Sources */,
+				80A313F72793B56800F1A639 /* NtfyNotification.swift in Sources */,
+				80856C7F27BDE0A7008AC8B8 /* ApiService.swift in Sources */,
+				80A313F52793B1CF00F1A639 /* NtfySubscription.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		800FA49927B19CA0005D05B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 800FA49227B19CA0005D05B9 /* NotificationService */;
+			targetProxy = 800FA49827B19CA0005D05B9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		800FA49C27B19CA0005D05B9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.NotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		800FA49D27B19CA0005D05B9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.NotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		80386E882793585C009B0480 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				APP_BASE_URL = "https://ntfy.sh";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				EXCLUDED_ARCHS = arm64;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		80386E892793585C009B0480 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				APP_BASE_URL = "https://ntfy.sh";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXCLUDED_ARCHS = arm64;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		80386E8B2793585C009B0480 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ntfy.sh.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ntfy-ios/Preview Content\"";
+				DEVELOPMENT_TEAM = D8Q555UR28;
+				ENABLE_PREVIEWS = YES;
+				EXCLUDED_ARCHS = arm64;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ntfy-ios/Assets/ntfy-sh-Info.plist";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
+				PRODUCT_NAME = ntfy;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		80386E8C2793585C009B0480 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ntfy.shRelease.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ntfy-ios/Preview Content\"";
+				DEVELOPMENT_TEAM = D8Q555UR28;
+				ENABLE_PREVIEWS = YES;
+				EXCLUDED_ARCHS = arm64;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ntfy-ios/Assets/ntfy-sh-Info.plist";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
+				PRODUCT_NAME = ntfy;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		800FA49E27B19CA0005D05B9 /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				800FA49C27B19CA0005D05B9 /* Debug */,
+				800FA49D27B19CA0005D05B9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		80386E772793585B009B0480 /* Build configuration list for PBXProject "ntfy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				80386E882793585C009B0480 /* Debug */,
+				80386E892793585C009B0480 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		80386E8A2793585C009B0480 /* Build configuration list for PBXNativeTarget "ntfy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				80386E8B2793585C009B0480 /* Debug */,
+				80386E8C2793585C009B0480 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		80386E9727935CC9009B0480 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		80386EA72793A7AC009B0480 /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		802D626827B1A36E00DDD3AF /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 80386E9727935CC9009B0480 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		802D626A27B1A37400DDD3AF /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 80386EA72793A7AC009B0480 /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
+		};
+		80386E9827935CC9009B0480 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 80386E9727935CC9009B0480 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		80386EA82793A7AC009B0480 /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 80386EA72793A7AC009B0480 /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 80386E742793585B009B0480 /* Project object */;
+}

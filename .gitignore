@@ -1,0 +1,3 @@
+ntfy-ios/Assets/Firebase/*
+!ntfy-ios/Assets/Firebase/.gitkeep
+.DS_Store
