@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-class DataController: ObservableObject {
+class Store: ObservableObject {
     let container = NSPersistentContainer(name: "Model")
     
     init() {

@@ -12,7 +12,7 @@ import Firebase
 @main
 struct ntfyApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate: AppDelegate
-    @StateObject private var dataController = DataController()
+    @StateObject private var dataController = Store()
 
     init() {
         FirebaseApp.configure()

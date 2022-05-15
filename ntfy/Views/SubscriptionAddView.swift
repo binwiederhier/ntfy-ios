@@ -8,7 +8,7 @@
 import SwiftUI
 import FirebaseMessaging
 
-struct AddSubscriptionView: View {
+struct SubscriptionAddView: View {
     @Environment(\.managedObjectContext) var context
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @State private var topic: String = ""
@@ -20,7 +20,7 @@ struct AddSubscriptionView: View {
                     header: Text("Topic name"),
                     footer: Text("Topics may not be password protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
                 ) {
-                    TextField("Topic name, e.g. server_alerts", text: $topic)
+                    TextField("Topic name, e.g. phil_alerts", text: $topic)
                         .textInputAutocapitalization(.never)
                 }
             }

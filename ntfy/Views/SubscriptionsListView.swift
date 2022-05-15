@@ -44,7 +44,7 @@ struct SubscriptionsList: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(
-                        destination: AddSubscriptionView()
+                        destination: SubscriptionAddView()
                     ) {
                         Image(systemName: "plus")
                     }
