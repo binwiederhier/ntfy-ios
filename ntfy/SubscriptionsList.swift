@@ -14,6 +14,59 @@ struct SubscriptionsList: View {
     @FetchRequest(sortDescriptors: []) var subscriptions: FetchedResults<Subscription>
     
     var body: some View {
+        NavigationView {
+            List {
+                ForEach(subscriptions) { subscription in
+                    ZStack {
+                        NavigationLink(
+                            destination: EmptyView() // TODO
+                        ) {
+                            EmptyView()
+                        }
+                        .opacity(0.0)
+                        .buttonStyle(PlainButtonStyle())
+
+                        SubscriptionRow(subscription: subscription)
+                    }
+                    /*.swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+//                            subscription.delete()
+//                            subscriptions.subscriptions = Database.current.getSubscriptions()
+                        } label: {
+                            Label("Delete", systemImage: "trash.circle")
+                        }
+                    }*/
+                }
+            }
+            .listStyle(PlainListStyle())
+            .navigationTitle("Subscribed topics")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+//                        currentView = .addingSubscription
+                        let firstNames = ["Ginny", "Harry", "Hermione", "Luna", "Ron"]
+                        let chosenFirstName = firstNames.randomElement()!
+
+                        let subscription = Subscription(context: context)
+                        subscription.baseUrl = "https://ntfy.sh"
+                        subscription.topic = chosenFirstName
+                        try? context.save()
+                    }) {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .overlay(Group {
+                if subscriptions.isEmpty {
+                    Text("No Topics")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                }
+            })
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
+        /*
+        
         VStack {
             List(subscriptions) { subscription in
                 Text("\(subscription.topic ?? "")")
@@ -27,7 +80,7 @@ struct SubscriptionsList: View {
                 subscription.topic = chosenFirstName
                 try? context.save()
             }
-        }
+        }*/
     }
 }
 

@@ -19,6 +19,7 @@
 		9474F1F22830825600CDE4DD /* SubscriptionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F12830825600CDE4DD /* SubscriptionsList.swift */; };
 		9474F1F72830830700CDE4DD /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F52830830700CDE4DD /* Model.xcdatamodeld */; };
 		9474F1F92830835400CDE4DD /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F82830835400CDE4DD /* DataController.swift */; };
+		9474F1FB28308A2B00CDE4DD /* SubscriptionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FA28308A2B00CDE4DD /* SubscriptionRow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +62,7 @@
 		9474F1F12830825600CDE4DD /* SubscriptionsList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionsList.swift; sourceTree = "<group>"; };
 		9474F1F62830830700CDE4DD /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		9474F1F82830835400CDE4DD /* DataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataController.swift; sourceTree = "<group>"; };
+		9474F1FA28308A2B00CDE4DD /* SubscriptionRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionRow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +109,7 @@
 			children = (
 				9474F1C2282F2AA700CDE4DD /* ContentView.swift */,
 				9474F1F12830825600CDE4DD /* SubscriptionsList.swift */,
+				9474F1FA28308A2B00CDE4DD /* SubscriptionRow.swift */,
 				9474F1D6282F2FF700CDE4DD /* Info.plist */,
 				9474F1D5282F2FED00CDE4DD /* ntfy.entitlements */,
 				9474F1C0282F2AA700CDE4DD /* App.swift */,
@@ -253,6 +256,7 @@
 				9474F1F92830835400CDE4DD /* DataController.swift in Sources */,
 				9474F1D2282F2D2C00CDE4DD /* AppDelegate.swift in Sources */,
 				9474F1C3282F2AA700CDE4DD /* ContentView.swift in Sources */,
+				9474F1FB28308A2B00CDE4DD /* SubscriptionRow.swift in Sources */,
 				9474F1F22830825600CDE4DD /* SubscriptionsList.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* App.swift in Sources */,
 				9474F1F72830830700CDE4DD /* Model.xcdatamodeld in Sources */,
