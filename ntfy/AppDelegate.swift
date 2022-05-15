@@ -18,9 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
    // FirebaseApp.configure() DOES NOT WORK
     FirebaseConfiguration.shared.setLoggerLevel(.max)
     Messaging.messaging().delegate = self
-      
-      Messaging.messaging().subscribe(toTopic: "philtest")
-    
+          
     registerForPushNotifications()
       UNUserNotificationCenter.current().delegate = self
     

@@ -22,6 +22,7 @@
 		9474F1FB28308A2B00CDE4DD /* SubscriptionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FA28308A2B00CDE4DD /* SubscriptionRow.swift */; };
 		9474F1FD2831311A00CDE4DD /* AddSubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FC2831311A00CDE4DD /* AddSubscriptionView.swift */; };
 		9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FE28316ACE00CDE4DD /* Subscription.swift */; };
+		9474F20128316D1100CDE4DD /* Messenger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F20028316D1100CDE4DD /* Messenger.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,7 @@
 		9474F1FA28308A2B00CDE4DD /* SubscriptionRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionRow.swift; sourceTree = "<group>"; };
 		9474F1FC2831311A00CDE4DD /* AddSubscriptionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddSubscriptionView.swift; sourceTree = "<group>"; };
 		9474F1FE28316ACE00CDE4DD /* Subscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subscription.swift; sourceTree = "<group>"; };
+		9474F20028316D1100CDE4DD /* Messenger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Messenger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +126,7 @@
 				9474F1D1282F2D2C00CDE4DD /* AppDelegate.swift */,
 				9474F1F82830835400CDE4DD /* DataController.swift */,
 				9474F1FE28316ACE00CDE4DD /* Subscription.swift */,
+				9474F20028316D1100CDE4DD /* Messenger.swift */,
 			);
 			path = ntfy;
 			sourceTree = "<group>";
@@ -260,6 +263,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9474F1F92830835400CDE4DD /* DataController.swift in Sources */,
+				9474F20128316D1100CDE4DD /* Messenger.swift in Sources */,
 				9474F1D2282F2D2C00CDE4DD /* AppDelegate.swift in Sources */,
 				9474F1C3282F2AA700CDE4DD /* ContentView.swift in Sources */,
 				9474F1FB28308A2B00CDE4DD /* SubscriptionRow.swift in Sources */,

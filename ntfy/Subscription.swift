@@ -8,6 +8,10 @@
 import Foundation
 
 extension Subscription {
+    func forceTopic() -> String {
+        return topic ?? "<unknown>"
+    }
+    
     func displayName() -> String {
         return topic ?? "<unknown>"
     }

@@ -8,6 +8,8 @@
 // https://www.hackingwithswift.com/books/ios-swiftui/how-to-combine-core-data-and-swiftui
 
 import SwiftUI
+import CoreData
+import FirebaseMessaging
 
 struct SubscriptionsList: View {
     @Environment(\.managedObjectContext) var context
@@ -28,14 +30,13 @@ struct SubscriptionsList: View {
 
                         SubscriptionRow(subscription: subscription)
                     }
-                    /*.swipeActions(edge: .trailing) {
+                    .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
-//                            subscription.delete()
-//                            subscriptions.subscriptions = Database.current.getSubscriptions()
+                            unsubscribe(subscription)
                         } label: {
                             Label("Delete", systemImage: "trash.circle")
                         }
-                    }*/
+                    }
                 }
             }
             .listStyle(PlainListStyle())
@@ -59,6 +60,14 @@ struct SubscriptionsList: View {
             })
         }
         .navigationViewStyle(StackNavigationViewStyle())
+    }
+    
+    func unsubscribe(_ subscription: Subscription) {
+        DispatchQueue.main.async {
+            Messaging.messaging().unsubscribe(fromTopic: subscription.forceTopic())
+            context.delete(subscription)
+            try? context.save()
+        }
     }
     
 }
