@@ -4,11 +4,7 @@ import UserNotifications
 import Firebase
 import FirebaseCore
 
-
-enum Identifiers {
-  static let viewAction = "VIEW_IDENTIFIER"
-  static let newsCategory = "NEWS_CATEGORY"
-}
+// https://stackoverflow.com/a/41783666/1440785
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
@@ -22,6 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
    // FirebaseApp.configure() DOES NOT WORK
     FirebaseConfiguration.shared.setLoggerLevel(.max)
     Messaging.messaging().delegate = self
+      
+      Messaging.messaging().subscribe(toTopic: "philtest")
     
     registerForPushNotifications()
       UNUserNotificationCenter.current().delegate = self

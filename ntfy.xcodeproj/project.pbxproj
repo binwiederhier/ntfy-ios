@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9474F1C1282F2AA700CDE4DD /* ntfyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1C0282F2AA700CDE4DD /* ntfyApp.swift */; };
+		9474F1C1282F2AA700CDE4DD /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1C0282F2AA700CDE4DD /* App.swift */; };
 		9474F1C3282F2AA700CDE4DD /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1C2282F2AA700CDE4DD /* ContentView.swift */; };
 		9474F1C5282F2AA800CDE4DD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9474F1C4282F2AA800CDE4DD /* Assets.xcassets */; };
 		9474F1C8282F2AA800CDE4DD /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9474F1C7282F2AA800CDE4DD /* Preview Assets.xcassets */; };
@@ -16,6 +16,9 @@
 		9474F1DC282F30B500CDE4DD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */; };
 		9474F1E7282F3FFD00CDE4DD /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1E6282F3FFD00CDE4DD /* NotificationService.swift */; };
 		9474F1EB282F3FFD00CDE4DD /* ntfyNSE.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9474F1F22830825600CDE4DD /* SubscriptionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F12830825600CDE4DD /* SubscriptionsList.swift */; };
+		9474F1F72830830700CDE4DD /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F52830830700CDE4DD /* Model.xcdatamodeld */; };
+		9474F1F92830835400CDE4DD /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F82830835400CDE4DD /* DataController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,7 +47,7 @@
 
 /* Begin PBXFileReference section */
 		9474F1BD282F2AA700CDE4DD /* ntfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		9474F1C0282F2AA700CDE4DD /* ntfyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ntfyApp.swift; sourceTree = "<group>"; };
+		9474F1C0282F2AA700CDE4DD /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		9474F1C2282F2AA700CDE4DD /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9474F1C4282F2AA800CDE4DD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9474F1C7282F2AA800CDE4DD /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -55,6 +58,9 @@
 		9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ntfyNSE.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9474F1E6282F3FFD00CDE4DD /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		9474F1E8282F3FFD00CDE4DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9474F1F12830825600CDE4DD /* SubscriptionsList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionsList.swift; sourceTree = "<group>"; };
+		9474F1F62830830700CDE4DD /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
+		9474F1F82830835400CDE4DD /* DataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +85,7 @@
 		9474F1B4282F2AA700CDE4DD = {
 			isa = PBXGroup;
 			children = (
+				9474F1F52830830700CDE4DD /* Model.xcdatamodeld */,
 				9474F1BF282F2AA700CDE4DD /* ntfy */,
 				9474F1E5282F3FFD00CDE4DD /* ntfyNSE */,
 				9474F1BE282F2AA700CDE4DD /* Products */,
@@ -98,14 +105,16 @@
 		9474F1BF282F2AA700CDE4DD /* ntfy */ = {
 			isa = PBXGroup;
 			children = (
+				9474F1C2282F2AA700CDE4DD /* ContentView.swift */,
+				9474F1F12830825600CDE4DD /* SubscriptionsList.swift */,
 				9474F1D6282F2FF700CDE4DD /* Info.plist */,
 				9474F1D5282F2FED00CDE4DD /* ntfy.entitlements */,
-				9474F1C0282F2AA700CDE4DD /* ntfyApp.swift */,
-				9474F1C2282F2AA700CDE4DD /* ContentView.swift */,
+				9474F1C0282F2AA700CDE4DD /* App.swift */,
 				9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */,
 				9474F1C4282F2AA800CDE4DD /* Assets.xcassets */,
 				9474F1C6282F2AA800CDE4DD /* Preview Content */,
 				9474F1D1282F2D2C00CDE4DD /* AppDelegate.swift */,
+				9474F1F82830835400CDE4DD /* DataController.swift */,
 			);
 			path = ntfy;
 			sourceTree = "<group>";
@@ -241,9 +250,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9474F1F92830835400CDE4DD /* DataController.swift in Sources */,
 				9474F1D2282F2D2C00CDE4DD /* AppDelegate.swift in Sources */,
 				9474F1C3282F2AA700CDE4DD /* ContentView.swift in Sources */,
-				9474F1C1282F2AA700CDE4DD /* ntfyApp.swift in Sources */,
+				9474F1F22830825600CDE4DD /* SubscriptionsList.swift in Sources */,
+				9474F1C1282F2AA700CDE4DD /* App.swift in Sources */,
+				9474F1F72830830700CDE4DD /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -546,6 +558,19 @@
 			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		9474F1F52830830700CDE4DD /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				9474F1F62830830700CDE4DD /* Model.xcdatamodel */,
+			);
+			currentVersion = 9474F1F62830830700CDE4DD /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 9474F1B5282F2AA700CDE4DD /* Project object */;
 }
