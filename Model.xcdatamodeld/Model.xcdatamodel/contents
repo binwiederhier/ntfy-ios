@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="20086" systemVersion="21E258" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Notification" representedClassName="Notification" syncable="YES" codeGenerationType="class">
-        <attribute name="message" optional="YES"/>
-        <attribute name="title" optional="YES"/>
+    <entity name="Notification" representedClassName="Notification" parentEntity="Subscription" syncable="YES" codeGenerationType="class">
+        <attribute name="id" attributeType="String"/>
+        <attribute name="message" attributeType="String"/>
+        <attribute name="timestamp" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="subscription" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Subscription"/>
     </entity>
     <entity name="Subscription" representedClassName="Subscription" syncable="YES" codeGenerationType="class">
-        <attribute name="baseUrl" optional="YES" attributeType="String"/>
-        <attribute name="topic" optional="YES" attributeType="String"/>
+        <attribute name="baseUrl" attributeType="String"/>
+        <attribute name="topic" attributeType="String" minValueString="1" maxValueString="64" regularExpressionString="^[-_A-Za-z0-9]{1,64}$"/>
     </entity>
     <elements>
         <element name="Subscription" positionX="-63" positionY="-18" width="128" height="59"/>
-        <element name="Notification" positionX="-54" positionY="9" width="128" height="59"/>
+        <element name="Notification" positionX="-54" positionY="9" width="128" height="104"/>
     </elements>
 </model>
