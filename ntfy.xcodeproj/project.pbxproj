@@ -69,6 +69,7 @@
 		9474F1FC2831311A00CDE4DD /* SubscriptionAddView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionAddView.swift; sourceTree = "<group>"; };
 		9474F1FE28316ACE00CDE4DD /* Subscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subscription.swift; sourceTree = "<group>"; };
 		9474F20028316D1100CDE4DD /* Messenger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Messenger.swift; sourceTree = "<group>"; };
+		9474F2042831CDBF00CDE4DD /* ntfyNSE.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfyNSE.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +146,7 @@
 		9474F1E5282F3FFD00CDE4DD /* ntfyNSE */ = {
 			isa = PBXGroup;
 			children = (
+				9474F2042831CDBF00CDE4DD /* ntfyNSE.entitlements */,
 				9474F1E6282F3FFD00CDE4DD /* NotificationService.swift */,
 				9474F1E8282F3FFD00CDE4DD /* Info.plist */,
 			);
@@ -491,6 +493,7 @@
 		9474F1ED282F3FFD00CDE4DD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ntfyNSE/ntfyNSE.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = YXQ4AMS4B4;
@@ -517,6 +520,7 @@
 		9474F1EE282F3FFD00CDE4DD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ntfyNSE/ntfyNSE.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = YXQ4AMS4B4;

@@ -19,5 +19,6 @@ struct Messenger {
         subscription.baseUrl = "https://ntfy.sh"
         subscription.topic = topic
         try? context.save()
+        
     }
 }

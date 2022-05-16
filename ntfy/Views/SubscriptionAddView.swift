@@ -52,7 +52,7 @@ struct SubscriptionAddView: View {
         subscription.baseUrl = "https://ntfy.sh"
         subscription.topic = topic
         try? context.save()
-        
+                
         presentationMode.wrappedValue.dismiss()
     }
 }

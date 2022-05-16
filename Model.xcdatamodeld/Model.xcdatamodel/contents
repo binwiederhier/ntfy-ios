@@ -3,16 +3,28 @@
     <entity name="Notification" representedClassName="Notification" parentEntity="Subscription" syncable="YES" codeGenerationType="class">
         <attribute name="id" attributeType="String"/>
         <attribute name="message" attributeType="String"/>
-        <attribute name="timestamp" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="time" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="title" optional="YES" attributeType="String"/>
-        <relationship name="subscription" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Subscription"/>
+        <relationship name="subscription" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Subscription" inverseName="notifications" inverseEntity="Subscription"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <entity name="Subscription" representedClassName="Subscription" syncable="YES" codeGenerationType="class">
         <attribute name="baseUrl" attributeType="String"/>
         <attribute name="topic" attributeType="String" minValueString="1" maxValueString="64" regularExpressionString="^[-_A-Za-z0-9]{1,64}$"/>
+        <relationship name="notifications" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Notification" inverseName="subscription" inverseEntity="Notification"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="baseUrl"/>
+                <constraint value="topic"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="Subscription" positionX="-63" positionY="-18" width="128" height="59"/>
+        <element name="Subscription" positionX="-63" positionY="-18" width="128" height="74"/>
         <element name="Notification" positionX="-54" positionY="9" width="128" height="104"/>
     </elements>
 </model>
