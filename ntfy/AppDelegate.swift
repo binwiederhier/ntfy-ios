@@ -5,6 +5,7 @@ import Firebase
 import FirebaseCore
 
 // https://stackoverflow.com/a/41783666/1440785
+// https://stackoverflow.com/questions/47374903/viewing-core-data-data-from-your-app-on-a-device
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
@@ -22,6 +23,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     registerForPushNotifications()
       UNUserNotificationCenter.current().delegate = self
     
+      
+      
+      print("Documents Directory: ", FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last ?? "Not Found!")
+      
     // Check if launched from notification
     let notificationOption = launchOptions?[.remoteNotification]
 

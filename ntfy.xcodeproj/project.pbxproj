@@ -23,6 +23,8 @@
 		9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FC2831311A00CDE4DD /* SubscriptionAddView.swift */; };
 		9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FE28316ACE00CDE4DD /* Subscription.swift */; };
 		9474F20128316D1100CDE4DD /* Messenger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F20028316D1100CDE4DD /* Messenger.swift */; };
+		9474F2052831D51500CDE4DD /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F82830835400CDE4DD /* Store.swift */; };
+		9474F2062831D73C00CDE4DD /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F52830830700CDE4DD /* Model.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -298,6 +300,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				9474F1E7282F3FFD00CDE4DD /* NotificationService.swift in Sources */,
+				9474F2052831D51500CDE4DD /* Store.swift in Sources */,
+				9474F2062831D73C00CDE4DD /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

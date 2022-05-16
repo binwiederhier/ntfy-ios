@@ -13,12 +13,15 @@ import CoreData
 class NotificationService: UNNotificationServiceExtension {
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
-//    var store: Store?
+    var store: Store?
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-
+        store = Store()
+        
+        let context = store?.container.viewContext
+        print("NotificationService didReceive")
         if let bestAttemptContent = bestAttemptContent {
             // Modify the notification content here...
             bestAttemptContent.title = "\(bestAttemptContent.title) [modified]"
@@ -30,10 +33,11 @@ class NotificationService: UNNotificationServiceExtension {
                            let notificationTimestampInt = Int64(notificationTimestamp),
                            let notificationMessage = userInfo["message"] as? String {
                 print("notification service \(notificationId)")
-/*                let notification = Notification(context: context)
+                /*let notification = Notification()
                 notification.id = notificationId
                 notification.time = notificationTimestampInt
                 notification.message = notificationMessage*/
+//                try? context?.save()
             }
                         
             contentHandler(bestAttemptContent)

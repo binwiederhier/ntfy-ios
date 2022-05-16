@@ -12,7 +12,7 @@ import Firebase
 @main
 struct ntfyApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate: AppDelegate
-    @StateObject private var dataController = Store()
+    @StateObject private var store = Store()
 
     init() {
         FirebaseApp.configure()
@@ -21,7 +21,7 @@ struct ntfyApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.managedObjectContext, dataController.container.viewContext)
+                .environment(\.managedObjectContext, store.container.viewContext)
         }
     }
 }
