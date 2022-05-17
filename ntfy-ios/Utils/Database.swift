@@ -52,7 +52,7 @@ class Database {
         do {
             let fileManager = FileManager.default
             // Get the App Group path, which is accessed by both the app and the notification service extension
-            if let path = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.ntfy") {
+            if let path = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.io.heckel.ntfy") {
                 // Connect to the database
                 db = try Connection("\(path.path)/ntfy.sqlite3")
 

@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "800FA49227B19CA0005D05B9"
-               BuildableName = "NotificationService.appex"
-               BlueprintName = "NotificationService"
+               BlueprintIdentifier = "9474F0EA282DD86500CDE4DD"
+               BuildableName = "ntfyNSE2.appex"
+               BlueprintName = "ntfyNSE2"
                ReferencedContainer = "container:ntfy.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -56,11 +56,12 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
-      launchAutomaticallySubstyle = "2">
+      launchAutomaticallySubstyle = "2"
+      notificationPayloadFile = "PushNotificationPayload.apns">
       <RemoteRunnable
          runnableDebuggingMode = "0"
-         BundleIdentifier = "com.copephobia.ntfy-ios"
-         RemotePath = "/var/containers/Bundle/Application/D35B7F2A-9DB4-4851-88A2-D9C4C585B936/ntfy.sh.app">
+         BundleIdentifier = "io.heckel.ntfy"
+         RemotePath = "/var/containers/Bundle/Application/12CD65CE-AD2A-46A8-BA07-49EE8258EC4D/ntfy.app">
       </RemoteRunnable>
       <MacroExpansion>
          <BuildableReference

@@ -90,7 +90,7 @@ class NtfyAttachment: Codable {
                let data = data {
                 let fileManager = FileManager.default
                 // Get the App Group path, which is accessed by both the app and the notification service extension
-                if let path = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.ntfy") {
+                if let path = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.io.heckel.ntfy") {
                     guard let fileUrl = URL(string: "\(path)/downloads/\(response.hash)") else { return }
                     do {
                         let parentPath = fileUrl.deletingLastPathComponent()

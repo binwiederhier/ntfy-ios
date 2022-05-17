@@ -36,6 +36,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
+
     // Handler for when user receives notification while app is in foreground
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
@@ -43,6 +44,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler:
         @escaping (UNNotificationPresentationOptions) -> Void
     ) {
+        print("willPresent")
+        dump(notification)
         // TODO: Should this be handled differently than the below handler?
         completionHandler([[.banner, .sound]])
     }
@@ -53,15 +56,41 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
+        print("didReceive")
+        dump(response)
         // TODO: Open app to subscription view
         completionHandler()
     }
 
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult)
+                       -> Void) {
+      // If you are receiving a notification message while your app is in the background,
+      // this callback will not be fired till the user taps on the notification launching the application.
+      // TODO: Handle data of notification
+
+      // With swizzling disabled you must let Messaging know about the message, for Analytics
+      // Messaging.messaging().appDidReceiveMessage(userInfo)
+
+      print("didReceiveRemoteNotification")
+
+        
+
+      // Print full message.
+      print(userInfo)
+
+      completionHandler(UIBackgroundFetchResult.newData)
+    }
+
+
+    
     // Mapping APNs token to the FCM registration token
     func application(
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
+        print("didRegisterForRemoteNotificationsWithDeviceToken", deviceToken)
         Messaging.messaging().apnsToken = deviceToken
     }
 
@@ -70,6 +99,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
         // Debug error
+        print("didRegisterForRemoteNotificationsWithDeviceToken", error)
+
         print("Failed to register for notifications: \(error.localizedDescription)")
     }
 }
