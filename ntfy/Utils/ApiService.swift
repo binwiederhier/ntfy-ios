@@ -9,14 +9,14 @@ import Foundation
 
 class ApiService: NSObject {
     static let shared = ApiService()
-/*
-    func poll(subscription: Subscription, completionHandler: @escaping ([Notification]?, Error?) -> Void) {
-        let lastNotificationTime = subscription.lastNotification()?.timestamp ?? 0
+
+    func poll(subscription: Subscription, completionHandler: @escaping ([Message]?, Error?) -> Void) {
+        let lastNotificationTime = 0 //subscription.lastNotification()?.timestamp ?? 0 // FIXME
         let sinceString = lastNotificationTime > 0 ? String(lastNotificationTime) : "all";
         let urlString = "\(subscription.urlString())/json?poll=1&since=\(sinceString)"
-        fetchJsonData(urlString: urlString, user: user, completionHandler: completionHandler)
+        fetchJsonData(urlString: urlString, completionHandler: completionHandler)
     }
-*/
+
     func publish(subscription: Subscription, message: String, title: String, priority: Int = 3, tags: [String] = [], completionHandler: @escaping (Notification?, Error?) -> Void) {
         guard let url = URL(string: subscription.urlString()) else { return }
         var request = URLRequest(url: url)
@@ -57,4 +57,11 @@ class ApiService: NSObject {
             }
         }.resume()
     }
+}
+
+struct Message: Decodable {
+    var id: String
+    var time: Int64
+    var message: String?
+    var title: String?
 }

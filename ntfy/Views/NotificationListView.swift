@@ -26,7 +26,7 @@ struct NotificationListView: View {
     var body: some View {
         NavigationView {
             List(selection: $selection) {
-                ForEach(Array(subscription.notifications! as Set), id: \.self) { notification in
+                ForEach(Array(subscription.notifications! as Set).reversed(), id: \.self) { notification in
                     NotificationRowView(notification: notification as! Notification)
                 }
             }
@@ -87,10 +87,10 @@ struct NotificationListView: View {
             switch activeAlert {
             case .clear:
                 return Alert(
-                    title: Text("Clear Notifications"),
+                    title: Text("Clear notifications"),
                     message: Text("Do you really want to delete all of the notifications in this topic?"),
                     primaryButton: .destructive(
-                        Text("Permanently Delete"),
+                        Text("Permanently delete"),
                         action: {
                             //Database.current.deleteNotificationsForSubscription(subscription: subscription)
                             //viewModel.notifications = Database.current.getNotifications(subscription: subscription)
@@ -130,7 +130,29 @@ struct NotificationListView: View {
         })*/
         .refreshable {
             print("Refresh")
-            //subscription.fetchNewNotifications(user: user, completionHandler: nil)
+            ApiService.shared.poll(subscription: subscription) { messages, error in
+                guard let messages = messages else {
+                    print(error)
+                    return
+                }
+                print("Saving new messages to subscription \(subscription.urlString())", messages)
+                DispatchQueue.main.async {
+                    for message in messages {
+                        do {
+                            let notification = Notification(context: context)
+                            notification.id = message.id
+                            notification.time = message.time
+                            notification.message = message.message ?? ""
+                            notification.title = message.title ?? ""
+                            subscription.addToNotifications(notification)
+                            try context.save()
+                        } catch let error {
+                            print(error)
+                            context.rollback()
+                        }
+                    }
+                }
+            }
         }
         .onAppear {
             print("onAppear")

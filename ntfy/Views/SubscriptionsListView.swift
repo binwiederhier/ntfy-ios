@@ -51,7 +51,7 @@ struct SubscriptionsList: View {
             }
             .overlay(Group {
                 if subscriptions.isEmpty {
-                    Text("No Topics")
+                    Text("No topics")
                         .font(.headline)
                         .foregroundColor(.secondary)
                 }
@@ -62,7 +62,9 @@ struct SubscriptionsList: View {
     
     func unsubscribe(_ subscription: Subscription) {
         DispatchQueue.main.async {
-            Messaging.messaging().unsubscribe(fromTopic: subscription.topic!)
+            if let topic = subscription.topic {
+                Messaging.messaging().unsubscribe(fromTopic: topic)
+            }
             context.delete(subscription)
             try? context.save()
         }
