@@ -20,9 +20,7 @@ struct SubscriptionsList: View {
             List {
                 ForEach(subscriptions) { subscription in
                     ZStack {
-                        NavigationLink(
-                            destination: EmptyView() // TODO
-                        ) {
+                        NavigationLink(destination: NotificationListView(subscription: subscription)) {
                             EmptyView()
                         }
                         .opacity(0.0)
@@ -64,7 +62,7 @@ struct SubscriptionsList: View {
     
     func unsubscribe(_ subscription: Subscription) {
         DispatchQueue.main.async {
-            Messaging.messaging().unsubscribe(fromTopic: subscription.forceTopic())
+            Messaging.messaging().unsubscribe(fromTopic: subscription.topic!)
             context.delete(subscription)
             try? context.save()
         }

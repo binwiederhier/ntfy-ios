@@ -8,8 +8,8 @@
 import Foundation
 
 extension Subscription {
-    func forceTopic() -> String {
-        return topic ?? "<unknown>"
+    func urlString() -> String {
+        return topicUrl(baseUrl: baseUrl!, topic: topic!)
     }
     
     func displayName() -> String {

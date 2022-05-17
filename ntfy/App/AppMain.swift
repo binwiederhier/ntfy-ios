@@ -8,9 +8,8 @@
 import SwiftUI
 import Firebase
 
-
 @main
-struct ntfyApp: App {
+struct AppMain: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate: AppDelegate
     @StateObject private var store = Store()
 
