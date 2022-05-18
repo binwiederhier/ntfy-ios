@@ -13,15 +13,14 @@ import FirebaseMessaging
 
 struct SubscriptionsList: View {
     @Environment(\.managedObjectContext) var context
-    @FetchRequest(sortDescriptors: []) var subscriptions: FetchedResults<Subscription>
+    @FetchRequest(sortDescriptors: [NSSortDescriptor(key: "topic", ascending: true)]) var subscriptions: FetchedResults<Subscription>
     
     var body: some View {
         NavigationView {
             List {
                 ForEach(subscriptions) { subscription in
-                    let notifications = subscription.notifications!.sortedArray(using: [NSSortDescriptor(key: "time", ascending: false)]) as [Notification]
                     ZStack {
-                        NavigationLink(destination: NotificationListView(subscription: subscription, notifications: notifications)) {
+                        NavigationLink(destination: NotificationListView(subscription: subscription)) {
                             EmptyView()
                         }
                         .opacity(0.0)

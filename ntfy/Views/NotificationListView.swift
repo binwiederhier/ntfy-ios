@@ -16,7 +16,6 @@ struct NotificationListView: View {
     @Environment(\.presentationMode) var presentationMode
 
     @ObservedObject var subscription: Subscription
-    var notifications: [Notification]
     
     @State private var editMode = EditMode.inactive
     @State private var selection = Set<Notification>()
@@ -27,11 +26,9 @@ struct NotificationListView: View {
     private let store = Store.shared
 
     var body: some View {
-        NavigationView {
-            List(selection: $selection) {
-                ForEach(notifications, id: \.self) { notification in
-                    NotificationRowView(notification: notification as! Notification)
-                }
+        List(selection: $selection) {
+            ForEach(subscription.notificationsSorted(), id: \.self) { notification in
+                NotificationRowView(notification: notification)
             }
         }
         .listStyle(PlainListStyle())
@@ -46,7 +43,7 @@ struct NotificationListView: View {
                 if (self.editMode == .active) {
                     editButton
                 } else {
-                    Menu("Edit") {
+                    Menu {
                         editButton
                         Button("Send test notification") {
                             let possibleTags = ["warning", "skull", "success", "triangular_flag_on_post", "de", "us", "dog", "cat", "rotating_light", "bike", "backup", "rsync", "this-s-a-tag", "ios"]
@@ -70,7 +67,8 @@ struct NotificationListView: View {
                             self.showAlert = true
                             self.activeAlert = .unsubscribe
                         }
-
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }

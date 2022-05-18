@@ -15,4 +15,16 @@ extension Subscription {
     func displayName() -> String {
         return topic ?? "<unknown>"
     }
+    
+    func notificationCount() -> Int {
+        return notifications?.count ?? 0
+    }
+    
+    func lastNotification() -> Notification? {
+        return notificationsSorted().first
+    }
+    
+    func notificationsSorted() -> [Notification] {
+        return notifications!.sortedArray(using: [NSSortDescriptor(key: "time", ascending: false)]) as! [Notification]
+    }
 }

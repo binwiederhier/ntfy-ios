@@ -11,7 +11,7 @@ struct SubscriptionRow: View {
     @ObservedObject var subscription: Subscription
 
     var body: some View {
-        let totalNotificationCount = 0//subscription.notificationCount()
+        let totalNotificationCount = subscription.notificationCount()
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text(subscription.displayName())
@@ -19,7 +19,7 @@ struct SubscriptionRow: View {
                     .bold()
                     .lineLimit(1)
                 Spacer()
-                Text("Monday") //subscription.lastNotification()?.displayShortDateTime() ?? "")
+                Text(subscription.lastNotification()?.shortDateTime() ?? "")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                 Image(systemName: "chevron.forward")
