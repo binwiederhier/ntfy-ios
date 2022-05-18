@@ -30,3 +30,10 @@ extension Notification {
         return dateFormatter.string(from: date)
     }
 }
+
+struct Message: Decodable {
+    var id: String
+    var time: Int64
+    var message: String?
+    var title: String?
+}

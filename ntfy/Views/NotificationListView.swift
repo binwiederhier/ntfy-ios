@@ -16,17 +16,20 @@ struct NotificationListView: View {
     @Environment(\.presentationMode) var presentationMode
 
     @ObservedObject var subscription: Subscription
-
+    var notifications: [Notification]
+    
     @State private var editMode = EditMode.inactive
     @State private var selection = Set<Notification>()
 
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
+    
+    private let store = Store.shared
 
     var body: some View {
         NavigationView {
             List(selection: $selection) {
-                ForEach(Array(subscription.notifications! as Set).reversed(), id: \.self) { notification in
+                ForEach(notifications, id: \.self) { notification in
                     NotificationRowView(notification: notification as! Notification)
                 }
             }
@@ -138,18 +141,7 @@ struct NotificationListView: View {
                 print("Saving new messages to subscription \(subscription.urlString())", messages)
                 DispatchQueue.main.async {
                     for message in messages {
-                        do {
-                            let notification = Notification(context: context)
-                            notification.id = message.id
-                            notification.time = message.time
-                            notification.message = message.message ?? ""
-                            notification.title = message.title ?? ""
-                            subscription.addToNotifications(notification)
-                            try context.save()
-                        } catch let error {
-                            print(error)
-                            context.rollback()
-                        }
+                        store.saveNotification(fromMessage: message, subscription: subscription)
                     }
                 }
             }
@@ -166,7 +158,7 @@ struct NotificationListView: View {
                 self.editMode = .active
                 self.selection = Set<Notification>()
             }) {
-                Text("Select Messages")
+                Text("Select messages")
             }
         } else {
             return Button(action: {

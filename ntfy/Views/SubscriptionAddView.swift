@@ -12,6 +12,7 @@ struct SubscriptionAddView: View {
     @Environment(\.managedObjectContext) var context
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @State private var topic: String = ""
+    private let store = Store.shared
 
     var body: some View {
         VStack {
@@ -45,14 +46,10 @@ struct SubscriptionAddView: View {
     }
     
     private func subscribeAction() {
-        print("Subscribing to topic \(topic)")
+        print("Subscribing to \(topicUrl(baseUrl: appBaseUrl, topic: topic))")
         Messaging.messaging().subscribe(toTopic: topic)
         
-        let subscription = Subscription(context: context)
-        subscription.baseUrl = "https://ntfy.sh"
-        subscription.topic = topic
-        try? context.save()
-                
+        store.saveSubscription(baseUrl: appBaseUrl, topic: topic)
         presentationMode.wrappedValue.dismiss()
     }
 }

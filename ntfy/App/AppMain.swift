@@ -11,7 +11,7 @@ import Firebase
 @main
 struct AppMain: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate: AppDelegate
-    @StateObject private var store = Store()
+    @StateObject private var store = Store.shared
 
     init() {
         FirebaseApp.configure()

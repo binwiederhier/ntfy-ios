@@ -19,8 +19,9 @@ struct SubscriptionsList: View {
         NavigationView {
             List {
                 ForEach(subscriptions) { subscription in
+                    let notifications = subscription.notifications!.sortedArray(using: [NSSortDescriptor(key: "time", ascending: false)]) as [Notification]
                     ZStack {
-                        NavigationLink(destination: NotificationListView(subscription: subscription)) {
+                        NavigationLink(destination: NotificationListView(subscription: subscription, notifications: notifications)) {
                             EmptyView()
                         }
                         .opacity(0.0)

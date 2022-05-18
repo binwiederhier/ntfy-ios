@@ -59,9 +59,3 @@ class ApiService: NSObject {
     }
 }
 
-struct Message: Decodable {
-    var id: String
-    var time: Int64
-    var message: String?
-    var title: String?
-}
