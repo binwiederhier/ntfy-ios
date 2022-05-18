@@ -8,11 +8,10 @@
 import SwiftUI
 import Firebase
 
-
 @main
-struct ntfyApp: App {
+struct AppMain: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate: AppDelegate
-    @StateObject private var dataController = DataController()
+    @StateObject private var store = Store.shared
 
     init() {
         FirebaseApp.configure()
@@ -21,7 +20,7 @@ struct ntfyApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.managedObjectContext, dataController.container.viewContext)
+                .environment(\.managedObjectContext, store.container.viewContext)
         }
     }
 }

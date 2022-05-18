@@ -6,20 +6,27 @@
 //
 
 import UserNotifications
+import CoreData
+
+// https://debashishdas3100.medium.com/save-push-notifications-to-coredata-userdefaults-ios-swift-5-ea074390b57
 
 class NotificationService: UNNotificationServiceExtension {
-
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
-
-    override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+    
+    override func didReceive(
+        _ request: UNNotificationRequest,
+        withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void
+    ) {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
+        print("NotificationService didReceive")
         if let bestAttemptContent = bestAttemptContent {
-            // Modify the notification content here...
             bestAttemptContent.title = "\(bestAttemptContent.title) [modified]"
             
+            let userInfo = bestAttemptContent.userInfo
+            Store.shared.saveNotification(fromUserInfo: userInfo)
             contentHandler(bestAttemptContent)
         }
     }
@@ -31,5 +38,5 @@ class NotificationService: UNNotificationServiceExtension {
             contentHandler(bestAttemptContent)
         }
     }
-
+    
 }
