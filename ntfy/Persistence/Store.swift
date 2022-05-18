@@ -11,11 +11,17 @@ import CoreData
 class Store: ObservableObject {
     static let shared = Store()
     
+    let tag = "Store"
     let container: NSPersistentContainer
     var context: NSManagedObjectContext
     
     init() {
+        let directory = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.io.heckel.ntfy")!
+        let storeUrl =  directory.appendingPathComponent("ntfy.sqlite")
+        let description =  NSPersistentStoreDescription(url: storeUrl)
+        
         container = NSPersistentContainer(name: "Model")
+        container.persistentStoreDescriptions = [description]
         container.loadPersistentStores { description, error in
             if let error = error {
                 print("Core Data failed to load: \(error.localizedDescription)")
@@ -31,7 +37,6 @@ class Store: ObservableObject {
         try? context.save()
     }
     
-    
     func getSubscription(baseUrl: String, topic: String) -> Subscription? {
         let fetchRequest = Subscription.fetchRequest()
         let baseUrlPredicate = NSPredicate(format: "baseUrl = %@", baseUrl)
@@ -44,7 +49,7 @@ class Store: ObservableObject {
     
     func saveNotification(fromUserInfo userInfo: [AnyHashable: Any]) {
         guard let id = userInfo["id"] as? String,
-              let topic = userInfo["topic"] as? String,
+              let topic = userInfo["topic"] as? String, // FIXME: Notification should also contain baseUrl
               let time = userInfo["time"] as? String,
               let timeInt = Int64(time),
               let message = userInfo["message"] as? String else {
@@ -65,7 +70,7 @@ class Store: ObservableObject {
             subscription.addToNotifications(notification)
             try context.save()
         } catch let error {
-            print(error)
+            Log.w(tag, "Cannot store notification", error)
             context.rollback()
         }
     }

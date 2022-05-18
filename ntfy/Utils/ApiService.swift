@@ -1,26 +1,32 @@
-//
-//  ApiService.swift
-//  ntfy.sh
-//
-//  Created by Andrew Cope on 2/16/22.
-//
-
 import Foundation
 
 class ApiService: NSObject {
     static let shared = ApiService()
-
+    let tag = "ApiService"
+    
     func poll(subscription: Subscription, completionHandler: @escaping ([Message]?, Error?) -> Void) {
-        let lastNotificationTime = 0 //subscription.lastNotification()?.timestamp ?? 0 // FIXME
+        guard let url = URL(string: subscription.urlString()) else { return }
+        let lastNotificationTime = subscription.lastNotification()?.time ?? 0
         let sinceString = lastNotificationTime > 0 ? String(lastNotificationTime) : "all";
-        let urlString = "\(subscription.urlString())/json?poll=1&since=\(sinceString)"
+        let urlString = "\(url)/json?poll=1&since=\(sinceString)"
+        
+        Log.d(tag, "Polling from \(urlString)")
         fetchJsonData(urlString: urlString, completionHandler: completionHandler)
     }
 
-    func publish(subscription: Subscription, message: String, title: String, priority: Int = 3, tags: [String] = [], completionHandler: @escaping (Notification?, Error?) -> Void) {
+    func publish(
+        subscription: Subscription,
+        message: String,
+        title: String,
+        priority: Int = 3,
+        tags: [String] = [],
+        completionHandler: @escaping (Notification?, Error?) -> Void
+    ) {
         guard let url = URL(string: subscription.urlString()) else { return }
         var request = URLRequest(url: url)
 
+        Log.d(tag, "Publishing to \(url)")
+        
         request.httpMethod = "POST"
         request.setValue(title, forHTTPHeaderField: "Title")
         request.setValue(String(priority), forHTTPHeaderField: "Priority")
@@ -35,7 +41,7 @@ class ApiService: NSObject {
 
     private func fetchJsonData<T: Decodable>(urlString: String, completionHandler: @escaping ([T]?, Error?) -> ()) {
         guard let url = URL(string: urlString) else { return }
-        var request = URLRequest(url: url)
+        let request = URLRequest(url: url)
      
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {

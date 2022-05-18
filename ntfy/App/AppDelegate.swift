@@ -9,14 +9,14 @@ import CoreData
 // https://stackoverflow.com/questions/47374903/viewing-core-data-data-from-your-app-on-a-device
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
+    let tag = "AppDelegate"
     let store = Store.shared
     
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        print("ApplicationDelegate didFinishLaunchingWithOptions.")
+        Log.d(tag, "ApplicationDelegate didFinishLaunchingWithOptions.")
         // FirebaseApp.configure() DOES NOT WORK
         FirebaseConfiguration.shared.setLoggerLevel(.max)
         Messaging.messaging().delegate = self
@@ -24,23 +24,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         registerForPushNotifications()
         UNUserNotificationCenter.current().delegate = self
         
-        
-        
-        print("Documents Directory: ", FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last ?? "Not Found!")
-        
-        // Check if launched from notification
-        let notificationOption = launchOptions?[.remoteNotification]
-        
-        // 1
-        if
-            let notification = notificationOption as? [String: AnyObject],
-            let aps = notification["aps"] as? [String: AnyObject] {
-            print("there is a new item")
-            // 2
-            
-            // 3
-            (window?.rootViewController as? UITabBarController)?.selectedIndex = 1
-        }
         return true
     }
     
@@ -108,33 +91,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
-    
-    lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "Model")
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-            if let error = error as NSError? {
-                
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
-        })
-        return container
-    }()
-    
-    // MARK: - Core Data Saving support
-    
-    func saveContext () {
-        let context = persistentContainer.viewContext
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-            }
-        }
-    }
-    
-    
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
@@ -144,8 +100,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         let userInfo = notification.request.content.userInfo
-        print("willPresent", userInfo)
-        
+        Log.d(tag, "Notification received via userNotificationCenter(willPresent)", userInfo)
         store.saveNotification(fromUserInfo: userInfo)
         completionHandler([[.alert, .sound]])
     }
@@ -155,18 +110,21 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        print("didReceive")
         let userInfo = response.notification.request.content.userInfo
-        
+        Log.d(tag, "Notification received via userNotificationCenter(didReceive)", userInfo)
+        store.saveNotification(fromUserInfo: userInfo)
         completionHandler()
     }
 }
 
-// [END ios_10_message_handling]
 extension AppDelegate: MessagingDelegate {
-    // [START refresh_token]
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("Firebase registration token: \(String(describing: fcmToken))")
+    func messaging(
+        _ messaging: Messaging,
+        didReceiveRegistrationToken fcmToken: String?
+    ) {
+        Log.d(tag, "Firebase token received: \(String(describing: fcmToken))")
+        
+        // FIXME: Is this necessary?
         
         let dataDict: [String: String] = ["token": fcmToken ?? ""]
         NotificationCenter.default.post(
@@ -174,8 +132,6 @@ extension AppDelegate: MessagingDelegate {
             object: nil,
             userInfo: dataDict
         )
-        // TODO: If necessary send token to application server.
-        // Note: This callback is fired at each app startup and whenever a new token is generated.
     }
 }
 
