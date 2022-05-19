@@ -20,6 +20,7 @@ class Store: ObservableObject {
         let storeUrl =  directory.appendingPathComponent("ntfy.sqlite")
         let description =  NSPersistentStoreDescription(url: storeUrl)
         
+        // Set up container and observe changes from app extension
         container = NSPersistentContainer(name: "Model")
         container.persistentStoreDescriptions = [description]
         container.loadPersistentStores { description, error in
@@ -27,6 +28,8 @@ class Store: ObservableObject {
                 print("Core Data failed to load: \(error.localizedDescription)")
             }
         }
+
+        // Shortcut for context
         context = container.viewContext
     }
     

@@ -17,6 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         Log.d(tag, "ApplicationDelegate didFinishLaunchingWithOptions.")
+        
         // FirebaseApp.configure() DOES NOT WORK
         FirebaseConfiguration.shared.setLoggerLevel(.max)
         Messaging.messaging().delegate = self
@@ -27,50 +28,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        guard let aps = userInfo["aps"] as? [String: AnyObject] else {
-            completionHandler(.failed)
-            return
-        }
-        print("didReceiveRemoteNotification")
-        print(userInfo)
-    }
-    
-    
-    func application(_ application: UIApplication,
-                     didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
-        print("didReceiveRemoteNotification 2")
-        
-        guard let aps = userInfo["aps"] as? [String: AnyObject] else {
-            return
-        }
-        print(userInfo)
+    func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+        fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    ) {
+        Log.d(tag, "Called didReceiveRemoteNotification (with completionHandler). This is a no-op.", userInfo)
     }
     
     
     func application(
         _ application: UIApplication,
-        didFailToRegisterForRemoteNotificationsWithError error: Error
+                     didReceiveRemoteNotification userInfo: [AnyHashable: Any]
     ) {
-        print("Failed to register: \(error)")
+        Log.d(tag, "Called didReceiveRemoteNotification (without completionHandler). This is a no-op.", userInfo)
     }
     
+    func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: Error
+    ) {
+        Log.e(tag, "Failed to register for remote notifications", error)
+    }
     
-    
-    // This function is added here only for debugging purposes, and can be removed if swizzling is enabled.
-    // If swizzling is disabled then this function must be implemented so that the APNs token can be paired to
-    // the FCM registration token.
-    func application(_ application: UIApplication,
-                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        print("APNs token retrieved: \(deviceToken)")
-        
-        // With swizzling disabled you must set the APNs token here.
+    func application(
+        _ application: UIApplication,
+                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        let token = deviceToken
+            .map { data in String(format: "%02.2hhx", data) }
+            .joined()
+        Log.d(tag, "Registered for remote notifications. Passing APNs token to Firebase: \(token)")
         Messaging.messaging().apnsToken = deviceToken
-        
-        let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
-        let token = tokenParts.joined()
-        print("Device Token: \(token)")
     }
     
     func registerForPushNotifications() {

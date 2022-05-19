@@ -26,7 +26,10 @@ class NotificationService: UNNotificationServiceExtension {
             bestAttemptContent.title = "\(bestAttemptContent.title) [modified]"
             
             let userInfo = bestAttemptContent.userInfo
-            Store.shared.saveNotification(fromUserInfo: userInfo)
+            let store = Store.shared
+            
+            store.saveNotification(fromUserInfo: userInfo)
+            
             contentHandler(bestAttemptContent)
         }
     }
