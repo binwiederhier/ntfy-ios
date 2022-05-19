@@ -1,16 +1,11 @@
-//
-//  NotificationService.swift
-//  ntfyNSE
-//
-//  Created by Philipp Heckel on 5/13/22.
-//
-
 import UserNotifications
 import CoreData
 
 // https://debashishdas3100.medium.com/save-push-notifications-to-coredata-userdefaults-ios-swift-5-ea074390b57
 
 class NotificationService: UNNotificationServiceExtension {
+    let tag = "NotificationService"
+    
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     
@@ -20,15 +15,13 @@ class NotificationService: UNNotificationServiceExtension {
     ) {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-        
-        print("NotificationService didReceive")
+        Log.d(tag, "Notification received (in service)") // Logs from extensions are not printed in Xcode!
+
         if let bestAttemptContent = bestAttemptContent {
-            bestAttemptContent.title = "\(bestAttemptContent.title) [modified]"
+            // bestAttemptContent.title = "\(bestAttemptContent.title) [modified]"
             
             let userInfo = bestAttemptContent.userInfo
-            let store = Store.shared
-            
-            store.saveNotification(fromUserInfo: userInfo)
+            Store.shared.saveNotification(fromUserInfo: userInfo)
             
             contentHandler(bestAttemptContent)
         }

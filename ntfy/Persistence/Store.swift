@@ -1,17 +1,10 @@
-//
-//  DataController.swift
-//  ntfy
-//
-//  Created by Philipp Heckel on 5/14/22.
-//
-
 import Foundation
 import CoreData
 
 class Store: ObservableObject {
     static let shared = Store()
+    static let tag = "Store"
     
-    let tag = "Store"
     let container: NSPersistentContainer
     var context: NSManagedObjectContext
     
@@ -19,13 +12,13 @@ class Store: ObservableObject {
         let directory = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.io.heckel.ntfy")!
         let storeUrl =  directory.appendingPathComponent("ntfy.sqlite")
         let description =  NSPersistentStoreDescription(url: storeUrl)
-        
+
         // Set up container and observe changes from app extension
         container = NSPersistentContainer(name: "Model")
         container.persistentStoreDescriptions = [description]
         container.loadPersistentStores { description, error in
             if let error = error {
-                print("Core Data failed to load: \(error.localizedDescription)")
+                Log.e(Store.tag, "Core Data failed to load: \(error.localizedDescription)", error)
             }
         }
 
@@ -56,11 +49,11 @@ class Store: ObservableObject {
               let time = userInfo["time"] as? String,
               let timeInt = Int64(time),
               let message = userInfo["message"] as? String else {
-            print("Unknown or irrelevant message", userInfo)
+            Log.d(Store.tag, "Unknown or irrelevant message", userInfo)
             return
         }
         guard let subscription = getSubscription(baseUrl: appBaseUrl, topic: topic) else {
-            print("Subscription for topic \(topic) unknown")
+            Log.d(Store.tag, "Subscription for topic \(topic) unknown")
             return
         }
         
@@ -73,8 +66,8 @@ class Store: ObservableObject {
             subscription.addToNotifications(notification)
             try context.save()
         } catch let error {
-            Log.w(tag, "Cannot store notification", error)
-            context.rollback()
+            Log.w(Store.tag, "Cannot store notification (fromUserInfo)", error)
+            rollbackAndRefresh()
         }
     }
     
@@ -88,8 +81,17 @@ class Store: ObservableObject {
             subscription.addToNotifications(notification)
             try context.save()
         } catch let error {
-            print(error)
-            context.rollback()
+            Log.w(Store.tag, "Cannot store notification (fromMessage)", error)
+            rollbackAndRefresh()
         }
+    }
+    
+    func rollbackAndRefresh() {
+        // Hack: We refresh all objects, since failing to store a notification usually means
+        // that the app extension stored the notification first. This is a way to update the
+        // UI properly when it is in the foreground and the app extension stores a notification.
+        
+        context.rollback()
+        context.refreshAllObjects()
     }
 }

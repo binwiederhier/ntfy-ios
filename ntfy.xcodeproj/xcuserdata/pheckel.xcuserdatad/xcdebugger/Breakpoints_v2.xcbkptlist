@@ -7,54 +7,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "75468F65-9E01-4DF5-A169-07217AF6D1B2"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ntfyNSE/NotificationService.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "25"
-            endingLineNumber = "25"
-            landmarkName = "didReceive(_:withContentHandler:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "75468F65-9E01-4DF5-A169-07217AF6D1B2 - 427a5e501e23ebe0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "ntfyNSE.NotificationService.didReceive(_: __C.UNNotificationRequest, withContentHandler: (__C.UNNotificationContent) -&gt; ()) -&gt; ()"
-                  moduleName = "ntfyNSE"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/pheckel/Code/ntfy/ntfyNSE/NotificationService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "25"
-                  endingLineNumber = "25"
-                  offsetFromSymbolStart = "516">
-               </Location>
-               <Location
-                  uuid = "75468F65-9E01-4DF5-A169-07217AF6D1B2 - 427a5e501e23ebe0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "ntfyNSE.NotificationService.didReceive(_: __C.UNNotificationRequest, withContentHandler: (__C.UNNotificationContent) -&gt; ()) -&gt; ()"
-                  moduleName = "ntfyNSE"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/pheckel/Code/ntfy/ntfyNSE/NotificationService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "25"
-                  endingLineNumber = "25"
-                  offsetFromSymbolStart = "560">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "57A50049-60E1-472C-ADB5-E4648E442C07"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
@@ -62,8 +14,8 @@
             filePath = "ntfyNSE/NotificationService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "32"
-            endingLineNumber = "32"
+            startingLineNumber = "25"
+            endingLineNumber = "25"
             landmarkName = "didReceive(_:withContentHandler:)"
             landmarkType = "7">
          </BreakpointContent>

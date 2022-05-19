@@ -1,10 +1,3 @@
-//
-//  Subscription.swift
-//  ntfy
-//
-//  Created by Philipp Heckel on 5/15/22.
-//
-
 import Foundation
 
 extension Subscription {
@@ -25,6 +18,9 @@ extension Subscription {
     }
     
     func notificationsSorted() -> [Notification] {
-        return notifications!.sortedArray(using: [NSSortDescriptor(key: "time", ascending: false)]) as! [Notification]
+        if let notifications = notifications {
+            return notifications.sortedArray(using: [NSSortDescriptor(key: "time", ascending: false)]) as! [Notification]
+        }
+        return []
     }
 }
