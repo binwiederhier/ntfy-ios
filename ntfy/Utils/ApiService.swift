@@ -1,14 +1,13 @@
 import Foundation
 
-class ApiService: NSObject {
+class ApiService {
+    private let tag = "ApiService"
     static let shared = ApiService()
-    let tag = "ApiService"
     
     func poll(subscription: Subscription, completionHandler: @escaping ([Message]?, Error?) -> Void) {
         guard let url = URL(string: subscription.urlString()) else { return }
-        let lastNotificationTime = subscription.lastNotification()?.time ?? 0
-        let sinceString = lastNotificationTime > 0 ? String(lastNotificationTime) : "all";
-        let urlString = "\(url)/json?poll=1&since=\(sinceString)"
+        let since = subscription.lastNotification()?.id ?? "all"
+        let urlString = "\(url)/json?poll=1&since=\(since)"
         
         Log.d(tag, "Polling from \(urlString)")
         fetchJsonData(urlString: urlString, completionHandler: completionHandler)
@@ -33,9 +32,11 @@ class ApiService: NSObject {
         request.setValue(tags.joined(separator: ","), forHTTPHeaderField: "Tags")
         request.httpBody = message.data(using: String.Encoding.utf8)
         URLSession.shared.dataTask(with: request) { (data, response, error) in
-            print(data)
-            print(response)
-            print(error)
+            guard error == nil else {
+                Log.e(self.tag, "Error publishing message", error!)
+                return
+            }
+            Log.d(self.tag, "Publishing message succeeded", response)
         }.resume()
     }
 

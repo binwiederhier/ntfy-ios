@@ -17,26 +17,30 @@ struct Log {
         return formatter
     }
     
-    static func d(_ tag: String, _ message: String, _ other: Any...) {
+    static func d(_ tag: String, _ message: String, _ other: Any?...) {
         log(.debug, tag, message, other)
     }
     
-    static func i(_ tag: String, _ message: String, _ other: Any...) {
+    static func i(_ tag: String, _ message: String, _ other: Any?...) {
         log(.info, tag, message, other)
     }
     
-    static func w(_ tag: String, _ message: String, _ other: Any...) {
+    static func w(_ tag: String, _ message: String, _ other: Any?...) {
         log(.warning, tag, message, other)
     }
     
-    static func e(_ tag: String, _ message: String, _ other: Any...) {
+    static func e(_ tag: String, _ message: String, _ other: Any?...) {
         log(.error, tag, message, other)
     }
     
-    static func log(_ level: LogLevel, _ tag: String, _ message: String, _ other: Any...) {
+    static func log(_ level: LogLevel, _ tag: String, _ message: String, _ other: Any?...) {
         print("\(dateStr()) ntfyApp [\(levelStr(level))] \(tag): \(message)")
         if !other.isEmpty {
-            print(other)
+            other.forEach { o in
+                if o != nil {
+                    print("  ", o!)
+                }
+            }
         }
     }
     

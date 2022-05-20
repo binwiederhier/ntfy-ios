@@ -124,19 +124,7 @@ struct NotificationListView: View {
             }
         })*/
         .refreshable {
-            print("Refresh")
-            ApiService.shared.poll(subscription: subscription) { messages, error in
-                guard let messages = messages else {
-                    print(error)
-                    return
-                }
-                print("Saving new messages to subscription \(subscription.urlString())", messages)
-                DispatchQueue.main.async {
-                    for message in messages {
-                        store.saveNotification(fromMessage: message, subscription: subscription)
-                    }
-                }
-            }
+            poll()
         }
     }
 
@@ -168,5 +156,22 @@ struct NotificationListView: View {
             }
         }*/
         selection = Set<Notification>()
+    }
+    
+    private func poll() {
+        ApiService.shared.poll(subscription: subscription) { messages, error in
+            guard let messages = messages else {
+                Log.e(tag, "Polling failed", error)
+                return
+            }
+            Log.d(tag, "Polling success, \(messages.count) new message(s)", messages)
+            if !messages.isEmpty {
+                DispatchQueue.main.async {
+                    for message in messages {
+                        store.saveNotification(fromMessage: message, subscription: subscription)
+                    }
+                }
+            }
+        }
     }
 }
