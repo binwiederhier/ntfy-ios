@@ -6,16 +6,16 @@ enum ActiveAlert {
 
 struct NotificationListView: View {
     private let tag = "NotificationListView"
-
+    
     @Environment(\.managedObjectContext) var context
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject private var store: Store
-
+    
     @ObservedObject var subscription: Subscription
     
     @State private var editMode = EditMode.inactive
     @State private var selection = Set<Notification>()
-
+    
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
     
@@ -113,25 +113,23 @@ struct NotificationListView: View {
                     message: Text("Do you really want to delete these selected notifications?"),
                     primaryButton: .destructive(
                         Text("Delete"),
-                        action: {
-                            //deleteSelectedNotifications(notifications: subscription.notifications)
-                            self.editMode = .inactive
-                        }),
+                        action: deleteSelected
+                    ),
                     secondaryButton: .cancel())
             }
         }
         /*.overlay(Group {
-            if subscription.notifications.isEmpty() {
-                Text("No notifications")
-                    .font(.headline)
-                    .foregroundColor(.gray)
-            }
-        })*/
+         if subscription.notifications.isEmpty() {
+         Text("No notifications")
+         .font(.headline)
+         .foregroundColor(.gray)
+         }
+         })*/
         .refreshable {
             poll()
         }
     }
-
+    
     private var editButton: some View {
         if editMode == .inactive {
             return Button(action: {
@@ -149,17 +147,11 @@ struct NotificationListView: View {
             }
         }
     }
-
-    private func deleteSelectedNotifications(notifications: [Notification]) {
-        print("deletedSelected")
-        /*
-        for id in selection {
-            if let index = subscription.notifications.lastIndex(where: { $0 == id }) {
-                subscription.notifications.remove(at: index)
-                //Database.current.deleteNotification(notification: notifications[index])
-            }
-        }*/
+    
+    private func deleteSelected() {
+        store.delete(notifications: selection)
         selection = Set<Notification>()
+        editMode = .inactive
     }
     
     private func poll() {

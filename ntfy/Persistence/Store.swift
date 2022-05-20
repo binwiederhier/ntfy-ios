@@ -115,6 +115,19 @@ class Store: ObservableObject {
         }
     }
     
+    func delete(notifications: Set<Notification>) {
+        Log.d(Store.tag, "Deleting \(notifications.count) notification(s)", notifications)
+        do {
+            notifications.forEach { notification in
+                context.delete(notification)
+            }
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot delete notification(s)", error)
+            rollbackAndRefresh()
+        }
+    }
+    
     func rollbackAndRefresh() {
         // Hack: We refresh all objects, since failing to store a notification usually means
         // that the app extension stored the notification first. This is a way to update the
