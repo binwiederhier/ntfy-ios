@@ -1,6 +1,8 @@
 import Foundation
 import FirebaseMessaging
 
+/// Manager to combine persisting a subscription to the data store and subscribing to Firebase.
+/// This is to centralize the logic in one place.
 struct SubscriptionManager {
     private let tag = "Store"
     var store: Store
@@ -17,7 +19,7 @@ struct SubscriptionManager {
             if let topic = subscription.topic {
                 Messaging.messaging().unsubscribe(fromTopic: topic)
             }
-            store.deleteSubscription(subscription: subscription)
+            store.delete(subscription: subscription)
         }
     }
 }

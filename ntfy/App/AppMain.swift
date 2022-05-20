@@ -9,7 +9,10 @@ struct AppMain: App {
     @StateObject private var store = Store.shared
     
     init() {
+        // We must configure Firebase here, and not in the AppDelegate. For some reason
+        // configuring it there did not work.
         FirebaseApp.configure()
+        FirebaseConfiguration.shared.setLoggerLevel(.max)
     }
     
     var body: some Scene {

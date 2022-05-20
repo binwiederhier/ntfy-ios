@@ -10,7 +10,6 @@ import CoreData
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
     let tag = "AppDelegate"
-    let store = Store.shared
     
     func application(
         _ application: UIApplication,
@@ -18,8 +17,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         Log.d(tag, "ApplicationDelegate didFinishLaunchingWithOptions.")
         
-        // FirebaseApp.configure() DOES NOT WORK
-        FirebaseConfiguration.shared.setLoggerLevel(.max)
         Messaging.messaging().delegate = self
         
         registerForPushNotifications()
@@ -63,15 +60,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func registerForPushNotifications() {
+        Log.d(tag, "Registering for local push notifications")
         UNUserNotificationCenter.current()
-            .requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, _ in
-                print("granted: \(granted)")
-                guard granted else { return }
-                self?.getNotificationSettings()
+            .requestAuthorization(options: [.alert, .sound, .badge]) { success, error in
+                guard success else {
+                    Log.e(self.tag, "Failed to register for local push notifications", error)
+                    return
+                }
+                Log.d(self.tag, "Successfully registered for local push notifications")
+                self.registerForRemoteNotifications()
             }
     }
     
-    func getNotificationSettings() {
+    func registerForRemoteNotifications() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             print("Notification settings: \(settings)")
             guard settings.authorizationStatus == .authorized else { return }
@@ -105,20 +106,10 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 }
 
 extension AppDelegate: MessagingDelegate {
-    func messaging(
-        _ messaging: Messaging,
-        didReceiveRegistrationToken fcmToken: String?
-    ) {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         Log.d(tag, "Firebase token received: \(String(describing: fcmToken))")
         
-        // FIXME: Is this necessary?
-        
-        let dataDict: [String: String] = ["token": fcmToken ?? ""]
-        NotificationCenter.default.post(
-            name: UserNotifications.Notification.Name("FCMToken"),
-            object: nil,
-            userInfo: dataDict
-        )
+        // We don't actually need the FCM token, since we're just using topics.
+        // We still print it so we can see if things were successful.
     }
 }
-

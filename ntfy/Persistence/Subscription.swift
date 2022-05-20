@@ -1,5 +1,7 @@
 import Foundation
 
+// FIXME: Store last notification ID in Subscription
+
 extension Subscription {
     func urlString() -> String {
         return topicUrl(baseUrl: baseUrl!, topic: topic!)

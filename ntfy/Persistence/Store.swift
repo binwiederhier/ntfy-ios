@@ -32,10 +32,12 @@ class Store: ObservableObject {
         context.mergePolicy = NSMergePolicy(merge: .mergeByPropertyStoreTrumpMergePolicyType) // https://stackoverflow.com/a/60362945/1440785
         context.transactionAuthor = Bundle.main.bundlePath.hasSuffix(".appex") ? "ntfy.appex" : "ntfy"
         
+        // When a remote change comes in (= the app extension updated entities in Core Data),
+        // we force refresh the view with horrible means. Please help me make this better!
         NotificationCenter.default
           .publisher(for: .NSPersistentStoreRemoteChange)
-          .sink {
-              Log.d(Store.tag, "Remote change detected", $0)
+          .sink { value in
+              Log.d(Store.tag, "Remote change detected, refreshing view", value)
               
               // Hack: This is the only way I could make the UI update the subscription list.
               // I'm pretty sure I got the @FetchRequest wrong, but I don
@@ -67,21 +69,22 @@ class Store: ObservableObject {
         return try? context.fetch(fetchRequest).first
     }
     
-    func deleteSubscription(subscription: Subscription) {
+    func delete(subscription: Subscription) {
         context.delete(subscription)
         try? context.save()
     }
     
-    func saveNotification(fromUserInfo userInfo: [AnyHashable: Any]) {
+    func save(notificationFromUserInfo userInfo: [AnyHashable: Any]) {
         guard let id = userInfo["id"] as? String,
-              let topic = userInfo["topic"] as? String, // FIXME: Notification should also contain baseUrl
+              let topic = userInfo["topic"] as? String,
               let time = userInfo["time"] as? String,
               let timeInt = Int64(time),
               let message = userInfo["message"] as? String else {
             Log.d(Store.tag, "Unknown or irrelevant message", userInfo)
             return
         }
-        guard let subscription = getSubscription(baseUrl: appBaseUrl, topic: topic) else {
+        let baseUrl = appBaseUrl // Firebase messages all come from the main ntfy server
+        guard let subscription = getSubscription(baseUrl: baseUrl, topic: topic) else {
             Log.d(Store.tag, "Subscription for topic \(topic) unknown")
             return
         }
@@ -100,7 +103,7 @@ class Store: ObservableObject {
         }
     }
     
-    func saveNotification(fromMessage message: Message, subscription: Subscription) {
+    func save(notificationFromMessage message: Message, withSubscription subscription: Subscription) {
         do {
             let notification = Notification(context: context)
             notification.id = message.id

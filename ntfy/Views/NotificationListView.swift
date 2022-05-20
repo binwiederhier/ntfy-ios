@@ -170,7 +170,7 @@ struct NotificationListView: View {
             if !messages.isEmpty {
                 DispatchQueue.main.async {
                     for message in messages {
-                        store.saveNotification(fromMessage: message, subscription: subscription)
+                        store.save(notificationFromMessage: message, withSubscription: subscription)
                     }
                 }
             }

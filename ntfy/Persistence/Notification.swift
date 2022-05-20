@@ -1,12 +1,6 @@
-//
-//  Notification.swift
-//  ntfy
-//
-//  Created by Philipp Heckel on 5/16/22.
-//
-
 import Foundation
 
+/// Extensions to make the notification easier to display
 extension Notification {
     func shortDateTime() -> String {
         let date = Date(timeIntervalSince1970: TimeInterval(self.time))
@@ -31,6 +25,7 @@ extension Notification {
     }
 }
 
+/// This is the "on the wire" message as it is received from the ntfy server
 struct Message: Decodable {
     var id: String
     var time: Int64
