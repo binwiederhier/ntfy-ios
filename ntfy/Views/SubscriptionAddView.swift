@@ -11,8 +11,8 @@ import FirebaseMessaging
 struct SubscriptionAddView: View {
     @Environment(\.managedObjectContext) var context
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @EnvironmentObject private var store: Store
     @State private var topic: String = ""
-    private let store = Store.shared
 
     var body: some View {
         VStack {

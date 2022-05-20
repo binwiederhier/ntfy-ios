@@ -1,10 +1,3 @@
-//
-//  ntfyApp.swift
-//  ntfy
-//
-//  Created by Philipp Heckel on 5/13/22.
-//
-
 import SwiftUI
 import Firebase
 
@@ -22,13 +15,15 @@ struct AppMain: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.managedObjectContext, store.container.viewContext)
+                .environment(\.managedObjectContext, store.context)
+                .environmentObject(store)
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                     // Use this hook instead of applicationDidBecomeActive, see https://stackoverflow.com/a/68888509/1440785
                     // That post also explains how to start SwiftUI from AppDelegate if that's ever needed.
                     
                     Log.d(tag, "App became active, refreshing objects")
                     store.context.refreshAllObjects()
+                    store.objectWillChange.send()
                 }
         }
     }

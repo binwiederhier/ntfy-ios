@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SubscriptionRow: View {
+struct SubscriptionRowView: View {
     @ObservedObject var subscription: Subscription
 
     var body: some View {

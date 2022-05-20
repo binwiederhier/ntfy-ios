@@ -14,6 +14,7 @@ enum ActiveAlert {
 struct NotificationListView: View {
     @Environment(\.managedObjectContext) var context
     @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject private var store: Store
 
     @ObservedObject var subscription: Subscription
     
@@ -23,8 +24,6 @@ struct NotificationListView: View {
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
     
-    private let store = Store.shared
-
     var body: some View {
         List(selection: $selection) {
             ForEach(subscription.notificationsSorted(), id: \.self) { notification in

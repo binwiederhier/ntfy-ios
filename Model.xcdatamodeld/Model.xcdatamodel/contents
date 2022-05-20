@@ -5,6 +5,7 @@
         <attribute name="message" attributeType="String"/>
         <attribute name="time" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="subscription" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Subscription" inverseName="notifications" inverseEntity="Subscription"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="id"/>
@@ -14,7 +15,7 @@
     <entity name="Subscription" representedClassName="Subscription" syncable="YES" codeGenerationType="class">
         <attribute name="baseUrl" attributeType="String"/>
         <attribute name="topic" attributeType="String" minValueString="1" maxValueString="64" regularExpressionString="^[-_A-Za-z0-9]{1,64}$"/>
-        <relationship name="notifications" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Notification"/>
+        <relationship name="notifications" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Notification" inverseName="subscription" inverseEntity="Notification"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="baseUrl"/>
@@ -23,7 +24,7 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="Notification" positionX="-54" positionY="9" width="128" height="103"/>
-        <element name="Subscription" positionX="-262.4760131835938" positionY="11.46405029296875" width="128" height="88"/>
+        <element name="Notification" positionX="-54" positionY="9" width="128" height="104"/>
+        <element name="Subscription" positionX="-262.4760131835938" positionY="11.46405029296875" width="128" height="74"/>
     </elements>
 </model>

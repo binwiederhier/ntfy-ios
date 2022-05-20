@@ -90,7 +90,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = notification.request.content.userInfo
         Log.d(tag, "Notification received via userNotificationCenter(willPresent)", userInfo)
-        store.saveNotification(fromUserInfo: userInfo)
+        //store.saveNotification(fromUserInfo: userInfo)
+        //_ = try? store.context.fetch(Subscription.fetchRequest())
+
         completionHandler([[.alert, .sound]])
     }
     

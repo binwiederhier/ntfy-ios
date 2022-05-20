@@ -1,18 +1,16 @@
-//
-//  ContentView.swift
-//  ntfy-ios
-//
-//  Created by Andrew Cope on 1/15/22.
-//
-
+// https://www.raywenderlich.com/14958063-modern-efficient-core-data
 // https://www.hackingwithswift.com/books/ios-swiftui/how-to-combine-core-data-and-swiftui
 
 import SwiftUI
 import CoreData
 import FirebaseMessaging
+import UserNotifications
 
-struct SubscriptionsList: View {
+struct SubscriptionListView: View {
+    let tag = "SubscriptionList"
+    
     @Environment(\.managedObjectContext) var context
+    @EnvironmentObject private var store: Store
     @FetchRequest(sortDescriptors: [NSSortDescriptor(key: "topic", ascending: true)]) var subscriptions: FetchedResults<Subscription>
     
     var body: some View {
@@ -26,7 +24,7 @@ struct SubscriptionsList: View {
                         .opacity(0.0)
                         .buttonStyle(PlainButtonStyle())
 
-                        SubscriptionRow(subscription: subscription)
+                        SubscriptionRowView(subscription: subscription)
                     }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {

@@ -1,17 +1,22 @@
 import Foundation
 import CoreData
+import Combine
 
 class Store: ObservableObject {
     static let shared = Store()
     static let tag = "Store"
     
-    let container: NSPersistentContainer
-    var context: NSManagedObjectContext
-    
+    private let container: NSPersistentContainer
+    var context: NSManagedObjectContext {
+        return container.viewContext
+    }
+    private var subscriptions: Set<AnyCancellable> = []
+
     init() {
         let directory = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.io.heckel.ntfy")!
         let storeUrl =  directory.appendingPathComponent("ntfy.sqlite")
         let description =  NSPersistentStoreDescription(url: storeUrl)
+        description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
         // Set up container and observe changes from app extension
         container = NSPersistentContainer(name: "Model")
@@ -21,9 +26,32 @@ class Store: ObservableObject {
                 Log.e(Store.tag, "Core Data failed to load: \(error.localizedDescription)", error)
             }
         }
-
+        
+        
         // Shortcut for context
-        context = container.viewContext
+        context.automaticallyMergesChangesFromParent = true
+        // context.mergePolicy = NSMergePolicyType.mergeByPropertyObjectTrumpMergePolicyType // https://stackoverflow.com/a/60362945/1440785
+        context.mergePolicy = NSMergePolicy(merge: .mergeByPropertyStoreTrumpMergePolicyType)
+        context.transactionAuthor = Bundle.main.bundlePath.hasSuffix(".appex") ? "ntfy.appex" : "ntfy"
+        
+        NotificationCenter.default
+          .publisher(for: .NSPersistentStoreRemoteChange)
+          .sink {
+              Log.d(Store.tag, "remote change", $0)
+              
+              // Hack: This is the only way I could make the UI update the subscription list.
+              // I'm pretty sure I got the @FetchRequest wrong, but I don
+
+              _ = try? self.context.fetch(Subscription.fetchRequest())
+              
+              DispatchQueue.main.async {
+                  self.objectWillChange.send()
+                  self.container.viewContext.refreshAllObjects()
+              }
+
+          }
+          .store(in: &subscriptions)
+
     }
     
     func saveSubscription(baseUrl: String, topic: String) {
