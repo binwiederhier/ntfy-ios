@@ -7,7 +7,7 @@ struct AppMain: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate: AppDelegate
     @StateObject private var store = Store.shared
-
+    
     init() {
         FirebaseApp.configure()
     }

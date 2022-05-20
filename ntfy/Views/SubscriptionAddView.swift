@@ -9,6 +9,10 @@ struct SubscriptionAddView: View {
     @EnvironmentObject private var store: Store
     @State private var topic: String = ""
 
+    private var subscriptionManager: SubscriptionManager {
+        return SubscriptionManager(store: store)
+    }
+    
     var body: some View {
         VStack {
             Form {
@@ -41,10 +45,7 @@ struct SubscriptionAddView: View {
     }
     
     private func subscribeAction() {
-        Log.d(tag, "Subscribing to \(topicUrl(baseUrl: appBaseUrl, topic: topic))")
-        Messaging.messaging().subscribe(toTopic: topic)
-        
-        store.saveSubscription(baseUrl: appBaseUrl, topic: topic)
+        subscriptionManager.subscribe(baseUrl: appBaseUrl, topic: topic)
         presentationMode.wrappedValue.dismiss()
     }
 }

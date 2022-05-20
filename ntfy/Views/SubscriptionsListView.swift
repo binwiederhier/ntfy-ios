@@ -13,6 +13,10 @@ struct SubscriptionListView: View {
     @EnvironmentObject private var store: Store
     @FetchRequest(sortDescriptors: [NSSortDescriptor(key: "topic", ascending: true)]) var subscriptions: FetchedResults<Subscription>
     
+    private var subscriptionManager: SubscriptionManager {
+        return SubscriptionManager(store: store)
+    }
+    
     var body: some View {
         NavigationView {
             List {
@@ -28,7 +32,7 @@ struct SubscriptionListView: View {
                     }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
-                            unsubscribe(subscription)
+                            subscriptionManager.unsubscribe(subscription)
                         } label: {
                             Label("Delete", systemImage: "trash.circle")
                         }
@@ -44,7 +48,6 @@ struct SubscriptionListView: View {
                     ) {
                         Image(systemName: "plus")
                     }
-                    
                 }
             }
             .overlay(Group {
@@ -57,17 +60,6 @@ struct SubscriptionListView: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
-    
-    func unsubscribe(_ subscription: Subscription) {
-        DispatchQueue.main.async {
-            if let topic = subscription.topic {
-                Messaging.messaging().unsubscribe(fromTopic: topic)
-            }
-            context.delete(subscription)
-            try? context.save()
-        }
-    }
-    
 }
 
 /*

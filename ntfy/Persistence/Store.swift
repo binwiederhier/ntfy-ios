@@ -67,6 +67,11 @@ class Store: ObservableObject {
         return try? context.fetch(fetchRequest).first
     }
     
+    func deleteSubscription(subscription: Subscription) {
+        context.delete(subscription)
+        try? context.save()
+    }
+    
     func saveNotification(fromUserInfo userInfo: [AnyHashable: Any]) {
         guard let id = userInfo["id"] as? String,
               let topic = userInfo["topic"] as? String, // FIXME: Notification should also contain baseUrl

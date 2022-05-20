@@ -19,6 +19,10 @@ struct NotificationListView: View {
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
     
+    private var subscriptionManager: SubscriptionManager {
+        return SubscriptionManager(store: store)
+    }
+    
     var body: some View {
         List(selection: $selection) {
             ForEach(subscription.notificationsSorted(), id: \.self) { notification in
@@ -99,7 +103,7 @@ struct NotificationListView: View {
                     primaryButton: .destructive(
                         Text("Unsubscribe"),
                         action: {
-                            try? context.delete(subscription)
+                            subscriptionManager.unsubscribe(subscription)
                             self.presentationMode.wrappedValue.dismiss()
                         }),
                     secondaryButton: .cancel())
