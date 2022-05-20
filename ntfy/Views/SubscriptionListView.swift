@@ -11,10 +11,7 @@ struct SubscriptionListView: View {
     
     @EnvironmentObject private var store: Store
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Subscription.topic, ascending: true)]) var subscriptions: FetchedResults<Subscription>
-    
-    @State private var unsubscribeAlert = false
-    @State private var unsubscribeSubscription: Subscription?
-    
+        
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
@@ -23,48 +20,14 @@ struct SubscriptionListView: View {
         NavigationView {
             List {
                 ForEach(subscriptions) { subscription in
-                    ZStack {
-                        NavigationLink(destination: NotificationListView(subscription: subscription)) {
-                            EmptyView()
-                        }
-                        .opacity(0.0)
-                        .buttonStyle(PlainButtonStyle())
-
-                        SubscriptionRowView(subscription: subscription)
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            unsubscribeAlert = true
-                            unsubscribeSubscription = subscription
-                            //subscriptionManager.unsubscribe(subscription)
-                        } label: {
-                            Label("Delete", systemImage: "trash.circle")
-                        }
-                    }
-                    .alert(isPresented: $unsubscribeAlert) {
-                        Alert(
-                            title: Text("Unsubscribe"),
-                            message: Text("Do you really want to unsubscribe from this topic and delete all of the notifications you received?"),
-                            primaryButton: .destructive(
-                                Text("Unsubscribe"),
-                                action: {
-                                    subscriptionManager.unsubscribe(unsubscribeSubscription!)
-                                    unsubscribeAlert = false
-                                    unsubscribeSubscription = nil
-                                }
-                            ),
-                            secondaryButton: .cancel()
-                        )
-                    }
+                    SubscriptionItemNavView(subscription: subscription)
                 }
             }
             .listStyle(PlainListStyle())
             .navigationTitle("Subscribed topics")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(
-                        destination: SubscriptionAddView()
-                    ) {
+                    NavigationLink(destination: SubscriptionAddView()) {
                         Image(systemName: "plus")
                     }
                 }
@@ -82,7 +45,51 @@ struct SubscriptionListView: View {
     
 }
 
-struct SubscriptionRowView: View {
+struct SubscriptionItemNavView: View {
+    @EnvironmentObject private var store: Store
+    @ObservedObject var subscription: Subscription
+    @State private var unsubscribeAlert = false
+
+    private var subscriptionManager: SubscriptionManager {
+        return SubscriptionManager(store: store)
+    }
+    
+    var body: some View {
+        ZStack {
+            NavigationLink(destination: NotificationListView(subscription: subscription)) {
+                EmptyView()
+            }
+            .opacity(0.0)
+            .buttonStyle(PlainButtonStyle())
+
+            SubscriptionItemRowView(subscription: subscription)
+        }
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) {
+                self.unsubscribeAlert = true
+            } label: {
+                Label("Delete", systemImage: "trash.circle")
+            }
+        }
+        .alert(isPresented: $unsubscribeAlert) {
+            Alert(
+                title: Text("Unsubscribe"),
+                message: Text("Do you really want to unsubscribe from this topic and delete all of the notifications you received?"),
+                primaryButton: .destructive(
+                    Text("Unsubscribe"),
+                    action: {
+                        self.subscriptionManager.unsubscribe(subscription)
+                        self.unsubscribeAlert = false
+                    }
+                ),
+                secondaryButton: .cancel()
+            )
+        }
+    }
+}
+
+
+struct SubscriptionItemRowView: View {
     @ObservedObject var subscription: Subscription
 
     var body: some View {
