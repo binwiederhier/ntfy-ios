@@ -52,11 +52,14 @@ class Store: ObservableObject {
           .store(in: &cancellables)
     }
     
-    func saveSubscription(baseUrl: String, topic: String) {
+    func saveSubscription(baseUrl: String, topic: String) -> Subscription {
         let subscription = Subscription(context: context)
         subscription.baseUrl = appBaseUrl
         subscription.topic = topic
-        try? context.save()
+        DispatchQueue.main.sync {
+            try? context.save()
+        }
+        return subscription
     }
     
     func getSubscription(baseUrl: String, topic: String) -> Subscription? {

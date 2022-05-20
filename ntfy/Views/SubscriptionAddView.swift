@@ -7,7 +7,7 @@ struct SubscriptionAddView: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject private var store: Store
     @State private var topic: String = ""
-
+    
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
@@ -29,22 +29,24 @@ struct SubscriptionAddView: View {
                     Button(action: subscribeAction) {
                         Text("Subscribe")
                     }
-                    .disabled(!isTopicValid(topic: sanitizeTopic(topic: topic)))
+                    .disabled(!isValid(topic: sanitize(topic: topic)))
                 }
             }
         }
     }
     
-    private func sanitizeTopic(topic: String) -> String {
+    private func sanitize(topic: String) -> String {
         return topic.trimmingCharacters(in: [" "])
     }
     
-    private func isTopicValid(topic: String) -> Bool {
+    private func isValid(topic: String) -> Bool {
         return !topic.isEmpty && (topic.range(of: "^[-_A-Za-z0-9]{1,64}$", options: .regularExpression, range: nil, locale: nil) != nil)
     }
     
     private func subscribeAction() {
-        subscriptionManager.subscribe(baseUrl: appBaseUrl, topic: topic)
+        DispatchQueue.global(qos: .background).async {
+            subscriptionManager.subscribe(baseUrl: appBaseUrl, topic: sanitize(topic: topic))
+        }
         presentationMode.wrappedValue.dismiss()
     }
 }

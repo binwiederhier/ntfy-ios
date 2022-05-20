@@ -10,7 +10,23 @@ struct SubscriptionManager {
     func subscribe(baseUrl: String, topic: String) {
         Log.d(tag, "Subscribing to \(topicUrl(baseUrl: appBaseUrl, topic: topic))")
         Messaging.messaging().subscribe(toTopic: topic)
-        store.saveSubscription(baseUrl: baseUrl, topic: topic)
+        let subscription = store.saveSubscription(baseUrl: baseUrl, topic: topic)
+        
+        // FIXME: Duplicate code!
+        ApiService.shared.poll(subscription: subscription) { messages, error in
+            guard let messages = messages else {
+                Log.e(tag, "Polling failed", error)
+                return
+            }
+            Log.d(tag, "Polling success, \(messages.count) new message(s)", messages)
+            if !messages.isEmpty {
+                DispatchQueue.main.async {
+                    for message in messages {
+                        store.save(notificationFromMessage: message, withSubscription: subscription)
+                    }
+                }
+            }
+        }
     }
     
     func unsubscribe(_ subscription: Subscription) {
