@@ -1,5 +1,4 @@
 import SwiftUI
-import FirebaseMessaging
 
 struct SubscriptionAddView: View {
     private let tag = "SubscriptionAddView"

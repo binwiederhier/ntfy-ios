@@ -10,7 +10,7 @@ class Store: ObservableObject {
     var context: NSManagedObjectContext {
         return container.viewContext
     }
-    private var subscriptions: Set<AnyCancellable> = []
+    private var cancellables: Set<AnyCancellable> = []
 
     init(inMemory: Bool = false) {
         let storeUrl = (inMemory) ? URL(fileURLWithPath: "/dev/null") : FileManager.default
@@ -49,8 +49,7 @@ class Store: ObservableObject {
                   self.container.viewContext.refreshAllObjects()
               }
           }
-          .store(in: &subscriptions)
-
+          .store(in: &cancellables)
     }
     
     func saveSubscription(baseUrl: String, topic: String) {
@@ -158,10 +157,12 @@ class Store: ObservableObject {
 
 
 extension Store {
-    private static let topics = [
+    static let sampleData = [
         "stats": [
-            Message(id: "1", time: 1653048956, message: "200 users/h\n123 IPs", title: nil),
-            Message(id: "2", time: 1653058956, message: "201 users/h\n80 IPs", title: nil)
+            Message(id: "1", time: 1653048956, message: "In the last 24 hours, hyou had 5,000 users across 13 countries visit your website", title: "Record visitor numbers"),
+            Message(id: "2", time: 1653058956, message: "201 users/h\n80 IPs", title: "This is a title"),
+            Message(id: "3", time: 1643058956, message: "This message does not have a title, but is instead super long. Like really really long. It can't be any longer I think. I mean, there is s 4,000 byte limit of the message, so I guess I have to make this 4,000 bytes long. Or do I? 😁 I don't know. It's quite tedious to come up with something so long, so I'll stop now. Bye!", title: nil)
+
         ],
         "backups": [],
         "announcements": [],
@@ -172,16 +173,16 @@ extension Store {
     static var preview: Store = {
         let store = Store(inMemory: true)
         store.context.perform {
-            topics.forEach { topic, messages in
-                let notifications = messages.map { store.makeNotification(store.context, $0) }
-                store.makeSubscription(store.context, topic, notifications)
+            sampleData.forEach { topic, messages in
+                store.makeSubscription(store.context, topic, messages)
             }
         }
         return store
     }()
     
     @discardableResult
-    func makeSubscription(_ context: NSManagedObjectContext, _ topic: String, _ notifications: [Notification]) -> Subscription {
+    func makeSubscription(_ context: NSManagedObjectContext, _ topic: String, _ messages: [Message]) -> Subscription {
+        let notifications = messages.map { makeNotification(context, $0) }
         let subscription = Subscription(context: context)
         subscription.baseUrl = appBaseUrl
         subscription.topic = topic

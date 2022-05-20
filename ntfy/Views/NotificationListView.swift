@@ -7,7 +7,6 @@ enum ActiveAlert {
 struct NotificationListView: View {
     private let tag = "NotificationListView"
     
-    @Environment(\.managedObjectContext) var context
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject private var store: Store
     
@@ -133,7 +132,7 @@ struct NotificationListView: View {
     }
     
     private func sendTestNotification() {
-        let possibleTags = ["warning", "skull", "success", "triangular_flag_on_post", "de", "us", "dog", "cat", "rotating_light", "bike", "backup", "rsync", "this-s-a-tag", "ios"]
+        let possibleTags: Array<String> = ["warning", "skull", "success", "triangular_flag_on_post", "de", "us", "dog", "cat", "rotating_light", "bike", "backup", "rsync", "this-s-a-tag", "ios"]
         let priority = Int.random(in: 1..<6)
         let tags = Array(possibleTags.shuffled().prefix(Int.random(in: 0..<4)))
         ApiService.shared.publish(
@@ -175,5 +174,35 @@ struct NotificationListView: View {
                 }
             }
         }
+    }
+}
+
+struct NotificationRowView: View {
+    let notification: Notification
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(notification.shortDateTime())
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            if let title = notification.title, title != "" {
+                Text(title)
+                    .font(.headline)
+                    .bold()
+            }
+            Text(notification.message ?? "")
+                .font(.body)
+        }
+        .padding(.all, 4)
+    }
+}
+
+struct NotificationListView_Previews: PreviewProvider {
+    static var previews: some View {
+        let store = Store.preview
+        let subscription = store.makeSubscription(store.context, "stats", Store.sampleData["stats"]!)
+        NotificationListView(subscription: subscription)
+            .environment(\.managedObjectContext, store.context)
+            .environmentObject(store)
     }
 }
