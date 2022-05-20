@@ -19,5 +19,5 @@ Originally developed by [@Copephobia](https://github.com/Copephobia). He did the
 of the credit. Thank you @Copephobia!
 
 The app is now maintained with ❤️ by [Philipp C. Heckel](https://heckel.io).   
-The project is dual licensed under the [Apache License 2.0](LICENSE) and the [GPLv2 License](LICENSE.GPLv2).
+The project is licensed under the [MIT License](LICENSE).
 
