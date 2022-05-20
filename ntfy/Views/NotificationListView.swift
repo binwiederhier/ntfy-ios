@@ -44,18 +44,7 @@ struct NotificationListView: View {
                     Menu {
                         editButton
                         Button("Send test notification") {
-                            let possibleTags = ["warning", "skull", "success", "triangular_flag_on_post", "de", "us", "dog", "cat", "rotating_light", "bike", "backup", "rsync", "this-s-a-tag", "ios"]
-                            let priority = Int.random(in: 1..<6)
-                            let tags = Array(possibleTags.shuffled().prefix(Int.random(in: 0..<4)))
-                            ApiService.shared.publish(
-                                subscription: subscription,
-                                message: "This is a test notification from the ntfy iOS app. It has a priority of \(priority). If you send another one, it may look different.",
-                                title: "Test: You can set a title if you like",
-                                priority: priority,
-                                tags: tags
-                            ) { _,_ in
-                                print("Success")
-                            }
+                            self.sendTestNotification()
                         }
                         Button("Clear all notifications") {
                             self.showAlert = true
@@ -90,11 +79,8 @@ struct NotificationListView: View {
                     message: Text("Do you really want to delete all of the notifications in this topic?"),
                     primaryButton: .destructive(
                         Text("Permanently delete"),
-                        action: {
-                            //Database.current.deleteNotificationsForSubscription(subscription: subscription)
-                            //viewModel.notifications = Database.current.getNotifications(subscription: subscription)
-                            //subscription.loadNotifications()
-                        }),
+                        action: deleteAll
+                    ),
                     secondaryButton: .cancel())
             case .unsubscribe:
                 return Alert(
@@ -102,10 +88,8 @@ struct NotificationListView: View {
                     message: Text("Do you really want to unsubscribe from this topic and delete all of the notifications you received?"),
                     primaryButton: .destructive(
                         Text("Unsubscribe"),
-                        action: {
-                            subscriptionManager.unsubscribe(subscription)
-                            self.presentationMode.wrappedValue.dismiss()
-                        }),
+                        action: unsubscribe
+                    ),
                     secondaryButton: .cancel())
             case .selected:
                 return Alert(
@@ -146,6 +130,28 @@ struct NotificationListView: View {
                 Text("Done")
             }
         }
+    }
+    
+    private func sendTestNotification() {
+        let possibleTags = ["warning", "skull", "success", "triangular_flag_on_post", "de", "us", "dog", "cat", "rotating_light", "bike", "backup", "rsync", "this-s-a-tag", "ios"]
+        let priority = Int.random(in: 1..<6)
+        let tags = Array(possibleTags.shuffled().prefix(Int.random(in: 0..<4)))
+        ApiService.shared.publish(
+            subscription: subscription,
+            message: "This is a test notification from the ntfy iOS app. It has a priority of \(priority). If you send another one, it may look different.",
+            title: "Test: You can set a title if you like",
+            priority: priority,
+            tags: tags
+        )
+    }
+    
+    private func unsubscribe() {
+        subscriptionManager.unsubscribe(subscription)
+        presentationMode.wrappedValue.dismiss()
+    }
+    
+    private func deleteAll() {
+        store.delete(allNotificationsFor: subscription)
     }
     
     private func deleteSelected() {

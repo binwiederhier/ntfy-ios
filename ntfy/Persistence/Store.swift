@@ -116,10 +116,24 @@ class Store: ObservableObject {
     }
     
     func delete(notifications: Set<Notification>) {
-        Log.d(Store.tag, "Deleting \(notifications.count) notification(s)", notifications)
+        Log.d(Store.tag, "Deleting \(notifications.count) notification(s)")
         do {
             notifications.forEach { notification in
                 context.delete(notification)
+            }
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot delete notification(s)", error)
+            rollbackAndRefresh()
+        }
+    }
+    
+    func delete(allNotificationsFor subscription: Subscription) {
+        guard let notifications = subscription.notifications else { return }
+        Log.d(Store.tag, "Deleting all \(notifications.count) notification(s) for subscription \(subscription.urlString())")
+        do {
+            notifications.forEach { notification in
+                context.delete(notification as! Notification)
             }
             try context.save()
         } catch let error {

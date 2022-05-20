@@ -18,8 +18,7 @@ class ApiService {
         message: String,
         title: String,
         priority: Int = 3,
-        tags: [String] = [],
-        completionHandler: @escaping (Notification?, Error?) -> Void
+        tags: [String] = []
     ) {
         guard let url = URL(string: subscription.urlString()) else { return }
         var request = URLRequest(url: url)
