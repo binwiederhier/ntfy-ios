@@ -11,6 +11,10 @@ extension Subscription {
         return topic ?? "<unknown>"
     }
     
+    func topicName() -> String {
+        return topic ?? "<unknown>"
+    }
+    
     func notificationCount() -> Int {
         return notifications?.count ?? 0
     }

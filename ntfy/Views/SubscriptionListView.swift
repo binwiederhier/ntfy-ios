@@ -1,6 +1,3 @@
-// https://www.raywenderlich.com/14958063-modern-efficient-core-data
-// https://www.hackingwithswift.com/books/ios-swiftui/how-to-combine-core-data-and-swiftui
-
 import SwiftUI
 import CoreData
 import FirebaseMessaging
@@ -42,7 +39,6 @@ struct SubscriptionListView: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
-    
 }
 
 struct SubscriptionItemNavView: View {

@@ -118,6 +118,12 @@ class Store: ObservableObject {
         }
     }
     
+    func delete(notification: Notification) {
+        Log.d(Store.tag, "Deleting notification \(notification.id ?? "")")
+        context.delete(notification)
+        try? context.save()
+    }
+    
     func delete(notifications: Set<Notification>) {
         Log.d(Store.tag, "Deleting \(notifications.count) notification(s)")
         do {

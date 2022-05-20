@@ -41,13 +41,17 @@ struct NotificationListView: View {
                     editButton
                 } else {
                     Menu {
-                        editButton
+                        if subscription.notificationCount() > 0 {
+                            editButton
+                        }
                         Button("Send test notification") {
                             self.sendTestNotification()
                         }
-                        Button("Clear all notifications") {
-                            self.showAlert = true
-                            self.activeAlert = .clear
+                        if subscription.notificationCount() > 0 {
+                            Button("Clear all notifications") {
+                                self.showAlert = true
+                                self.activeAlert = .clear
+                            }
                         }
                         Button("Unsubscribe") {
                             self.showAlert = true
@@ -101,13 +105,19 @@ struct NotificationListView: View {
                     secondaryButton: .cancel())
             }
         }
-        /*.overlay(Group {
-         if subscription.notifications.isEmpty() {
-         Text("No notifications")
-         .font(.headline)
-         .foregroundColor(.gray)
-         }
-         })*/
+        .overlay(Group {
+            if subscription.notificationCount() == 0 {
+                VStack {
+                    Text("You haven't received any notifications for this topic yet")
+                        .font(.title2)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom)
+                    Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https;//ntfy.sh) and [in the docs](https:ntfy.sh/docs).")
+                }
+                .padding(40)
+            }
+        })
         .refreshable {
             poll()
         }
@@ -135,27 +145,35 @@ struct NotificationListView: View {
         let possibleTags: Array<String> = ["warning", "skull", "success", "triangular_flag_on_post", "de", "us", "dog", "cat", "rotating_light", "bike", "backup", "rsync", "this-s-a-tag", "ios"]
         let priority = Int.random(in: 1..<6)
         let tags = Array(possibleTags.shuffled().prefix(Int.random(in: 0..<4)))
-        ApiService.shared.publish(
-            subscription: subscription,
-            message: "This is a test notification from the ntfy iOS app. It has a priority of \(priority). If you send another one, it may look different.",
-            title: "Test: You can set a title if you like",
-            priority: priority,
-            tags: tags
-        )
+        DispatchQueue.global(qos: .background).async {
+            ApiService.shared.publish(
+                subscription: subscription,
+                message: "This is a test notification from the ntfy iOS app. It has a priority of \(priority). If you send another one, it may look different.",
+                title: "Test: You can set a title if you like",
+                priority: priority,
+                tags: tags
+            )
+        }
     }
     
     private func unsubscribe() {
-        subscriptionManager.unsubscribe(subscription)
+        DispatchQueue.global(qos: .background).async {
+            subscriptionManager.unsubscribe(subscription)
+        }
         presentationMode.wrappedValue.dismiss()
     }
     
     private func deleteAll() {
-        store.delete(allNotificationsFor: subscription)
+        DispatchQueue.global(qos: .background).async {
+            store.delete(allNotificationsFor: subscription)
+        }
     }
     
     private func deleteSelected() {
-        store.delete(notifications: selection)
-        selection = Set<Notification>()
+        DispatchQueue.global(qos: .background).async {
+            store.delete(notifications: selection)
+            selection = Set<Notification>()
+        }
         editMode = .inactive
     }
     
@@ -178,7 +196,8 @@ struct NotificationListView: View {
 }
 
 struct NotificationRowView: View {
-    let notification: Notification
+    @EnvironmentObject private var store: Store
+    @ObservedObject var notification: Notification
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -194,15 +213,30 @@ struct NotificationRowView: View {
                 .font(.body)
         }
         .padding(.all, 4)
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) {
+                store.delete(notification: notification)
+            } label: {
+                Label("Delete", systemImage: "trash.circle")
+            }
+        }
     }
 }
 
 struct NotificationListView_Previews: PreviewProvider {
     static var previews: some View {
         let store = Store.preview
-        let subscription = store.makeSubscription(store.context, "stats", Store.sampleData["stats"]!)
-        NotificationListView(subscription: subscription)
-            .environment(\.managedObjectContext, store.context)
-            .environmentObject(store)
+        Group {
+            let subscriptionWithNotifications = store.makeSubscription(store.context, "stats", Store.sampleData["stats"]!)
+            let subscriptionWithoutNotifications = store.makeSubscription(store.context, "announcements", Store.sampleData["announcements"]!)
+
+            NotificationListView(subscription: subscriptionWithNotifications)
+                .environment(\.managedObjectContext, store.context)
+                .environmentObject(store)
+            NotificationListView(subscription: subscriptionWithoutNotifications)
+                .environment(\.managedObjectContext, store.context)
+                .environmentObject(store)
+        }
+        
     }
 }
