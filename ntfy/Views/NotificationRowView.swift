@@ -1,10 +1,3 @@
-//
-//  NotificationRow.swift
-//  ntfy.sh
-//
-//  Created by Andrew Cope on 1/15/22.
-//
-
 import SwiftUI
 
 struct NotificationRowView: View {

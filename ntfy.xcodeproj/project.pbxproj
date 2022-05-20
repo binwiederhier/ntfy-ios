@@ -17,13 +17,13 @@
 		9474F1E7282F3FFD00CDE4DD /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1E6282F3FFD00CDE4DD /* NotificationService.swift */; };
 		9474F1EB282F3FFD00CDE4DD /* ntfyNSE.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9474F1F22830825600CDE4DD /* SubscriptionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F12830825600CDE4DD /* SubscriptionsListView.swift */; };
-		9474F1F72830830700CDE4DD /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F52830830700CDE4DD /* Model.xcdatamodeld */; };
+		9474F1F72830830700CDE4DD /* ntfy.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F52830830700CDE4DD /* ntfy.xcdatamodeld */; };
 		9474F1F92830835400CDE4DD /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F82830835400CDE4DD /* Store.swift */; };
 		9474F1FB28308A2B00CDE4DD /* SubscriptionRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FA28308A2B00CDE4DD /* SubscriptionRowView.swift */; };
 		9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FC2831311A00CDE4DD /* SubscriptionAddView.swift */; };
 		9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FE28316ACE00CDE4DD /* Subscription.swift */; };
 		9474F2052831D51500CDE4DD /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F82830835400CDE4DD /* Store.swift */; };
-		9474F2062831D73C00CDE4DD /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F52830830700CDE4DD /* Model.xcdatamodeld */; };
+		9474F2062831D73C00CDE4DD /* ntfy.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F52830830700CDE4DD /* ntfy.xcdatamodeld */; };
 		9474F20928331F3A00CDE4DD /* NotificationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F20728331F3900CDE4DD /* NotificationListView.swift */; };
 		9474F20A28331F3A00CDE4DD /* NotificationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F20828331F3A00CDE4DD /* NotificationRowView.swift */; };
 		9474F20C283321C300CDE4DD /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F20B283321C300CDE4DD /* Notification.swift */; };
@@ -110,7 +110,7 @@
 		9474F1B4282F2AA700CDE4DD = {
 			isa = PBXGroup;
 			children = (
-				9474F1F52830830700CDE4DD /* Model.xcdatamodeld */,
+				9474F1F52830830700CDE4DD /* ntfy.xcdatamodeld */,
 				9474F1BF282F2AA700CDE4DD /* ntfy */,
 				9474F1E5282F3FFD00CDE4DD /* ntfyNSE */,
 				9474F1BE282F2AA700CDE4DD /* Products */,
@@ -331,7 +331,7 @@
 				9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */,
 				9474F20F283326C500CDE4DD /* ApiService.swift in Sources */,
-				9474F1F72830830700CDE4DD /* Model.xcdatamodeld in Sources */,
+				9474F1F72830830700CDE4DD /* ntfy.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -344,7 +344,7 @@
 				9474F2152834758700CDE4DD /* Helpers.swift in Sources */,
 				9474F1E7282F3FFD00CDE4DD /* NotificationService.swift in Sources */,
 				9474F2052831D51500CDE4DD /* Store.swift in Sources */,
-				9474F2062831D73C00CDE4DD /* Model.xcdatamodeld in Sources */,
+				9474F2062831D73C00CDE4DD /* ntfy.xcdatamodeld in Sources */,
 				9474F2142834755E00CDE4DD /* Subscription.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -644,13 +644,13 @@
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
-		9474F1F52830830700CDE4DD /* Model.xcdatamodeld */ = {
+		9474F1F52830830700CDE4DD /* ntfy.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
 				9474F1F62830830700CDE4DD /* Model.xcdatamodel */,
 			);
 			currentVersion = 9474F1F62830830700CDE4DD /* Model.xcdatamodel */;
-			path = Model.xcdatamodeld;
+			path = ntfy.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};

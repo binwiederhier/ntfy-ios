@@ -1,14 +1,9 @@
-//
-//  AddSubscriptionView.swift
-//  ntfy.sh
-//
-//  Created by Andrew Cope on 1/16/22.
-//
-
 import SwiftUI
 import FirebaseMessaging
 
 struct SubscriptionAddView: View {
+    private let tag = "SubscriptionAddView"
+    
     @Environment(\.managedObjectContext) var context
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject private var store: Store
@@ -46,7 +41,7 @@ struct SubscriptionAddView: View {
     }
     
     private func subscribeAction() {
-        print("Subscribing to \(topicUrl(baseUrl: appBaseUrl, topic: topic))")
+        Log.d(tag, "Subscribing to \(topicUrl(baseUrl: appBaseUrl, topic: topic))")
         Messaging.messaging().subscribe(toTopic: topic)
         
         store.saveSubscription(baseUrl: appBaseUrl, topic: topic)

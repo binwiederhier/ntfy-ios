@@ -19,7 +19,7 @@ class Store: ObservableObject {
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
         // Set up container and observe changes from app extension
-        container = NSPersistentContainer(name: "Model")
+        container = NSPersistentContainer(name: "ntfy") // See .xdatamodeld folder
         container.persistentStoreDescriptions = [description]
         container.loadPersistentStores { description, error in
             if let error = error {
@@ -27,28 +27,24 @@ class Store: ObservableObject {
             }
         }
         
-        
         // Shortcut for context
         context.automaticallyMergesChangesFromParent = true
-        // context.mergePolicy = NSMergePolicyType.mergeByPropertyObjectTrumpMergePolicyType // https://stackoverflow.com/a/60362945/1440785
-        context.mergePolicy = NSMergePolicy(merge: .mergeByPropertyStoreTrumpMergePolicyType)
+        context.mergePolicy = NSMergePolicy(merge: .mergeByPropertyStoreTrumpMergePolicyType) // https://stackoverflow.com/a/60362945/1440785
         context.transactionAuthor = Bundle.main.bundlePath.hasSuffix(".appex") ? "ntfy.appex" : "ntfy"
         
         NotificationCenter.default
           .publisher(for: .NSPersistentStoreRemoteChange)
           .sink {
-              Log.d(Store.tag, "remote change", $0)
+              Log.d(Store.tag, "Remote change detected", $0)
               
               // Hack: This is the only way I could make the UI update the subscription list.
               // I'm pretty sure I got the @FetchRequest wrong, but I don
-
               _ = try? self.context.fetch(Subscription.fetchRequest())
               
               DispatchQueue.main.async {
                   self.objectWillChange.send()
                   self.container.viewContext.refreshAllObjects()
               }
-
           }
           .store(in: &subscriptions)
 

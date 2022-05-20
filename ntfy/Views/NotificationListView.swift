@@ -1,10 +1,3 @@
-//
-//  SubscriptionDetail.swift
-//  ntfy.sh
-//
-//  Created by Andrew Cope on 1/15/22.
-//
-
 import SwiftUI
 
 enum ActiveAlert {
@@ -12,6 +5,8 @@ enum ActiveAlert {
 }
 
 struct NotificationListView: View {
+    private let tag = "NotificationListView"
+
     @Environment(\.managedObjectContext) var context
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject private var store: Store
@@ -123,7 +118,7 @@ struct NotificationListView: View {
         }
         /*.overlay(Group {
             if subscription.notifications.isEmpty() {
-                Text("No Notifications")
+                Text("No notifications")
                     .font(.headline)
                     .foregroundColor(.gray)
             }
@@ -142,10 +137,6 @@ struct NotificationListView: View {
                     }
                 }
             }
-        }
-        .onAppear {
-            print("onAppear")
-            //subscription.loadNotifications()
         }
     }
 
