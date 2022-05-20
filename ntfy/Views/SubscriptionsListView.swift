@@ -62,13 +62,11 @@ struct SubscriptionListView: View {
     }
 }
 
-/*
+
 struct SubscriptionsList_Previews: PreviewProvider {
-    static var previews: some View {
-        SubscriptionsList(
-            subscriptions: NtfySubscriptionList,
-            currentView: (.subscriptionList)
-        )
-    }
+  static var previews: some View {
+    SubscriptionListView()
+      .environment(\.managedObjectContext, Store.preview.context)
+      .environmentObject(Store.preview)
+  }
 }
-*/

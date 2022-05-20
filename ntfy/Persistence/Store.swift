@@ -12,10 +12,11 @@ class Store: ObservableObject {
     }
     private var subscriptions: Set<AnyCancellable> = []
 
-    init() {
-        let directory = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.io.heckel.ntfy")!
-        let storeUrl =  directory.appendingPathComponent("ntfy.sqlite")
-        let description =  NSPersistentStoreDescription(url: storeUrl)
+    init(inMemory: Bool = false) {
+        let storeUrl = (inMemory) ? URL(fileURLWithPath: "/dev/null") : FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: "group.io.heckel.ntfy")!
+            .appendingPathComponent("ntfy.sqlite")
+        let description = NSPersistentStoreDescription(url: storeUrl)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
         // Set up container and observe changes from app extension
@@ -152,5 +153,49 @@ class Store: ObservableObject {
         
         context.rollback()
         context.refreshAllObjects()
+    }
+}
+
+
+extension Store {
+    private static let topics = [
+        "stats": [
+            Message(id: "1", time: 1653048956, message: "200 users/h\n123 IPs", title: nil),
+            Message(id: "2", time: 1653058956, message: "201 users/h\n80 IPs", title: nil)
+        ],
+        "backups": [],
+        "announcements": [],
+        "alerts": [],
+        "plaground": []
+    ]
+    
+    static var preview: Store = {
+        let store = Store(inMemory: true)
+        store.context.perform {
+            topics.forEach { topic, messages in
+                let notifications = messages.map { store.makeNotification(store.context, $0) }
+                store.makeSubscription(store.context, topic, notifications)
+            }
+        }
+        return store
+    }()
+    
+    @discardableResult
+    func makeSubscription(_ context: NSManagedObjectContext, _ topic: String, _ notifications: [Notification]) -> Subscription {
+        let subscription = Subscription(context: context)
+        subscription.baseUrl = appBaseUrl
+        subscription.topic = topic
+        subscription.notifications = NSSet(array: notifications)
+        return subscription
+    }
+    
+    @discardableResult
+    func makeNotification(_ context: NSManagedObjectContext, _ message: Message) -> Notification {
+        let notification = Notification(context: context)
+        notification.id = message.id
+        notification.time = message.time
+        notification.message = message.message
+        notification.title = message.title
+        return notification
     }
 }
