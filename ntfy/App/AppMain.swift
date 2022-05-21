@@ -3,6 +3,7 @@ import Firebase
 
 // Must have before release:
 // TODO: Verify whether model version needs to be specified
+// TODO: Disallow adding same topic twice!!
 
 // Nice to have
 // TODO: Make notification click open detail view
