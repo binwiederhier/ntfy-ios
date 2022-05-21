@@ -111,7 +111,6 @@
 		9474F1B4282F2AA700CDE4DD = {
 			isa = PBXGroup;
 			children = (
-				9474F1F52830830700CDE4DD /* ntfy.xcdatamodeld */,
 				9474F1BF282F2AA700CDE4DD /* ntfy */,
 				9474F1E5282F3FFD00CDE4DD /* ntfyNSE */,
 				9474F1BE282F2AA700CDE4DD /* Products */,
@@ -183,6 +182,7 @@
 		9474F2032831725A00CDE4DD /* Persistence */ = {
 			isa = PBXGroup;
 			children = (
+				9474F1F52830830700CDE4DD /* ntfy.xcdatamodeld */,
 				9474F1FE28316ACE00CDE4DD /* Subscription.swift */,
 				9474F1F82830835400CDE4DD /* Store.swift */,
 				9474F20B283321C300CDE4DD /* Notification.swift */,

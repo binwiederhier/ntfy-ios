@@ -104,6 +104,7 @@ class Store: ObservableObject {
             notification.message = message
             notification.title = userInfo["title"] as? String ?? ""
             subscription.addToNotifications(notification)
+            subscription.lastNotificationId = id
             try context.save()
         } catch let error {
             Log.w(Store.tag, "Cannot store notification (fromUserInfo)", error)
@@ -119,6 +120,7 @@ class Store: ObservableObject {
             notification.message = message.message ?? ""
             notification.title = message.title ?? ""
             subscription.addToNotifications(notification)
+            subscription.lastNotificationId = message.id
             try context.save()
         } catch let error {
             Log.w(Store.tag, "Cannot store notification (fromMessage)", error)

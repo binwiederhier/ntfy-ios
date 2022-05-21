@@ -3,8 +3,6 @@ import Firebase
 
 // Must have before release:
 // TODO: Verify whether model version needs to be specified
-// TODO: Add known future fields to model
-// TODO: Store last notification ID in Subscription
 // TODO: Make AppDelegate prettier
 // TODO: Remove duplicate code for poll()
 

@@ -6,7 +6,7 @@ class ApiService {
     
     func poll(subscription: Subscription, completionHandler: @escaping ([Message]?, Error?) -> Void) {
         guard let url = URL(string: subscription.urlString()) else { return }
-        let since = subscription.lastNotification()?.id ?? "all"
+        let since = subscription.lastNotificationId ?? "all"
         let urlString = "\(url)/json?poll=1&since=\(since)"
         
         Log.d(tag, "Polling from \(urlString)")
