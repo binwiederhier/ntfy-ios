@@ -8,7 +8,7 @@ struct SubscriptionManager {
     var store: Store
     
     func subscribe(baseUrl: String, topic: String) {
-        Log.d(tag, "Subscribing to \(topicUrl(baseUrl: appBaseUrl, topic: topic))")
+        Log.d(tag, "Subscribing to \(topicUrl(baseUrl: baseUrl, topic: topic))")
         Messaging.messaging().subscribe(toTopic: topic)
         let subscription = store.saveSubscription(baseUrl: baseUrl, topic: topic)
         

@@ -26,7 +26,7 @@ class NotificationService: UNNotificationServiceExtension {
             if let topic = userInfo["topic"] as? String,
                let title = userInfo["title"] as? String {
                 if title == "" {
-                    bestAttemptContent.title = topicShortUrl(baseUrl: appBaseUrl, topic: topic)
+                    bestAttemptContent.title = topicShortUrl(baseUrl: Config.appBaseUrl, topic: topic)
                 }
             }
 

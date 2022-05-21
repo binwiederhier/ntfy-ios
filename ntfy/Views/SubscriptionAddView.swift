@@ -46,7 +46,7 @@ struct SubscriptionAddView: View {
     
     private func subscribeAction() {
         DispatchQueue.global(qos: .background).async {
-            subscriptionManager.subscribe(baseUrl: appBaseUrl, topic: sanitize(topic: topic))
+            subscriptionManager.subscribe(baseUrl: Config.appBaseUrl, topic: sanitize(topic: topic))
         }
         presentationMode.wrappedValue.dismiss()
     }

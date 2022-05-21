@@ -1,7 +1,5 @@
 import Foundation
 
-let appBaseUrl = "http://192.168.1.4" // FIXME
-
 func topicUrl(baseUrl: String, topic: String) -> String {
     return "\(baseUrl)/\(topic)"
 }

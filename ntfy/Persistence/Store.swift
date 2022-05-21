@@ -59,7 +59,7 @@ class Store: ObservableObject {
     
     func saveSubscription(baseUrl: String, topic: String) -> Subscription {
         let subscription = Subscription(context: context)
-        subscription.baseUrl = appBaseUrl
+        subscription.baseUrl = baseUrl
         subscription.topic = topic
         DispatchQueue.main.sync {
             try? context.save()
@@ -91,7 +91,7 @@ class Store: ObservableObject {
             Log.d(Store.tag, "Unknown or irrelevant message", userInfo)
             return
         }
-        let baseUrl = appBaseUrl // Firebase messages all come from the main ntfy server
+        let baseUrl = Config.appBaseUrl // Firebase messages all come from the main ntfy server
         guard let subscription = getSubscription(baseUrl: baseUrl, topic: topic) else {
             Log.d(Store.tag, "Subscription for topic \(topic) unknown")
             return
@@ -200,7 +200,7 @@ extension Store {
     func makeSubscription(_ context: NSManagedObjectContext, _ topic: String, _ messages: [Message]) -> Subscription {
         let notifications = messages.map { makeNotification(context, $0) }
         let subscription = Subscription(context: context)
-        subscription.baseUrl = appBaseUrl
+        subscription.baseUrl = Config.appBaseUrl
         subscription.topic = topic
         subscription.notifications = NSSet(array: notifications)
         return subscription
