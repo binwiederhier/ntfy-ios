@@ -8,7 +8,7 @@ struct SubscriptionListView: View {
     
     @EnvironmentObject private var store: Store
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Subscription.topic, ascending: true)]) var subscriptions: FetchedResults<Subscription>
-        
+    
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
@@ -31,9 +31,16 @@ struct SubscriptionListView: View {
             }
             .overlay(Group {
                 if subscriptions.isEmpty {
-                    Text("No topics")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
+                    VStack {
+                        Text("It looks like you don't have any subscriptions yet")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.bottom)
+                        Text("Click the + to create or subscribe to a topic. Afterwards, you receive notifications on your device when sending messages via PUT or POST.\n\nDetailed instructions are available on [ntfy.sh](https;//ntfy.sh) and [in the docs](https:ntfy.sh/docs).")
+                            .foregroundColor(.gray)
+                    }
+                    .padding(40)
                 }
             })
         }
@@ -45,7 +52,7 @@ struct SubscriptionItemNavView: View {
     @EnvironmentObject private var store: Store
     @ObservedObject var subscription: Subscription
     @State private var unsubscribeAlert = false
-
+    
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
@@ -57,7 +64,7 @@ struct SubscriptionItemNavView: View {
             }
             .opacity(0.0)
             .buttonStyle(PlainButtonStyle())
-
+            
             SubscriptionItemRowView(subscription: subscription)
         }
         .swipeActions(edge: .trailing) {
@@ -84,10 +91,9 @@ struct SubscriptionItemNavView: View {
     }
 }
 
-
 struct SubscriptionItemRowView: View {
     @ObservedObject var subscription: Subscription
-
+    
     var body: some View {
         let totalNotificationCount = subscription.notificationCount()
         VStack(alignment: .leading, spacing: 0) {
@@ -114,9 +120,10 @@ struct SubscriptionItemRowView: View {
 }
 
 struct SubscriptionsListView_Previews: PreviewProvider {
-  static var previews: some View {
-    SubscriptionListView()
-      .environment(\.managedObjectContext, Store.preview.context)
-      .environmentObject(Store.preview)
-  }
+    static var previews: some View {
+        let store = Store.preview // Store.previewEmpty
+        SubscriptionListView()
+            .environment(\.managedObjectContext, store.context)
+            .environmentObject(store)
+    }
 }

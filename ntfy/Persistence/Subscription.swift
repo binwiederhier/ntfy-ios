@@ -1,14 +1,12 @@
 import Foundation
 
-// FIXME: Store last notification ID in Subscription
-
 extension Subscription {
     func urlString() -> String {
         return topicUrl(baseUrl: baseUrl!, topic: topic!)
     }
     
     func displayName() -> String {
-        return topic ?? "<unknown>"
+        return topicShortUrl(baseUrl: baseUrl!, topic: topic!)
     }
     
     func topicName() -> String {
@@ -25,7 +23,7 @@ extension Subscription {
     
     func notificationsSorted() -> [Notification] {
         if let notifications = notifications {
-            return notifications.sortedArray(using: [NSSortDescriptor(key: "time", ascending: false)]) as! [Notification]
+            return notifications.sortedArray(using: [NSSortDescriptor(keyPath: \Notification.time, ascending: false)]) as! [Notification]
         }
         return []
     }

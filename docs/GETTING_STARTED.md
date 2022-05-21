@@ -46,3 +46,11 @@ Note: these requirements are strictly based off of my development on this app. T
 1. Follow step 4 of [https://firebase.google.com/docs/ios/setup](Add Firebase to your Apple project) to install the firebase-ios-sdk in XCode, if it's not already present - you can select any packages in addition to Firebase Core / Firebase Messaging
 1. Similarly, install the SQLite.swift package dependency in XCode
 1. When running the debug build, ensure XCode is pointed to the connected iOS device - registering for push notifications does not work in the iOS simulators
+
+## Useful resources
+
+- https://www.raywenderlich.com/14958063-modern-efficient-core-data
+- https://www.hackingwithswift.com/books/ios-swiftui/how-to-combine-core-data-and-swiftui
+- https://stackoverflow.com/a/41783666/1440785
+- https://stackoverflow.com/questions/47374903/viewing-core-data-data-from-your-app-on-a-device
+- https://debashishdas3100.medium.com/save-push-notifications-to-coredata-userdefaults-ios-swift-5-ea074390b57

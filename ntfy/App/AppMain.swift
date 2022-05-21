@@ -1,6 +1,19 @@
 import SwiftUI
 import Firebase
 
+// Must have before release:
+// TODO: Verify whether model version needs to be specified
+// TODO: Add known future fields to model
+// TODO: Store last notification ID in Subscription
+// TODO: Make AppDelegate prettier
+// TODO: appBaseUrl from config
+// TODO: Remove duplicate code for poll()
+
+// Nice to have
+// TODO: Make notification click open detail view
+// TODO: Slide up dialog for "add topic"
+// TODO: Pull down "refresh all"
+
 @main
 struct AppMain: App {
     let tag = "main"
@@ -9,6 +22,8 @@ struct AppMain: App {
     @StateObject private var store = Store.shared
     
     init() {
+        Log.d(tag, "Launching ntfy 🥳. Welcome!")
+        
         // We must configure Firebase here, and not in the AppDelegate. For some reason
         // configuring it there did not work.
         FirebaseApp.configure()

@@ -1,8 +1,11 @@
 import UserNotifications
 import CoreData
 
-// https://debashishdas3100.medium.com/save-push-notifications-to-coredata-userdefaults-ios-swift-5-ea074390b57
-
+/// This app extension is responsible for persisting the incoming notification to the data store (Core Data). It will eventually be the entity that
+/// fetches notification content from selfhosted servers (when a "poll request" is received). This is not implemented yet.
+///
+/// Note that the app extension does not run as part of the main app, so log messages are not printed in the main Xcode window. To debug,
+/// select Debug -> Attach to Process by PID or Name, and select the extension. Don't forget to set a breakpoint, or you're not gonna have a good time.
 class NotificationService: UNNotificationServiceExtension {
     let tag = "NotificationService"
     
@@ -16,11 +19,19 @@ class NotificationService: UNNotificationServiceExtension {
         Log.d(tag, "Notification received (in service)") // Logs from extensions are not printed in Xcode!
 
         if let bestAttemptContent = bestAttemptContent {
-            // bestAttemptContent.title = "\(bestAttemptContent.title) [modified]"
-            
             let userInfo = bestAttemptContent.userInfo
-            Store.shared.save(notificationFromUserInfo: userInfo)
             
+            // Set notification title to short URL if there is no title. The title is always set
+            // by the server, but it may be empty.
+            if let topic = userInfo["topic"] as? String,
+               let title = userInfo["title"] as? String {
+                if title == "" {
+                    bestAttemptContent.title = topicShortUrl(baseUrl: appBaseUrl, topic: topic)
+                }
+            }
+
+            // Save notification to store, and display it
+            Store.shared.save(notificationFromUserInfo: userInfo)
             contentHandler(bestAttemptContent)
         }
     }
@@ -34,5 +45,4 @@ class NotificationService: UNNotificationServiceExtension {
             contentHandler(bestAttemptContent)
         }
     }
-    
 }

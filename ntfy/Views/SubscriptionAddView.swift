@@ -29,7 +29,7 @@ struct SubscriptionAddView: View {
                     Button(action: subscribeAction) {
                         Text("Subscribe")
                     }
-                    .disabled(!isValid(topic: sanitize(topic: topic)))
+                    .disabled(!isValid(topic: topic))
                 }
             }
         }
@@ -40,7 +40,8 @@ struct SubscriptionAddView: View {
     }
     
     private func isValid(topic: String) -> Bool {
-        return !topic.isEmpty && (topic.range(of: "^[-_A-Za-z0-9]{1,64}$", options: .regularExpression, range: nil, locale: nil) != nil)
+        let sanitizedTopic = sanitize(topic: topic)
+        return !sanitizedTopic.isEmpty && (sanitizedTopic.range(of: "^[-_A-Za-z0-9]{1,64}$", options: .regularExpression, range: nil, locale: nil) != nil)
     }
     
     private func subscribeAction() {

@@ -108,12 +108,13 @@ struct NotificationListView: View {
         .overlay(Group {
             if subscription.notificationCount() == 0 {
                 VStack {
-                    Text("You haven't received any notifications for this topic yet")
+                    Text("You haven't received any notifications for this topic yet.")
                         .font(.title2)
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
                         .padding(.bottom)
                     Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https;//ntfy.sh) and [in the docs](https:ntfy.sh/docs).")
+                        .foregroundColor(.gray)
                 }
                 .padding(40)
             }
@@ -229,7 +230,6 @@ struct NotificationListView_Previews: PreviewProvider {
         Group {
             let subscriptionWithNotifications = store.makeSubscription(store.context, "stats", Store.sampleData["stats"]!)
             let subscriptionWithoutNotifications = store.makeSubscription(store.context, "announcements", Store.sampleData["announcements"]!)
-
             NotificationListView(subscription: subscriptionWithNotifications)
                 .environment(\.managedObjectContext, store.context)
                 .environmentObject(store)
@@ -237,6 +237,5 @@ struct NotificationListView_Previews: PreviewProvider {
                 .environment(\.managedObjectContext, store.context)
                 .environmentObject(store)
         }
-        
     }
 }

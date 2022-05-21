@@ -1,10 +1,3 @@
-//
-//  Log.swift
-//  ntfy
-//
-//  Created by Philipp Heckel on 5/18/22.
-//
-
 import Foundation
 
 struct Log {

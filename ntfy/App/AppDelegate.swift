@@ -5,9 +5,6 @@ import Firebase
 import FirebaseCore
 import CoreData
 
-// https://stackoverflow.com/a/41783666/1440785
-// https://stackoverflow.com/questions/47374903/viewing-core-data-data-from-your-app-on-a-device
-
 class AppDelegate: UIResponder, UIApplicationDelegate {
     let tag = "AppDelegate"
     
@@ -27,22 +24,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(
         _ application: UIApplication,
-        didReceiveRemoteNotification userInfo: [AnyHashable : Any],
-        fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
-    ) {
-        Log.d(tag, "Called didReceiveRemoteNotification (with completionHandler). This is a no-op.", userInfo)
-    }
-    
-    
-    func application(
-        _ application: UIApplication,
-                     didReceiveRemoteNotification userInfo: [AnyHashable: Any]
-    ) {
-        Log.d(tag, "Called didReceiveRemoteNotification (without completionHandler). This is a no-op.", userInfo)
-    }
-    
-    func application(
-        _ application: UIApplication,
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
         Log.e(tag, "Failed to register for remote notifications", error)
@@ -50,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(
         _ application: UIApplication,
-                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
         let token = deviceToken
             .map { data in String(format: "%02.2hhx", data) }

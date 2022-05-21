@@ -2,9 +2,13 @@ import Foundation
 import CoreData
 import Combine
 
+/// Handles all persistence in the app by storing/loading subscriptions and notifications using Core Data.
+/// There are sadly a lot of hacks in here, because I don't quite understand this fully.
 class Store: ObservableObject {
     static let shared = Store()
     static let tag = "Store"
+    static let appGroup = "group.io.heckel.ntfy" // Must match app group of ntfy = ntfyNSE targets
+    static let modelName = "ntfy" // Must match .xdatamodeld folder
     
     private let container: NSPersistentContainer
     var context: NSManagedObjectContext {
@@ -14,13 +18,14 @@ class Store: ObservableObject {
 
     init(inMemory: Bool = false) {
         let storeUrl = (inMemory) ? URL(fileURLWithPath: "/dev/null") : FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: "group.io.heckel.ntfy")!
+            .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup)!
             .appendingPathComponent("ntfy.sqlite")
+        print(storeUrl)
         let description = NSPersistentStoreDescription(url: storeUrl)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
         // Set up container and observe changes from app extension
-        container = NSPersistentContainer(name: "ntfy") // See .xdatamodeld folder
+        container = NSPersistentContainer(name: Store.modelName)
         container.persistentStoreDescriptions = [description]
         container.loadPersistentStores { description, error in
             if let error = error {
@@ -164,14 +169,12 @@ class Store: ObservableObject {
     }
 }
 
-
 extension Store {
     static let sampleData = [
         "stats": [
             Message(id: "1", time: 1653048956, message: "In the last 24 hours, hyou had 5,000 users across 13 countries visit your website", title: "Record visitor numbers"),
             Message(id: "2", time: 1653058956, message: "201 users/h\n80 IPs", title: "This is a title"),
             Message(id: "3", time: 1643058956, message: "This message does not have a title, but is instead super long. Like really really long. It can't be any longer I think. I mean, there is s 4,000 byte limit of the message, so I guess I have to make this 4,000 bytes long. Or do I? 😁 I don't know. It's quite tedious to come up with something so long, so I'll stop now. Bye!", title: nil)
-
         ],
         "backups": [],
         "announcements": [],
@@ -187,6 +190,10 @@ extension Store {
             }
         }
         return store
+    }()
+    
+    static var previewEmpty: Store = {
+        return Store(inMemory: true)
     }()
     
     @discardableResult
