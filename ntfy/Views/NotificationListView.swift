@@ -120,7 +120,7 @@ struct NotificationListView: View {
             }
         })
         .refreshable {
-            poll()
+            subscriptionManager.poll(subscription)
         }
     }
     
@@ -176,23 +176,6 @@ struct NotificationListView: View {
             selection = Set<Notification>()
         }
         editMode = .inactive
-    }
-    
-    private func poll() {
-        ApiService.shared.poll(subscription: subscription) { messages, error in
-            guard let messages = messages else {
-                Log.e(tag, "Polling failed", error)
-                return
-            }
-            Log.d(tag, "Polling success, \(messages.count) new message(s)", messages)
-            if !messages.isEmpty {
-                DispatchQueue.main.async {
-                    for message in messages {
-                        store.save(notificationFromMessage: message, withSubscription: subscription)
-                    }
-                }
-            }
-        }
     }
 }
 

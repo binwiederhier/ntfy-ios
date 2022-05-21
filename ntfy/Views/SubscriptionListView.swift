@@ -43,6 +43,11 @@ struct SubscriptionListView: View {
                     .padding(40)
                 }
             })
+            .refreshable {
+                subscriptions.forEach { subscription in
+                    subscriptionManager.poll(subscription)
+                }
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }

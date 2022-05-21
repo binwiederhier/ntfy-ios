@@ -11,8 +11,21 @@ struct SubscriptionManager {
         Log.d(tag, "Subscribing to \(topicUrl(baseUrl: baseUrl, topic: topic))")
         Messaging.messaging().subscribe(toTopic: topic)
         let subscription = store.saveSubscription(baseUrl: baseUrl, topic: topic)
-        
-        // FIXME: Duplicate code!
+        poll(subscription)
+    }
+    
+    func unsubscribe(_ subscription: Subscription) {
+        Log.d(tag, "Unsubscribing from \(subscription.urlString())")
+        DispatchQueue.main.async {
+            if let topic = subscription.topic {
+                Messaging.messaging().unsubscribe(fromTopic: topic)
+            }
+            store.delete(subscription: subscription)
+        }
+    }
+    
+    func poll(_ subscription: Subscription) {
+        Log.d(tag, "Polling from \(subscription.urlString())")
         ApiService.shared.poll(subscription: subscription) { messages, error in
             guard let messages = messages else {
                 Log.e(tag, "Polling failed", error)
@@ -26,16 +39,6 @@ struct SubscriptionManager {
                     }
                 }
             }
-        }
-    }
-    
-    func unsubscribe(_ subscription: Subscription) {
-        Log.d(tag, "Unsubscribing from \(subscription.urlString())")
-        DispatchQueue.main.async {
-            if let topic = subscription.topic {
-                Messaging.messaging().unsubscribe(fromTopic: topic)
-            }
-            store.delete(subscription: subscription)
         }
     }
 }

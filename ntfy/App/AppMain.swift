@@ -4,12 +4,10 @@ import Firebase
 // Must have before release:
 // TODO: Verify whether model version needs to be specified
 // TODO: Make AppDelegate prettier
-// TODO: Remove duplicate code for poll()
 
 // Nice to have
 // TODO: Make notification click open detail view
 // TODO: Slide up dialog for "add topic"
-// TODO: Pull down "refresh all"
 
 @main
 struct AppMain: App {
