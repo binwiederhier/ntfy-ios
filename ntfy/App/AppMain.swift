@@ -5,7 +5,6 @@ import Firebase
 // TODO: Verify whether model version needs to be specified
 // TODO: Disallow adding same topic twice!!
 // TODO: When clicked, the notification does not open the topic, but instead just shows the last view
-// TODO: The notification does not make a sound or vibrate on the Apple Watch
 // TODO: When opening a topic, the notifications in the Apple notification center should be dismissed automatically
 // TODO: Errors are not shown to the user, but instead just logged
 

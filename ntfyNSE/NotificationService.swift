@@ -30,6 +30,10 @@ class NotificationService: UNNotificationServiceExtension {
                 }
             }
 
+            // Play a sound, and group by topic
+            bestAttemptContent.sound = .default
+            bestAttemptContent.threadIdentifier = userInfo["topic"]  as? String ?? ""
+            
             // Save notification to store, and display it
             Store.shared.save(notificationFromUserInfo: userInfo)
             contentHandler(bestAttemptContent)
