@@ -55,6 +55,7 @@ struct SubscriptionListView: View {
 
 struct SubscriptionItemNavView: View {
     @EnvironmentObject private var store: Store
+    @EnvironmentObject private var delegate: AppDelegate
     @ObservedObject var subscription: Subscription
     @State private var unsubscribeAlert = false
     
@@ -64,7 +65,11 @@ struct SubscriptionItemNavView: View {
     
     var body: some View {
         ZStack {
-            NavigationLink(destination: NotificationListView(subscription: subscription)) {
+            NavigationLink(
+                destination: NotificationListView(subscription: subscription),
+                tag: subscription.urlString(),
+                selection: $delegate.selectedBaseUrl
+            ) {
                 EmptyView()
             }
             .opacity(0.0)

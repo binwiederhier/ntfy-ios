@@ -34,6 +34,7 @@ struct AppMain: App {
             ContentView()
                 .environment(\.managedObjectContext, store.context)
                 .environmentObject(store)
+                .environmentObject(delegate)
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                     // Use this hook instead of applicationDidBecomeActive, see https://stackoverflow.com/a/68888509/1440785
                     // That post also explains how to start SwiftUI from AppDelegate if that's ever needed.

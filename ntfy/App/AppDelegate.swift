@@ -5,9 +5,12 @@ import Firebase
 import FirebaseCore
 import CoreData
 
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     let tag = "AppDelegate"
     
+    // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
+    @Published var selectedBaseUrl: String? = nil
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         Log.d(tag, "Launching AppDelegate")
         
@@ -61,7 +64,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = response.notification.request.content.userInfo
         Log.d(tag, "Notification received via userNotificationCenter(didReceive)", userInfo)
-        // TODO: This should navigate to the detail view
+        
+        if let topic = userInfo["topic"] as? String {
+           selectedBaseUrl = topicUrl(baseUrl: Config.appBaseUrl, topic: topic)
+        }
+    
         completionHandler()
     }
 }

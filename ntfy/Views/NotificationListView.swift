@@ -7,7 +7,7 @@ enum ActiveAlert {
 struct NotificationListView: View {
     private let tag = "NotificationListView"
     
-    @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject private var delegate: AppDelegate
     @EnvironmentObject private var store: Store
     
     @ObservedObject var subscription: Subscription
@@ -31,8 +31,22 @@ struct NotificationListView: View {
         .listStyle(PlainListStyle())
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.editMode, self.$editMode)
-        .navigationBarBackButtonHidden(self.editMode == .active)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                if (self.editMode != .active) {
+                    Button(action: {
+                        // iOS bug (?): We create a custom back button, because when we return using the original
+                        // back button, and the navigation is popped that way, the row stays highlighted for a long
+                        // time, which is weird and feels wrong. This avoids that behavior.
+                        
+                        self.delegate.selectedBaseUrl = nil
+                    }){
+                        Image(systemName: "chevron.left")
+                    }
+                    .padding([.top, .bottom, .trailing], 20)
+                }
+            }
             ToolbarItem(placement: .principal) {
                 Text(subscription.displayName()).font(.headline)
             }
@@ -59,6 +73,7 @@ struct NotificationListView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                            .padding([.top, .bottom, .leading], 20)
                     }
                 }
             }
@@ -161,7 +176,7 @@ struct NotificationListView: View {
         DispatchQueue.global(qos: .background).async {
             subscriptionManager.unsubscribe(subscription)
         }
-        presentationMode.wrappedValue.dismiss()
+        delegate.selectedBaseUrl = nil
     }
     
     private func deleteAll() {
