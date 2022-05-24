@@ -20,7 +20,6 @@ class Store: ObservableObject {
         let storeUrl = (inMemory) ? URL(fileURLWithPath: "/dev/null") : FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup)!
             .appendingPathComponent("ntfy.sqlite")
-        print(storeUrl)
         let description = NSPersistentStoreDescription(url: storeUrl)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
@@ -44,14 +43,8 @@ class Store: ObservableObject {
           .publisher(for: .NSPersistentStoreRemoteChange)
           .sink { value in
               Log.d(Store.tag, "Remote change detected, refreshing view", value)
-              
-              // Hack: This is the only way I could make the UI update the subscription list.
-              // I'm pretty sure I got the @FetchRequest wrong, but I don
-              _ = try? self.context.fetch(Subscription.fetchRequest())
-              
               DispatchQueue.main.async {
-                  self.objectWillChange.send()
-                  self.container.viewContext.refreshAllObjects()
+                  self.hardRefresh()
               }
           }
           .store(in: &cancellables)
@@ -167,7 +160,17 @@ class Store: ObservableObject {
         // UI properly when it is in the foreground and the app extension stores a notification.
         
         context.rollback()
+        hardRefresh()
+    }
+    
+    func hardRefresh() {
+        // `refreshAllObjects` only refreshes objects from which the cache is invalid. With a staleness intervall of -1 the cache never invalidates.
+        // We set the `stalenessInterval` to 0 to make sure that changes in the app extension get processed correctly.
+        // From: https://www.avanderlee.com/swift/core-data-app-extension-data-sharing/
+        
+        context.stalenessInterval = 0
         context.refreshAllObjects()
+        context.stalenessInterval = -1
     }
 }
 
