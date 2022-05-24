@@ -23,121 +23,133 @@ struct NotificationListView: View {
     }
     
     var body: some View {
-        List(selection: $selection) {
-            ForEach(subscription.notificationsSorted(), id: \.self) { notification in
-                NotificationRowView(notification: notification)
-            }
-        }
-        .listStyle(PlainListStyle())
-        .navigationBarTitleDisplayMode(.inline)
-        .environment(\.editMode, self.$editMode)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                if (self.editMode != .active) {
-                    Button(action: {
-                        // iOS bug (?): We create a custom back button, because when we return using the original
-                        // back button, and the navigation is popped that way, the row stays highlighted for a long
-                        // time, which is weird and feels wrong. This avoids that behavior.
-                        
-                        self.delegate.selectedBaseUrl = nil
-                    }){
-                        Image(systemName: "chevron.left")
-                    }
-                    .padding([.top, .bottom, .trailing], 20)
-                }
-            }
-            ToolbarItem(placement: .principal) {
-                Text(subscription.displayName()).font(.headline)
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if (self.editMode == .active) {
-                    editButton
-                } else {
-                    Menu {
-                        if subscription.notificationCount() > 0 {
-                            editButton
-                        }
-                        Button("Send test notification") {
-                            self.sendTestNotification()
-                        }
-                        if subscription.notificationCount() > 0 {
-                            Button("Clear all notifications") {
-                                self.showAlert = true
-                                self.activeAlert = .clear
-                            }
-                        }
-                        Button("Unsubscribe") {
-                            self.showAlert = true
-                            self.activeAlert = .unsubscribe
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                            .padding([.top, .bottom, .leading], 20)
-                    }
-                }
-            }
-            ToolbarItem(placement: .navigationBarLeading) {
-                if (self.editMode == .active) {
-                    Button(action: {
-                        self.showAlert = true
-                        self.activeAlert = .selected
-                    }) {
-                        Text("Delete")
-                            .foregroundColor(.red)
-                    }
-                }
-            }
-        }
-        .alert(isPresented: $showAlert) {
-            switch activeAlert {
-            case .clear:
-                return Alert(
-                    title: Text("Clear notifications"),
-                    message: Text("Do you really want to delete all of the notifications in this topic?"),
-                    primaryButton: .destructive(
-                        Text("Permanently delete"),
-                        action: deleteAll
-                    ),
-                    secondaryButton: .cancel())
-            case .unsubscribe:
-                return Alert(
-                    title: Text("Unsubscribe"),
-                    message: Text("Do you really want to unsubscribe from this topic and delete all of the notifications you received?"),
-                    primaryButton: .destructive(
-                        Text("Unsubscribe"),
-                        action: unsubscribe
-                    ),
-                    secondaryButton: .cancel())
-            case .selected:
-                return Alert(
-                    title: Text("Delete"),
-                    message: Text("Do you really want to delete these selected notifications?"),
-                    primaryButton: .destructive(
-                        Text("Delete"),
-                        action: deleteSelected
-                    ),
-                    secondaryButton: .cancel())
-            }
-        }
-        .overlay(Group {
-            if subscription.notificationCount() == 0 {
-                VStack {
-                    Text("You haven't received any notifications for this topic yet.")
-                        .font(.title2)
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                        .padding(.bottom)
-                    Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https;//ntfy.sh) and [in the docs](https:ntfy.sh/docs).")
-                        .foregroundColor(.gray)
-                }
-                .padding(40)
-            }
-        })
-        .refreshable {
-            subscriptionManager.poll(subscription)
-        }
+			notificationlist
+			if #available(iOS 15.0, *) {
+				notificationlist
+					.refreshable {
+						subscriptionManager.poll(subscription)
+					}
+			} else {
+				notificationlist
+			}
     }
+	
+	private var notificationlist: some View {
+		List(selection: $selection) {
+			ForEach(subscription.notificationsSorted(), id: \.self) { notification in
+				NotificationRowView(notification: notification)
+			}
+		}
+		.listStyle(PlainListStyle())
+		.navigationBarTitleDisplayMode(.inline)
+		.environment(\.editMode, self.$editMode)
+		.navigationBarBackButtonHidden(true)
+		.toolbar {
+			ToolbarItem(placement: .navigationBarLeading) {
+				if (self.editMode != .active) {
+					Button(action: {
+						// iOS bug (?): We create a custom back button, because when we return using the original
+						// back button, and the navigation is popped that way, the row stays highlighted for a long
+						// time, which is weird and feels wrong. This avoids that behavior.
+						
+						self.delegate.selectedBaseUrl = nil
+					}){
+						Image(systemName: "chevron.left")
+					}
+					.padding([.top, .bottom, .trailing], 20)
+				}
+			}
+			ToolbarItem(placement: .principal) {
+				Text(subscription.displayName()).font(.headline)
+			}
+			ToolbarItem(placement: .navigationBarTrailing) {
+				if (self.editMode == .active) {
+					editButton
+				} else {
+					Menu {
+						Button("Refresh") {
+							subscriptionManager.poll(subscription)
+						}
+						if subscription.notificationCount() > 0 {
+							editButton
+						}
+						Button("Send test notification") {
+							self.sendTestNotification()
+						}
+						if subscription.notificationCount() > 0 {
+							Button("Clear all notifications") {
+								self.showAlert = true
+								self.activeAlert = .clear
+							}
+						}
+						Button("Unsubscribe") {
+							self.showAlert = true
+							self.activeAlert = .unsubscribe
+						}
+					} label: {
+						Image(systemName: "ellipsis.circle")
+							.padding([.top, .bottom, .leading], 20)
+					}
+				}
+			}
+			ToolbarItem(placement: .navigationBarLeading) {
+				if (self.editMode == .active) {
+					Button(action: {
+						self.showAlert = true
+						self.activeAlert = .selected
+					}) {
+						Text("Delete")
+							.foregroundColor(.red)
+					}
+				}
+			}
+		}
+		.alert(isPresented: $showAlert) {
+			switch activeAlert {
+				case .clear:
+					return Alert(
+						title: Text("Clear notifications"),
+						message: Text("Do you really want to delete all of the notifications in this topic?"),
+						primaryButton: .destructive(
+							Text("Permanently delete"),
+							action: deleteAll
+						),
+						secondaryButton: .cancel())
+				case .unsubscribe:
+					return Alert(
+						title: Text("Unsubscribe"),
+						message: Text("Do you really want to unsubscribe from this topic and delete all of the notifications you received?"),
+						primaryButton: .destructive(
+							Text("Unsubscribe"),
+							action: unsubscribe
+						),
+						secondaryButton: .cancel())
+				case .selected:
+					return Alert(
+						title: Text("Delete"),
+						message: Text("Do you really want to delete these selected notifications?"),
+						primaryButton: .destructive(
+							Text("Delete"),
+							action: deleteSelected
+						),
+						secondaryButton: .cancel())
+			}
+		}
+		.overlay(Group {
+			if subscription.notificationCount() == 0 {
+				VStack {
+					Text("You haven't received any notifications for this topic yet.")
+						.font(.title2)
+						.foregroundColor(.gray)
+						.multilineTextAlignment(.center)
+						.padding(.bottom)
+					Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https;//ntfy.sh) and [in the docs](https:ntfy.sh/docs).")
+						.foregroundColor(.gray)
+				}
+				.padding(40)
+			}
+		})
+	}
     
     private var editButton: some View {
         if editMode == .inactive {
@@ -199,27 +211,35 @@ struct NotificationRowView: View {
     @ObservedObject var notification: Notification
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(notification.shortDateTime())
-                .font(.subheadline)
-                .foregroundColor(.gray)
-            if let title = notification.title, title != "" {
-                Text(title)
-                    .font(.headline)
-                    .bold()
-            }
-            Text(notification.message ?? "")
-                .font(.body)
-        }
-        .padding(.all, 4)
-        .swipeActions(edge: .trailing) {
-            Button(role: .destructive) {
-                store.delete(notification: notification)
-            } label: {
-                Label("Delete", systemImage: "trash.circle")
-            }
-        }
+			if #available(iOS 15.0, *) {
+				notificationRow
+					.swipeActions(edge: .trailing) {
+						Button(role: .destructive) {
+							store.delete(notification: notification)
+						} label: {
+							Label("Delete", systemImage: "trash.circle")
+						}
+					}
+			} else {
+				notificationRow
+			}
     }
+	
+	private var notificationRow: some View {
+		VStack(alignment: .leading, spacing: 0) {
+			Text(notification.shortDateTime())
+				.font(.subheadline)
+				.foregroundColor(.gray)
+			if let title = notification.title, title != "" {
+				Text(title)
+					.font(.headline)
+					.bold()
+			}
+			Text(notification.message ?? "")
+				.font(.body)
+		}
+		.padding(.all, 4)
+	}
 }
 
 struct NotificationListView_Previews: PreviewProvider {

@@ -15,42 +15,61 @@ struct SubscriptionListView: View {
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(subscriptions) { subscription in
-                    SubscriptionItemNavView(subscription: subscription)
-                }
-            }
-            .listStyle(PlainListStyle())
-            .navigationTitle("Subscribed topics")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: SubscriptionAddView()) {
-                        Image(systemName: "plus")
-                    }
-                }
-            }
-            .overlay(Group {
-                if subscriptions.isEmpty {
-                    VStack {
-                        Text("It looks like you don't have any subscriptions yet")
-                            .font(.title2)
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.center)
-                            .padding(.bottom)
-                        Text("Click the + to create or subscribe to a topic. Afterwards, you receive notifications on your device when sending messages via PUT or POST.\n\nDetailed instructions are available on [ntfy.sh](https;//ntfy.sh) and [in the docs](https:ntfy.sh/docs).")
-                            .foregroundColor(.gray)
-                    }
-                    .padding(40)
-                }
-            })
-            .refreshable {
-                subscriptions.forEach { subscription in
-                    subscriptionManager.poll(subscription)
-                }
-            }
+					if #available(iOS 15.0, *) {
+						subscriptionList
+							.refreshable {
+								subscriptions.forEach { subscription in
+									subscriptionManager.poll(subscription)
+								}
+							}
+					} else {
+						subscriptionList
+							.toolbar {
+								ToolbarItem(placement: .navigationBarLeading) {
+									Button {
+										subscriptions.forEach { subscription in
+											subscriptionManager.poll(subscription)
+										}
+									} label: {
+										Image(systemName: "arrow.clockwise")
+									}
+								}
+							}
+					}
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
+	
+	private var subscriptionList: some View {
+		List {
+			ForEach(subscriptions) { subscription in
+				SubscriptionItemNavView(subscription: subscription)
+			}
+		}
+		.listStyle(PlainListStyle())
+		.navigationTitle("Subscribed topics")
+		.toolbar {
+			ToolbarItem(placement: .navigationBarTrailing) {
+				NavigationLink(destination: SubscriptionAddView()) {
+					Image(systemName: "plus")
+				}
+			}
+		}
+		.overlay(Group {
+			if subscriptions.isEmpty {
+				VStack {
+					Text("It looks like you don't have any subscriptions yet")
+						.font(.title2)
+						.foregroundColor(.gray)
+						.multilineTextAlignment(.center)
+						.padding(.bottom)
+					Text("Click the + to create or subscribe to a topic. Afterwards, you receive notifications on your device when sending messages via PUT or POST.\n\nDetailed instructions are available on [ntfy.sh](https;//ntfy.sh) and [in the docs](https:ntfy.sh/docs).")
+						.foregroundColor(.gray)
+				}
+				.padding(40)
+			}
+		})
+	}
 }
 
 struct SubscriptionItemNavView: View {
@@ -64,41 +83,49 @@ struct SubscriptionItemNavView: View {
     }
     
     var body: some View {
-        ZStack {
-            NavigationLink(
-                destination: NotificationListView(subscription: subscription),
-                tag: subscription.urlString(),
-                selection: $delegate.selectedBaseUrl
-            ) {
-                EmptyView()
-            }
-            .opacity(0.0)
-            .buttonStyle(PlainButtonStyle())
-            
-            SubscriptionItemRowView(subscription: subscription)
-        }
-        .swipeActions(edge: .trailing) {
-            Button(role: .destructive) {
-                self.unsubscribeAlert = true
-            } label: {
-                Label("Delete", systemImage: "trash.circle")
-            }
-        }
-        .alert(isPresented: $unsubscribeAlert) {
-            Alert(
-                title: Text("Unsubscribe"),
-                message: Text("Do you really want to unsubscribe from this topic and delete all of the notifications you received?"),
-                primaryButton: .destructive(
-                    Text("Unsubscribe"),
-                    action: {
-                        self.subscriptionManager.unsubscribe(subscription)
-                        self.unsubscribeAlert = false
-                    }
-                ),
-                secondaryButton: .cancel()
-            )
-        }
-    }
+			if #available(iOS 15.0, *) {
+				subscriptionRow
+					.swipeActions(edge: .trailing) {
+						Button(role: .destructive) {
+							self.unsubscribeAlert = true
+						} label: {
+							Label("Delete", systemImage: "trash.circle")
+						}
+					}
+			} else {
+				subscriptionRow
+			}
+		}
+	
+	private var subscriptionRow: some View {
+		ZStack {
+			NavigationLink(
+				destination: NotificationListView(subscription: subscription),
+				tag: subscription.urlString(),
+				selection: $delegate.selectedBaseUrl
+			) {
+				EmptyView()
+			}
+			.opacity(0.0)
+			.buttonStyle(PlainButtonStyle())
+			
+			SubscriptionItemRowView(subscription: subscription)
+		}
+		.alert(isPresented: $unsubscribeAlert) {
+			Alert(
+				title: Text("Unsubscribe"),
+				message: Text("Do you really want to unsubscribe from this topic and delete all of the notifications you received?"),
+				primaryButton: .destructive(
+					Text("Unsubscribe"),
+					action: {
+						self.subscriptionManager.unsubscribe(subscription)
+						self.unsubscribeAlert = false
+					}
+				),
+				secondaryButton: .cancel()
+			)
+		}
+	}
 }
 
 struct SubscriptionItemRowView: View {
