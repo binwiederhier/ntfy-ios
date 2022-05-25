@@ -66,8 +66,14 @@ struct SubscriptionListView: View {
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
                         .padding(.bottom)
-                    Text("Click the + to create or subscribe to a topic. Afterwards, you receive notifications on your device when sending messages via PUT or POST.\n\nDetailed instructions are available on [ntfy.sh](https;//ntfy.sh) and [in the docs](https:ntfy.sh/docs).")
-                        .foregroundColor(.gray)
+
+                    if #available(iOS 15.0, *) {
+                        Text("Click the + to create or subscribe to a topic. Afterwards, you receive notifications on your device when sending messages via PUT or POST.\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
+                            .foregroundColor(.gray)
+                    } else {
+                        Text("Click the + to create or subscribe to a topic. Afterwards, you receive notifications on your device when sending messages via PUT or POST.\n\nDetailed instructions are available on https://ntfy.sh and https://ntfy.sh/docs")
+                            .foregroundColor(.gray)
+                    }
                 }
                 .padding(40)
             }
