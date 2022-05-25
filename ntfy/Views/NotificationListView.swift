@@ -23,6 +23,17 @@ struct NotificationListView: View {
     }
     
     var body: some View {
+        if #available(iOS 15.0, *) {
+            notificationList
+                .refreshable {
+                    subscriptionManager.poll(subscription)
+                }
+        } else {
+            notificationList
+        }
+    }
+    
+    private var notificationList: some View {
         List(selection: $selection) {
             ForEach(subscription.notificationsSorted(), id: \.self) { notification in
                 NotificationRowView(notification: notification)
@@ -55,6 +66,11 @@ struct NotificationListView: View {
                     editButton
                 } else {
                     Menu {
+                        if #unavailable(iOS 15.0) {
+                            Button("Refresh") {
+                                subscriptionManager.poll(subscription)
+                            }
+                        }
                         if subscription.notificationCount() > 0 {
                             editButton
                         }
@@ -134,9 +150,6 @@ struct NotificationListView: View {
                 .padding(40)
             }
         })
-        .refreshable {
-            subscriptionManager.poll(subscription)
-        }
         .onAppear {
             cancelSubscriptionNotifications()
         }
@@ -222,6 +235,21 @@ struct NotificationRowView: View {
     @ObservedObject var notification: Notification
     
     var body: some View {
+        if #available(iOS 15.0, *) {
+            notificationRow
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        store.delete(notification: notification)
+                    } label: {
+                        Label("Delete", systemImage: "trash.circle")
+                    }
+                }
+        } else {
+            notificationRow
+        }
+    }
+    
+    private var notificationRow: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .center, spacing: 2) {
                 Text(notification.shortDateTime())
@@ -248,13 +276,6 @@ struct NotificationRowView: View {
             }
         }
         .padding(.all, 4)
-        .swipeActions(edge: .trailing) {
-            Button(role: .destructive) {
-                store.delete(notification: notification)
-            } label: {
-                Label("Delete", systemImage: "trash.circle")
-            }
-        }
     }
 }
 

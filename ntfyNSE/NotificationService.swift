@@ -48,22 +48,24 @@ class NotificationService: UNNotificationServiceExtension {
             bestAttemptContent.threadIdentifier = topic
 
             // Map priorities to interruption level (light up screen, ...) and relevance (order)
-            switch priority {
-            case "1":
-                bestAttemptContent.interruptionLevel = .passive
-                bestAttemptContent.relevanceScore = 0
-            case "2":
-                bestAttemptContent.interruptionLevel = .passive
-                bestAttemptContent.relevanceScore = 0.25
-            case "4":
-                bestAttemptContent.interruptionLevel = .timeSensitive
-                bestAttemptContent.relevanceScore = 0.75
-            case "5":
-                bestAttemptContent.interruptionLevel = .critical
-                bestAttemptContent.relevanceScore = 1
-            default:
-                bestAttemptContent.interruptionLevel = .active
-                bestAttemptContent.relevanceScore = 0.5
+            if #available(iOS 15.0, *) {
+                switch priority {
+                case "1":
+                    bestAttemptContent.interruptionLevel = .passive
+                    bestAttemptContent.relevanceScore = 0
+                case "2":
+                    bestAttemptContent.interruptionLevel = .passive
+                    bestAttemptContent.relevanceScore = 0.25
+                case "4":
+                    bestAttemptContent.interruptionLevel = .timeSensitive
+                    bestAttemptContent.relevanceScore = 0.75
+                case "5":
+                    bestAttemptContent.interruptionLevel = .critical
+                    bestAttemptContent.relevanceScore = 1
+                default:
+                    bestAttemptContent.interruptionLevel = .active
+                    bestAttemptContent.relevanceScore = 0.5
+                }
             }
             
             // Save notification to store, and display it

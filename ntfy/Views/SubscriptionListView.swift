@@ -8,6 +8,7 @@ struct SubscriptionListView: View {
     
     @EnvironmentObject private var store: Store
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Subscription.topic, ascending: true)]) var subscriptions: FetchedResults<Subscription>
+    @State private var showingAddDialog = false
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -15,41 +16,65 @@ struct SubscriptionListView: View {
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(subscriptions) { subscription in
-                    SubscriptionItemNavView(subscription: subscription)
-                }
-            }
-            .listStyle(PlainListStyle())
-            .navigationTitle("Subscribed topics")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: SubscriptionAddView()) {
-                        Image(systemName: "plus")
+            if #available(iOS 15.0, *) {
+                subscriptionList
+                    .refreshable {
+                        subscriptions.forEach { subscription in
+                            subscriptionManager.poll(subscription)
+                        }
                     }
-                }
-            }
-            .overlay(Group {
-                if subscriptions.isEmpty {
-                    VStack {
-                        Text("It looks like you don't have any subscriptions yet")
-                            .font(.title2)
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.center)
-                            .padding(.bottom)
-                        Text("Click the + to create or subscribe to a topic. Afterwards, you receive notifications on your device when sending messages via PUT or POST.\n\nDetailed instructions are available on [ntfy.sh](https;//ntfy.sh) and [in the docs](https:ntfy.sh/docs).")
-                            .foregroundColor(.gray)
+            } else {
+                subscriptionList
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button {
+                                subscriptions.forEach { subscription in
+                                    subscriptionManager.poll(subscription)
+                                }
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
+                            }
+                        }
                     }
-                    .padding(40)
-                }
-            })
-            .refreshable {
-                subscriptions.forEach { subscription in
-                    subscriptionManager.poll(subscription)
-                }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+    }
+    
+    private var subscriptionList: some View {
+        List {
+            ForEach(subscriptions) { subscription in
+                SubscriptionItemNavView(subscription: subscription)
+            }
+        }
+        .listStyle(PlainListStyle())
+        .navigationTitle("Subscribed topics")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    self.showingAddDialog = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .overlay(Group {
+            if subscriptions.isEmpty {
+                VStack {
+                    Text("It looks like you don't have any subscriptions yet")
+                        .font(.title2)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom)
+                    Text("Click the + to create or subscribe to a topic. Afterwards, you receive notifications on your device when sending messages via PUT or POST.\n\nDetailed instructions are available on [ntfy.sh](https;//ntfy.sh) and [in the docs](https:ntfy.sh/docs).")
+                        .foregroundColor(.gray)
+                }
+                .padding(40)
+            }
+        })
+        .sheet(isPresented: $showingAddDialog) {
+            SubscriptionAddView(isShowing: $showingAddDialog)
+        }
     }
 }
 
@@ -64,6 +89,21 @@ struct SubscriptionItemNavView: View {
     }
     
     var body: some View {
+        if #available(iOS 15.0, *) {
+            subscriptionRow
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        self.unsubscribeAlert = true
+                    } label: {
+                        Label("Delete", systemImage: "trash.circle")
+                    }
+                }
+        } else {
+            subscriptionRow
+        }
+    }
+    
+    private var subscriptionRow: some View {
         ZStack {
             NavigationLink(
                 destination: NotificationListView(subscription: subscription),
@@ -76,13 +116,6 @@ struct SubscriptionItemNavView: View {
             .buttonStyle(PlainButtonStyle())
             
             SubscriptionItemRowView(subscription: subscription)
-        }
-        .swipeActions(edge: .trailing) {
-            Button(role: .destructive) {
-                self.unsubscribeAlert = true
-            } label: {
-                Label("Delete", systemImage: "trash.circle")
-            }
         }
         .alert(isPresented: $unsubscribeAlert) {
             Alert(
