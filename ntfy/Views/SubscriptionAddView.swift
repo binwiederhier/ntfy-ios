@@ -3,11 +3,10 @@ import SwiftUI
 struct SubscriptionAddView: View {
     private let tag = "SubscriptionAddView"
     
-    @Environment(\.managedObjectContext) var context
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Binding var isShowing: Bool
+    
     @EnvironmentObject private var store: Store
     @State private var topic: String = ""
-    @Binding var isShowing: Bool
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -18,26 +17,30 @@ struct SubscriptionAddView: View {
             VStack {
                 Form {
                     Section(
-                        header: Text("Topic name"),
-                        footer: Text("Topics may not be password protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
+                        footer:
+                            Text("Topics may not be password protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
                     ) {
                         TextField("Topic name, e.g. phil_alerts", text: $topic)
                             .disableAutocapitalization()
                             .disableAutocorrection(true)
                     }
-                    
+                }
+            }
+            .navigationTitle("Add subscription")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: cancelAction) {
+                        Text("Cancel")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: subscribeAction) {
                         Text("Subscribe")
                     }
                     .disabled(!isValid(topic: topic))
                 }
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        CloseButton(isShowing: $isShowing)
-                    }
-                }
             }
-            .navigationTitle("Add Subscription")
         }
     }
     
@@ -54,19 +57,10 @@ struct SubscriptionAddView: View {
         DispatchQueue.global(qos: .background).async {
             subscriptionManager.subscribe(baseUrl: Config.appBaseUrl, topic: sanitize(topic: topic))
         }
-        presentationMode.wrappedValue.dismiss()
+        isShowing = false
     }
-}
-
-struct CloseButton: View {
-    @Binding var isShowing: Bool
     
-    var body: some View {
-        Button(action: {
-            isShowing = false
-        }, label: {
-            Image(systemName: "xmark")
-                .font(.headline)
-        })
+    private func cancelAction() {
+        isShowing = false
     }
 }

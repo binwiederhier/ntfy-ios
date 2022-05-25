@@ -8,7 +8,7 @@ struct SubscriptionListView: View {
     
     @EnvironmentObject private var store: Store
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Subscription.topic, ascending: true)]) var subscriptions: FetchedResults<Subscription>
-    @State private var showingAddSubscriptionView = false
+    @State private var showingAddDialog = false
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -52,7 +52,7 @@ struct SubscriptionListView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    self.showingAddSubscriptionView = true
+                    self.showingAddDialog = true
                 } label: {
                     Image(systemName: "plus")
                 }
@@ -72,8 +72,8 @@ struct SubscriptionListView: View {
                 .padding(40)
             }
         })
-        .sheet(isPresented: $showingAddSubscriptionView) {
-            SubscriptionAddView(isShowing: $showingAddSubscriptionView)
+        .sheet(isPresented: $showingAddDialog) {
+            SubscriptionAddView(isShowing: $showingAddDialog)
         }
     }
 }
