@@ -7,7 +7,7 @@ import CoreData
 /// Note that the app extension does not run as part of the main app, so log messages are not printed in the main Xcode window. To debug,
 /// select Debug -> Attach to Process by PID or Name, and select the extension. Don't forget to set a breakpoint, or you're not gonna have a good time.
 class NotificationService: UNNotificationServiceExtension {
-    let tag = "NotificationService"
+    private let tag = "NotificationService"
     
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
@@ -21,18 +21,50 @@ class NotificationService: UNNotificationServiceExtension {
         if let bestAttemptContent = bestAttemptContent {
             let userInfo = bestAttemptContent.userInfo
             
+            // Get all the things
+            let topic = userInfo["topic"]  as? String ?? ""
+            let title = userInfo["title"] as? String
+            let priority = userInfo["priority"] as? String ?? "3"
+            let tags = userInfo["tags"] as? String
+
             // Set notification title to short URL if there is no title. The title is always set
             // by the server, but it may be empty.
-            if let topic = userInfo["topic"] as? String,
-               let title = userInfo["title"] as? String {
-                if title == "" {
-                    bestAttemptContent.title = topicShortUrl(baseUrl: Config.appBaseUrl, topic: topic)
+            if let title = title, title == "" {
+                bestAttemptContent.title = topicShortUrl(baseUrl: Config.appBaseUrl, topic: topic)
+            }
+            
+            // Emojify title or message
+            let emojiTags = parseEmojiTags(tags)
+            if !emojiTags.isEmpty {
+                if let title = title, title != "" {
+                    bestAttemptContent.title = emojiTags.joined(separator: "") + " " + bestAttemptContent.title
+                } else {
+                    bestAttemptContent.body = emojiTags.joined(separator: "") + " " + bestAttemptContent.body
                 }
             }
 
             // Play a sound, and group by topic
             bestAttemptContent.sound = .default
-            bestAttemptContent.threadIdentifier = userInfo["topic"]  as? String ?? ""
+            bestAttemptContent.threadIdentifier = topic
+
+            // Map priorities to interruption level (light up screen, ...) and relevance (order)
+            switch priority {
+            case "1":
+                bestAttemptContent.interruptionLevel = .passive
+                bestAttemptContent.relevanceScore = 0
+            case "2":
+                bestAttemptContent.interruptionLevel = .passive
+                bestAttemptContent.relevanceScore = 0.25
+            case "4":
+                bestAttemptContent.interruptionLevel = .timeSensitive
+                bestAttemptContent.relevanceScore = 0.75
+            case "5":
+                bestAttemptContent.interruptionLevel = .critical
+                bestAttemptContent.relevanceScore = 1
+            default:
+                bestAttemptContent.interruptionLevel = .active
+                bestAttemptContent.relevanceScore = 0.5
+            }
             
             // Save notification to store, and display it
             Store.shared.save(notificationFromUserInfo: userInfo)

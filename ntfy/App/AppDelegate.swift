@@ -65,8 +65,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         let userInfo = response.notification.request.content.userInfo
         Log.d(tag, "Notification received via userNotificationCenter(didReceive)", userInfo)
         
-        if let topic = userInfo["topic"] as? String {
-           selectedBaseUrl = topicUrl(baseUrl: Config.appBaseUrl, topic: topic)
+        let clickUrl = URL(string: userInfo["click"] as? String ?? "")
+        let topic = userInfo["topic"] as? String ?? ""
+        if let clickUrl = clickUrl {
+            UIApplication.shared.open(clickUrl, options: [:], completionHandler: nil)
+        } else if topic != "" {
+            selectedBaseUrl = topicUrl(baseUrl: Config.appBaseUrl, topic: topic)
         }
     
         completionHandler()
