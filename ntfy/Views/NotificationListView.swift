@@ -223,9 +223,17 @@ struct NotificationRowView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(notification.shortDateTime())
-                .font(.subheadline)
-                .foregroundColor(.gray)
+            HStack(alignment: .center, spacing: 2) {
+                Text(notification.shortDateTime())
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                if [1,2,4,5].contains(notification.priority) {
+                    Image("priority-\(notification.priority)")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 16, height: 16)
+                }
+            }
             if let title = notification.title, title != "" {
                 Text(title)
                     .font(.headline)

@@ -31,4 +31,5 @@ struct Message: Decodable {
     var time: Int64
     var message: String?
     var title: String?
+    var priority: Int16?
 }
