@@ -8,6 +8,7 @@ import CoreData
 /// select Debug -> Attach to Process by PID or Name, and select the extension. Don't forget to set a breakpoint, or you're not gonna have a good time.
 class NotificationService: UNNotificationServiceExtension {
     private let tag = "NotificationService"
+    private let actionsCategory = "ntfyActions" // It seems ok to re-use the same category
     
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
@@ -26,6 +27,7 @@ class NotificationService: UNNotificationServiceExtension {
             let title = userInfo["title"] as? String
             let priority = userInfo["priority"] as? String ?? "3"
             let tags = userInfo["tags"] as? String
+            let actions = userInfo["actions"] as? String ?? "[]"
 
             // Set notification title to short URL if there is no title. The title is always set
             // by the server, but it may be empty.
@@ -42,7 +44,24 @@ class NotificationService: UNNotificationServiceExtension {
                     bestAttemptContent.body = emojiTags.joined(separator: "") + " " + bestAttemptContent.body
                 }
             }
+            
+            // Add custom actions
+            //
+            // We re-define the categories every time here, which is weird, but it works. When tapped, the action sets the
+            // actionIdentifier in the application(didReceive) callback. This logic is handled in the AppDelegate. This approach
+            // is described in a comment in https://stackoverflow.com/questions/30103867/changing-action-titles-in-interactive-notifications-at-run-time#comment122812568_30107065
+            //
+            // We also must set the .foreground flag, which brings the notification to the foreground and avoids an error about
+            // permissions. This is described in https://stackoverflow.com/a/44580916/1440785
+            if let actions = Actions.shared.parse(actions), !actions.isEmpty {
+                bestAttemptContent.categoryIdentifier = actionsCategory
 
+                let center = UNUserNotificationCenter.current()
+                let notificationActions = actions.map { UNNotificationAction(identifier: $0.id, title: $0.label, options: [.foreground]) } //
+                let category = UNNotificationCategory(identifier: actionsCategory, actions: notificationActions, intentIdentifiers: [])
+                center.setNotificationCategories([category])
+            }
+                        
             // Play a sound, and group by topic
             bestAttemptContent.sound = .default
             bestAttemptContent.threadIdentifier = topic

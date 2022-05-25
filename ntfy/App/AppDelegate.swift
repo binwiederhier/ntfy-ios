@@ -63,17 +63,58 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
+        let actionId = response.actionIdentifier
+
         Log.d(tag, "Notification received via userNotificationCenter(didReceive)", userInfo)
         
         let clickUrl = URL(string: userInfo["click"] as? String ?? "")
         let topic = userInfo["topic"] as? String ?? ""
-        if let clickUrl = clickUrl {
-            UIApplication.shared.open(clickUrl, options: [:], completionHandler: nil)
+        let action = findAction(id: actionId, actions: Actions.shared.parse(userInfo["actions"] as? String ?? "[]"))
+
+        if let action = action {
+            handleAction(action)
+        } else if let clickUrl = clickUrl {
+            handleCustomClick(clickUrl)
         } else if topic != "" {
-            selectedBaseUrl = topicUrl(baseUrl: Config.appBaseUrl, topic: topic)
+            handleDefaultClick(topic: topic)
         }
     
         completionHandler()
+    }
+    
+    private func findAction(id: String, actions: [Action]?) -> Action? {
+        guard let actions = actions else { return nil }
+        return actions.first { $0.id == id }
+    }
+    
+    private func handleAction(_ action: Action) {
+        Log.d(tag, "Executing user action", action)
+        switch action.action {
+        case "view":
+            if let url = URL(string: action.url ?? "") {
+                openUrl(url)
+            } else {
+                Log.w(tag, "Unable to parse action URL", action)
+            }
+        case "http":
+            Actions.shared.http(action)
+        default:
+            Log.w(tag, "Action \(action.action) not supported", action)
+        }
+    }
+    
+    private func handleCustomClick(_ url: URL) {
+        openUrl(url)
+    }
+    
+    private func handleDefaultClick(topic: String) {
+        Log.d(tag, "Selecting topic \(topic)")
+        selectedBaseUrl = topicUrl(baseUrl: Config.appBaseUrl, topic: topic)
+    }
+    
+    private func openUrl(_ url: URL) {
+        Log.d(tag, "Opening URL \(url)")
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 }
 

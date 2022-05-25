@@ -68,4 +68,16 @@ struct Message: Decodable {
     var title: String?
     var priority: Int16?
     var tags: [String]?
+    var actions: [Action]?
+}
+
+struct Action: Decodable {
+    var id: String
+    var action: String
+    var label: String
+    var url: String?
+    var method: String?
+    var headers: [String: String]?
+    var body: String?
+    var clear: Bool?
 }

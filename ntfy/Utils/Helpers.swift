@@ -1,5 +1,8 @@
 import Foundation
 
+let helperFnTag = "Helpers"
+let supportedActions = ["view", "http"]
+
 func topicUrl(baseUrl: String, topic: String) -> String {
     return "\(baseUrl)/\(topic)"
 }
