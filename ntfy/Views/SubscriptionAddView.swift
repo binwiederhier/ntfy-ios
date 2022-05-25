@@ -20,8 +20,8 @@ struct SubscriptionAddView: View {
                     footer: Text("Topics may not be password protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
                 ) {
                     TextField("Topic name, e.g. phil_alerts", text: $topic)
-										.disableAutoCapitalisation()
-										.disableAutocorrection(true)
+                        .disableAutocapitalization()
+                        .disableAutocorrection(true)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
