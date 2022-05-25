@@ -23,6 +23,41 @@ extension Notification {
 
         return dateFormatter.string(from: date)
     }
+    
+    func formatMessage() -> String {
+        let message = message ?? ""
+        if let title = title, title != "" {
+            return message
+        }
+        let emojiTags = emojiTags()
+        if !emojiTags.isEmpty {
+            return emojiTags.joined(separator: "") + " " + message
+        }
+        return message
+    }
+    
+    func formatTitle() -> String? {
+        if let title = title, title != "" {
+            let emojiTags = emojiTags()
+            if !emojiTags.isEmpty {
+                return emojiTags.joined(separator: "") + " " + title
+            }
+            return title
+        }
+        return nil
+    }
+    
+    func allTags() -> [String] {
+        return parseAllTags(tags)
+    }
+    
+    func emojiTags() -> [String] {
+        return parseEmojiTags(tags)
+    }
+    
+    func nonEmojiTags() -> [String] {
+        return parseNonEmojiTags(tags)
+    }
 }
 
 /// This is the "on the wire" message as it is received from the ntfy server
@@ -31,4 +66,6 @@ struct Message: Decodable {
     var time: Int64
     var message: String?
     var title: String?
+    var priority: Int16?
+    var tags: [String]?
 }

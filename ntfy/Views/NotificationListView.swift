@@ -150,6 +150,15 @@ struct NotificationListView: View {
                 .padding(40)
             }
         })
+<<<<<<< HEAD
+=======
+        .refreshable {
+            subscriptionManager.poll(subscription)
+        }
+        .onAppear {
+            cancelSubscriptionNotifications()
+        }
+>>>>>>> 6d40c441f96e3a6c7331e3883bdf5df999ce8d66
     }
     
     private var editButton: some View {
@@ -205,6 +214,26 @@ struct NotificationListView: View {
         }
         editMode = .inactive
     }
+    
+    private func cancelSubscriptionNotifications() {
+        let notificationCenter = UNUserNotificationCenter.current()
+        notificationCenter.getDeliveredNotifications { notifications in
+            let ids = notifications
+                .filter { notification in
+                    if let topic = notification.request.content.userInfo["topic"] as? String {
+                        return topic == subscription.topic // TODO: This is not enough for selfhosted servers
+                    }
+                    return false
+                }
+                .map { notification in
+                    notification.request.identifier
+                }
+            if !ids.isEmpty {
+                Log.d(tag, "Cancelling \(ids.count) notification(s) from notification center")
+                notificationCenter.removeDeliveredNotifications(withIdentifiers: ids)
+            }
+        }
+    }
 }
 
 struct NotificationRowView: View {
@@ -228,16 +257,29 @@ struct NotificationRowView: View {
     
     private var notificationRow: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(notification.shortDateTime())
-                .font(.subheadline)
-                .foregroundColor(.gray)
-            if let title = notification.title, title != "" {
+            HStack(alignment: .center, spacing: 2) {
+                Text(notification.shortDateTime())
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                if [1,2,4,5].contains(notification.priority) {
+                    Image("priority-\(notification.priority)")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 16, height: 16)
+                }
+            }
+            if let title = notification.formatTitle(), title != "" {
                 Text(title)
                     .font(.headline)
                     .bold()
             }
-            Text(notification.message ?? "")
+            Text(notification.formatMessage())
                 .font(.body)
+            if !notification.nonEmojiTags().isEmpty {
+                Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
         }
         .padding(.all, 4)
     }

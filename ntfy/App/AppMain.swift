@@ -1,14 +1,9 @@
 import SwiftUI
 import Firebase
 
-// Must have before release:
 // TODO: Verify whether model version needs to be specified
 // TODO: Disallow adding same topic twice!!
-// TODO: When opening a topic, the notifications in the Apple notification center should be dismissed automatically
 // TODO: Errors are not shown to the user, but instead just logged
-
-// Nice to have
-// TODO: Make notification click open detail view
 // TODO: Slide up dialog for "add topic"
 
 @main

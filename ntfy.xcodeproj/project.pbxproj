@@ -35,6 +35,10 @@
 		94A3F7C8283734D900C48E79 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A3F7C7283734D900C48E79 /* SubscriptionManager.swift */; };
 		94A3F7CA28386B2100C48E79 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A3F7C928386B2100C48E79 /* Config.swift */; };
 		94A3F7CB28386B2100C48E79 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A3F7C928386B2100C48E79 /* Config.swift */; };
+		94CD1966283E662900973B93 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 94CD1965283E662900973B93 /* emojis.json */; };
+		94CD1967283E662900973B93 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 94CD1965283E662900973B93 /* emojis.json */; };
+		94CD196A283E666900973B93 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CD1969283E666900973B93 /* EmojiManager.swift */; };
+		94CD196B283E666900973B93 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CD1969283E666900973B93 /* EmojiManager.swift */; };
 		94E9196C28353E0100F30170 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F216283531A200CDE4DD /* Log.swift */; };
 /* End PBXBuildFile section */
 
@@ -71,7 +75,7 @@
 		9474F1C7282F2AA800CDE4DD /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		9474F1D1282F2D2C00CDE4DD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9474F1D5282F2FED00CDE4DD /* ntfy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfy.entitlements; sourceTree = "<group>"; };
-		9474F1D6282F2FF700CDE4DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9474F1D6282F2FF700CDE4DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ntfyNSE.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9474F1E6282F3FFD00CDE4DD /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -89,6 +93,8 @@
 		9474F216283531A200CDE4DD /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		94A3F7C7283734D900C48E79 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		94A3F7C928386B2100C48E79 /* Config.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		94CD1965283E662900973B93 /* emojis.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = emojis.json; sourceTree = "<group>"; };
+		94CD1969283E666900973B93 /* EmojiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,14 +138,13 @@
 		9474F1BF282F2AA700CDE4DD /* ntfy */ = {
 			isa = PBXGroup;
 			children = (
-				9474F210283326E000CDE4DD /* Utils */,
-				9474F20D2833264F00CDE4DD /* App */,
-				9474F1C4282F2AA800CDE4DD /* Assets.xcassets */,
-				9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */,
-				9474F1D6282F2FF700CDE4DD /* Info.plist */,
 				9474F1D5282F2FED00CDE4DD /* ntfy.entitlements */,
+				9474F1D6282F2FF700CDE4DD /* Info.plist */,
+				9474F20D2833264F00CDE4DD /* App */,
+				94CD1968283E663700973B93 /* Assets */,
 				9474F2032831725A00CDE4DD /* Persistence */,
 				9474F1C6282F2AA800CDE4DD /* Preview Content */,
+				9474F210283326E000CDE4DD /* Utils */,
 				9474F202283170F000CDE4DD /* Views */,
 			);
 			path = ntfy;
@@ -207,11 +212,22 @@
 			isa = PBXGroup;
 			children = (
 				9474F20E283326C500CDE4DD /* ApiService.swift */,
+				94CD1969283E666900973B93 /* EmojiManager.swift */,
 				9474F211283327C200CDE4DD /* Helpers.swift */,
 				94A3F7C928386B2100C48E79 /* Config.swift */,
 				9474F216283531A200CDE4DD /* Log.swift */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		94CD1968283E663700973B93 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				9474F1C4282F2AA800CDE4DD /* Assets.xcassets */,
+				94CD1965283E662900973B93 /* emojis.json */,
+				9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */,
+			);
+			path = Assets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -303,6 +319,7 @@
 			files = (
 				9474F1C8282F2AA800CDE4DD /* Preview Assets.xcassets in Resources */,
 				9474F1C5282F2AA800CDE4DD /* Assets.xcassets in Resources */,
+				94CD1966283E662900973B93 /* emojis.json in Resources */,
 				9474F1DC282F30B500CDE4DD /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -311,6 +328,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94CD1967283E662900973B93 /* emojis.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,6 +352,7 @@
 				9474F1F22830825600CDE4DD /* SubscriptionListView.swift in Sources */,
 				9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */,
 				9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */,
+				94CD196A283E666900973B93 /* EmojiManager.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */,
 				9474F20F283326C500CDE4DD /* ApiService.swift in Sources */,
 				9474F1F72830830700CDE4DD /* ntfy.xcdatamodeld in Sources */,
@@ -348,6 +367,7 @@
 				94E9196C28353E0100F30170 /* Log.swift in Sources */,
 				9474F2152834758700CDE4DD /* Helpers.swift in Sources */,
 				9474F1E7282F3FFD00CDE4DD /* NotificationService.swift in Sources */,
+				94CD196B283E666900973B93 /* EmojiManager.swift in Sources */,
 				9474F2052831D51500CDE4DD /* Store.swift in Sources */,
 				9474F2062831D73C00CDE4DD /* ntfy.xcdatamodeld in Sources */,
 				94A3F7CB28386B2100C48E79 /* Config.swift in Sources */,
