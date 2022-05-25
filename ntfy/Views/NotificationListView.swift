@@ -150,15 +150,9 @@ struct NotificationListView: View {
                 .padding(40)
             }
         })
-<<<<<<< HEAD
-=======
-        .refreshable {
-            subscriptionManager.poll(subscription)
-        }
         .onAppear {
             cancelSubscriptionNotifications()
         }
->>>>>>> 6d40c441f96e3a6c7331e3883bdf5df999ce8d66
     }
     
     private var editButton: some View {
