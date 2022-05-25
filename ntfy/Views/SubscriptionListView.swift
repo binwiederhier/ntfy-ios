@@ -8,6 +8,7 @@ struct SubscriptionListView: View {
     
     @EnvironmentObject private var store: Store
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Subscription.topic, ascending: true)]) var subscriptions: FetchedResults<Subscription>
+    @State private var showingAddSubscriptionView = false
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -50,7 +51,9 @@ struct SubscriptionListView: View {
         .navigationTitle("Subscribed topics")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                NavigationLink(destination: SubscriptionAddView()) {
+                Button {
+                    self.showingAddSubscriptionView = true
+                } label: {
                     Image(systemName: "plus")
                 }
             }
@@ -69,6 +72,9 @@ struct SubscriptionListView: View {
                 .padding(40)
             }
         })
+        .sheet(isPresented: $showingAddSubscriptionView) {
+            SubscriptionAddView(isShowing: $showingAddSubscriptionView)
+        }
     }
 }
 
