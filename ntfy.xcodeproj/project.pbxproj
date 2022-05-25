@@ -143,7 +143,6 @@
 				9474F20D2833264F00CDE4DD /* App */,
 				94CD1968283E663700973B93 /* Assets */,
 				9474F2032831725A00CDE4DD /* Persistence */,
-				9474F1C6282F2AA800CDE4DD /* Preview Content */,
 				9474F210283326E000CDE4DD /* Utils */,
 				9474F202283170F000CDE4DD /* Views */,
 			);
@@ -223,6 +222,7 @@
 		94CD1968283E663700973B93 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				9474F1C6282F2AA800CDE4DD /* Preview Content */,
 				9474F1C4282F2AA800CDE4DD /* Assets.xcassets */,
 				94CD1965283E662900973B93 /* emojis.json */,
 				9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */,
@@ -511,7 +511,7 @@
 				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Assets/Preview Content\"";
 				DEVELOPMENT_TEAM = YXQ4AMS4B4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -544,7 +544,7 @@
 				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Assets/Preview Content\"";
 				DEVELOPMENT_TEAM = YXQ4AMS4B4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
