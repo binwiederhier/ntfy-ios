@@ -57,7 +57,7 @@ class NotificationService: UNNotificationServiceExtension {
                 bestAttemptContent.categoryIdentifier = actionsCategory
 
                 let center = UNUserNotificationCenter.current()
-                let notificationActions = actions.map { UNNotificationAction(identifier: $0.id, title: $0.label, options: [.foreground]) } //
+                let notificationActions = actions.map { UNNotificationAction(identifier: $0.id, title: $0.label, options: [.foreground]) }
                 let category = UNNotificationCategory(identifier: actionsCategory, actions: notificationActions, intentIdentifiers: [])
                 center.setNotificationCategories([category])
             }

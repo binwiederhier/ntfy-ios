@@ -3,6 +3,7 @@ import Foundation
 struct Actions {
     static let shared = Actions()
     private let tag = "Actions"
+    private let supportedActions = ["view", "http"]
     
     func parse(_ actions: String?) -> [Action]? {
         guard let actions = actions,

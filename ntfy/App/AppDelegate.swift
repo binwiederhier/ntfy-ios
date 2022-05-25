@@ -69,14 +69,19 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         
         let clickUrl = URL(string: userInfo["click"] as? String ?? "")
         let topic = userInfo["topic"] as? String ?? ""
-        let action = findAction(id: actionId, actions: Actions.shared.parse(userInfo["actions"] as? String ?? "[]"))
+        let actions = userInfo["actions"] as? String ?? "[]"
+        let action = findAction(id: actionId, actions: Actions.shared.parse(actions))
 
+        // Show current topic
+        if topic != "" {
+            selectedBaseUrl = topicUrl(baseUrl: Config.appBaseUrl, topic: topic)
+        }
+        
+        // Execute user action or click action (if any)
         if let action = action {
             handleAction(action)
         } else if let clickUrl = clickUrl {
             handleCustomClick(clickUrl)
-        } else if topic != "" {
-            handleDefaultClick(topic: topic)
         }
     
         completionHandler()
