@@ -234,13 +234,18 @@ struct NotificationRowView: View {
                         .frame(width: 16, height: 16)
                 }
             }
-            if let title = notification.title, title != "" {
+            if let title = notification.formatTitle(), title != "" {
                 Text(title)
                     .font(.headline)
                     .bold()
             }
-            Text(notification.message ?? "")
+            Text(notification.formatMessage())
                 .font(.body)
+            if !notification.nonEmojiTags().isEmpty {
+                Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
         }
         .padding(.all, 4)
         .swipeActions(edge: .trailing) {

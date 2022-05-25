@@ -21,21 +21,33 @@ class NotificationService: UNNotificationServiceExtension {
         if let bestAttemptContent = bestAttemptContent {
             let userInfo = bestAttemptContent.userInfo
             
+            // Get all the things
+            let topic = userInfo["topic"]  as? String ?? ""
+            let title = userInfo["title"] as? String
+            let priority = userInfo["priority"] as? String ?? "3"
+            let tags = userInfo["tags"] as? String
+
             // Set notification title to short URL if there is no title. The title is always set
             // by the server, but it may be empty.
-            if let topic = userInfo["topic"] as? String,
-               let title = userInfo["title"] as? String {
-                if title == "" {
-                    bestAttemptContent.title = topicShortUrl(baseUrl: Config.appBaseUrl, topic: topic)
+            if let title = title, title == "" {
+                bestAttemptContent.title = topicShortUrl(baseUrl: Config.appBaseUrl, topic: topic)
+            }
+            
+            // Emojify title or message
+            let emojiTags = parseEmojiTags(tags)
+            if !emojiTags.isEmpty {
+                if let title = title, title != "" {
+                    bestAttemptContent.title = emojiTags.joined(separator: "") + " " + bestAttemptContent.title
+                } else {
+                    bestAttemptContent.body = emojiTags.joined(separator: "") + " " + bestAttemptContent.body
                 }
             }
 
             // Play a sound, and group by topic
             bestAttemptContent.sound = .default
-            bestAttemptContent.threadIdentifier = userInfo["topic"]  as? String ?? ""
+            bestAttemptContent.threadIdentifier = topic
 
             // Map priorities to interruption level (light up screen, ...) and relevance (order)
-            let priority = userInfo["priority"] as? String ?? "3"
             switch priority {
             case "1":
                 bestAttemptContent.interruptionLevel = .passive
