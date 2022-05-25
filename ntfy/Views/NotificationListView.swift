@@ -36,9 +36,9 @@ struct NotificationListView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 if (self.editMode != .active) {
                     Button(action: {
-                        // iOS bug (?): We create a custom back button, because when we return using the original
-                        // back button, and the navigation is popped that way, the row stays highlighted for a long
-                        // time, which is weird and feels wrong. This avoids that behavior.
+                        // iOS bug (?): We create a custom back button, because the original back button doesn't reset
+                        // selectedBaseUrl early enough and the row stays highlighted for a long time,
+                        // which is weird and feels wrong. This avoids that behavior.
                         
                         self.delegate.selectedBaseUrl = nil
                     }){
@@ -73,7 +73,7 @@ struct NotificationListView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
-                            .padding([.top, .bottom, .leading], 20)
+                            .padding([.leading], 20)
                     }
                 }
             }
@@ -137,6 +137,9 @@ struct NotificationListView: View {
         .refreshable {
             subscriptionManager.poll(subscription)
         }
+        .onAppear {
+            cancelSubscriptionNotifications()
+        }
     }
     
     private var editButton: some View {
@@ -192,12 +195,32 @@ struct NotificationListView: View {
         }
         editMode = .inactive
     }
+    
+    private func cancelSubscriptionNotifications() {
+        let notificationCenter = UNUserNotificationCenter.current()
+        notificationCenter.getDeliveredNotifications { notifications in
+            let ids = notifications
+                .filter { notification in
+                    if let topic = notification.request.content.userInfo["topic"] as? String {
+                        return topic == subscription.topic // TODO: This is not enough for selfhosted servers
+                    }
+                    return false
+                }
+                .map { notification in
+                    notification.request.identifier
+                }
+            if !ids.isEmpty {
+                Log.d(tag, "Cancelling \(ids.count) notification(s) from notification center")
+                notificationCenter.removeDeliveredNotifications(withIdentifiers: ids)
+            }
+        }
+    }
 }
 
 struct NotificationRowView: View {
     @EnvironmentObject private var store: Store
     @ObservedObject var notification: Notification
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(notification.shortDateTime())
