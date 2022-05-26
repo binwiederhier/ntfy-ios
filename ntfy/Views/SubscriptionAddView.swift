@@ -7,6 +7,8 @@ struct SubscriptionAddView: View {
     
     @EnvironmentObject private var store: Store
     @State private var topic: String = ""
+    @State private var useAnother: Bool = false
+    @State private var baseUrl: String = ""
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -23,6 +25,14 @@ struct SubscriptionAddView: View {
                         TextField("Topic name, e.g. phil_alerts", text: $topic)
                             .disableAutocapitalization()
                             .disableAutocorrection(true)
+                    }
+                    Section {
+                        Toggle("Use another server", isOn: $useAnother)
+                        if useAnother {
+                            TextField("Server URL, e.g. https://ntfy.example.com", text: $baseUrl)
+                                .disableAutocapitalization()
+                                .disableAutocorrection(true)
+                        }
                     }
                 }
             }
@@ -61,13 +71,25 @@ struct SubscriptionAddView: View {
     }
     
     private func subscribeAction() {
+        let baseUrl = (useAnother) ? baseUrl : Config.appBaseUrl
         DispatchQueue.global(qos: .background).async {
-            subscriptionManager.subscribe(baseUrl: Config.appBaseUrl, topic: sanitize(topic: topic))
+            subscriptionManager.subscribe(baseUrl: baseUrl, topic: sanitize(topic: topic))
         }
         isShowing = false
     }
     
     private func cancelAction() {
         isShowing = false
+    }
+}
+
+
+struct SubscriptionAddView_Previews: PreviewProvider {
+    @State static var isShowing = true
+    
+    static var previews: some View {
+        let store = Store.preview
+        SubscriptionAddView(isShowing: $isShowing)
+            .environmentObject(store)
     }
 }

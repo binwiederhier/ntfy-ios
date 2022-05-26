@@ -25,20 +25,26 @@ struct SubscriptionManager {
     }
     
     func poll(_ subscription: Subscription) {
+        poll(subscription) { _ in }
+    }
+    
+    func poll(_ subscription: Subscription, completionHandler: @escaping ([Message]) -> Void) {
         Log.d(tag, "Polling from \(subscription.urlString())")
         ApiService.shared.poll(subscription: subscription) { messages, error in
             guard let messages = messages else {
                 Log.e(tag, "Polling failed", error)
+                completionHandler([])
                 return
             }
             Log.d(tag, "Polling success, \(messages.count) new message(s)", messages)
             if !messages.isEmpty {
-                DispatchQueue.main.async {
+                DispatchQueue.main.sync {
                     for message in messages {
                         store.save(notificationFromMessage: message, withSubscription: subscription)
                     }
                 }
             }
+            completionHandler(messages)
         }
     }
 }

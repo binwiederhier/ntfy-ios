@@ -6,7 +6,8 @@ import FirebaseCore
 import CoreData
 
 class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
-    let tag = "AppDelegate"
+    private let tag = "AppDelegate"
+    private let pollTimerTopic = "~poll" // See ntfy server if ever changed
     
     // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
     @Published var selectedBaseUrl: String? = nil
@@ -30,7 +31,47 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         // Set self as messaging delegate
         Messaging.messaging().delegate = self
         
+        // Register to timerkeeper topic
+        Messaging.messaging().subscribe(toTopic: pollTimerTopic)
+        
         return true
+    }
+    
+    /// Executed when a background notification arrives. This is used to trigger polling of local topics.
+    /// See https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/pushing_background_updates_to_your_app
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        Log.d(tag, "Background notification received", userInfo)
+        
+        // Exit out early if this message is not expected
+        let topic = userInfo["topic"] as? String ?? ""
+        if topic != pollTimerTopic {
+            completionHandler(.noData)
+            return
+        }
+
+        // Poll and display new messages
+        let store = Store.shared
+        let center = UNUserNotificationCenter.current()
+        let subscriptionManager = SubscriptionManager(store: store)
+        
+        store.getSubscriptions()?.forEach { subscription in
+            subscriptionManager.poll(subscription) { messages in
+                messages.forEach { message in
+                    let content = UNMutableNotificationContent()
+                    content.title = message.title ?? ""
+                    content.body = message.message ?? ""
+                    content.sound = .default
+                    
+                    let request = UNNotificationRequest(identifier: message.id, content: content, trigger: nil /* now */)
+                    center.add(request) { (error) in
+                        if let error = error {
+                            Log.e(self.tag, "Unable to create notification", error)
+                        }
+                    }
+                }
+            }
+        }
+        completionHandler(.newData)
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {

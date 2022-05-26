@@ -70,6 +70,10 @@ class Store: ObservableObject {
         return try? context.fetch(fetchRequest).first
     }
     
+    func getSubscriptions() -> [Subscription]? {
+        return try? context.fetch(Subscription.fetchRequest())
+    }
+    
     func delete(subscription: Subscription) {
         context.delete(subscription)
         try? context.save()
