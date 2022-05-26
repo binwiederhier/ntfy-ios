@@ -79,37 +79,6 @@ class Store: ObservableObject {
         try? context.save()
     }
     
-    func save(notificationFromUserInfo userInfo: [AnyHashable: Any]) {
-        guard let id = userInfo["id"] as? String,
-              let time = userInfo["time"] as? String,
-              let event = userInfo["event"] as? String,
-              let topic = userInfo["topic"] as? String,
-              let timeInt = Int64(time),
-              let message = userInfo["message"] as? String else {
-            Log.d(Store.tag, "Unknown or irrelevant message", userInfo)
-            return
-        }
-        let baseUrl = userInfo["base_url"] as? String ?? Config.appBaseUrl // Firebase messages all come from the main ntfy server
-        guard let subscription = getSubscription(baseUrl: baseUrl, topic: topic) else {
-            Log.d(Store.tag, "Subscription for topic \(topic) unknown")
-            return
-        }
-        let title = userInfo["title"] as? String ?? ""
-        let priority = Int16(userInfo["priority"] as? String ?? "3") ?? 3
-        let tags = (userInfo["tags"] as? String ?? "").components(separatedBy: ",")
-        let m = Message(
-            id: id,
-            time: timeInt,
-            event: event,
-            message: message,
-            title: title,
-            priority: priority,
-            tags: tags,
-            actions: nil // TODO: Actions
-        )
-        save(notificationFromMessage: m, withSubscription: subscription)
-    }
-    
     func save(notificationFromMessage message: Message, withSubscription subscription: Subscription) {
         do {
             let notification = Notification(context: context)
@@ -119,7 +88,8 @@ class Store: ObservableObject {
             notification.title = message.title ?? ""
             notification.priority = (message.priority != nil && message.priority != 0) ? message.priority! : 3
             notification.tags = message.tags?.joined(separator: ",") ?? ""
-            // TODO: actions
+            notification.actions = Actions.shared.encode(message.actions)
+            notification.click = message.click ?? ""
             subscription.addToNotifications(notification)
             subscription.lastNotificationId = message.id
             try context.save()

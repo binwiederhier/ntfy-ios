@@ -20,33 +20,38 @@ class NotificationService: UNNotificationServiceExtension {
         Log.d(tag, "Notification received (in service)") // Logs from extensions are not printed in Xcode!
 
         if let bestAttemptContent = bestAttemptContent {
+            let store = Store.shared
             let userInfo = bestAttemptContent.userInfo
-            
-            // Get all the things
-            let event = userInfo["event"]  as? String ?? ""
-            let baseUrl = userInfo["base_url"]  as? String ?? Config.appBaseUrl
-            let topic = userInfo["topic"]  as? String ?? ""
-            let title = userInfo["title"] as? String
-            let priority = userInfo["priority"] as? String ?? "3"
-            let tags = userInfo["tags"] as? String
-            let actions = userInfo["actions"] as? String ?? "[]"
-
-            // Only handle "message" events
-            if event != "message" {
+            guard let message = Message.from(userInfo: userInfo) else {
+                Log.w(Store.tag, "Message cannot be parsed from userInfo", userInfo)
+                contentHandler(request.content)
+                return
+            }
+            if message.event != "message" {
+                Log.w(tag, "Irrelevant message received", message)
                 contentHandler(request.content)
                 return
             }
             
+            // Only handle "message" events
+            let baseUrl = userInfo["base_url"]  as? String ?? Config.appBaseUrl
+            let topic = userInfo["topic"]  as? String ?? ""
+            guard let subscription = store.getSubscription(baseUrl: baseUrl, topic: topic) else {
+                Log.w(tag, "Subscription for topic \(topic) unknown")
+                contentHandler(request.content)
+                return
+            }
+
             // Set notification title to short URL if there is no title. The title is always set
             // by the server, but it may be empty.
-            if let title = title, title == "" {
+            if let title = message.title, title == "" {
                 bestAttemptContent.title = topicShortUrl(baseUrl: baseUrl, topic: topic)
             }
             
             // Emojify title or message
-            let emojiTags = parseEmojiTags(tags)
+            let emojiTags = parseEmojiTags(message.tags)
             if !emojiTags.isEmpty {
-                if let title = title, title != "" {
+                if let title = message.title, title != "" {
                     bestAttemptContent.title = emojiTags.joined(separator: "") + " " + bestAttemptContent.title
                 } else {
                     bestAttemptContent.body = emojiTags.joined(separator: "") + " " + bestAttemptContent.body
@@ -61,7 +66,7 @@ class NotificationService: UNNotificationServiceExtension {
             //
             // We also must set the .foreground flag, which brings the notification to the foreground and avoids an error about
             // permissions. This is described in https://stackoverflow.com/a/44580916/1440785
-            if let actions = Actions.shared.parse(actions), !actions.isEmpty {
+            if let actions = message.actions, !actions.isEmpty {
                 bestAttemptContent.categoryIdentifier = actionsCategory
 
                 let center = UNUserNotificationCenter.current()
@@ -76,17 +81,17 @@ class NotificationService: UNNotificationServiceExtension {
 
             // Map priorities to interruption level (light up screen, ...) and relevance (order)
             if #available(iOS 15.0, *) {
-                switch priority {
-                case "1":
+                switch message.priority {
+                case 1:
                     bestAttemptContent.interruptionLevel = .passive
                     bestAttemptContent.relevanceScore = 0
-                case "2":
+                case 2:
                     bestAttemptContent.interruptionLevel = .passive
                     bestAttemptContent.relevanceScore = 0.25
-                case "4":
+                case 4:
                     bestAttemptContent.interruptionLevel = .timeSensitive
                     bestAttemptContent.relevanceScore = 0.75
-                case "5":
+                case 5:
                     bestAttemptContent.interruptionLevel = .critical
                     bestAttemptContent.relevanceScore = 1
                 default:
@@ -96,7 +101,7 @@ class NotificationService: UNNotificationServiceExtension {
             }
             
             // Save notification to store, and display it
-            Store.shared.save(notificationFromUserInfo: userInfo)
+            Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
             contentHandler(bestAttemptContent)
         }
     }

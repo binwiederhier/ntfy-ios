@@ -12,12 +12,17 @@ func topicShortUrl(baseUrl: String, topic: String) -> String {
 
 func parseAllTags(_ tags: String?) -> [String] {
     return (tags?.components(separatedBy: ",") ?? [])
-        .filter { $0.trimmingCharacters(in: [" "]) != "" }
+        .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
 }
 
 func parseEmojiTags(_ tags: String?) -> [String] {
+    return parseEmojiTags(parseAllTags(tags))
+}
+
+func parseEmojiTags(_ tags: [String]?) -> [String] {
+    guard let tags = tags else { return [] }
     var emojiTags: [String] = []
-    for tag in parseAllTags(tags) {
+    for tag in tags {
         if let emoji = EmojiManager.shared.getEmojiByAlias(alias: tag) {
             emojiTags.append(emoji.getUnicode())
         }

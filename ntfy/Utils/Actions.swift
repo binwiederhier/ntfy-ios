@@ -17,6 +17,14 @@ struct Actions {
         }
     }
     
+    func encode(_ actions: [Action]?) -> String {
+        guard let actions = actions else { return "" }
+        if let actionsData = try? JSONEncoder().encode(actions) {
+            return String(data: actionsData, encoding: .utf8) ?? ""
+        }
+        return ""
+    }
+    
     func http(_ action: Action) {
         guard let actionUrl = action.url, let url = URL(string: actionUrl) else {
             Log.w(tag, "Unable to execute HTTP action, no or invalid URL", action)

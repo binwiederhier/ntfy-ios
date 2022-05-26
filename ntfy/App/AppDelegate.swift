@@ -3,6 +3,7 @@ import SafariServices
 import UserNotifications
 import Firebase
 import FirebaseCore
+import FirebaseMessaging
 import CoreData
 
 class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
@@ -86,6 +87,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         content.sound = .default
         content.userInfo = userInfo
         
+        // FIXME: Use logic in NotificationService here to build the same message
+        
         let request = UNNotificationRequest(identifier: message.id, content: content, trigger: nil /* now */)
         UNUserNotificationCenter.current().add(request) { (error) in
             if let error = error {
@@ -114,15 +117,16 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
-        let actionId = response.actionIdentifier
-
         Log.d(tag, "Notification received via userNotificationCenter(didReceive)", userInfo)
+        guard let message = Message.from(userInfo: userInfo) else {
+            Log.w(tag, "Cannot convert userInfo to message", userInfo)
+            completionHandler()
+            return
+        }
         
         let baseUrl = userInfo["base_url"] as? String ?? Config.appBaseUrl
         let topic = userInfo["topic"] as? String ?? ""
-        let clickUrl = URL(string: userInfo["click"] as? String ?? "")
-        let actions = userInfo["actions"] as? String ?? "[]"
-        let action = findAction(id: actionId, actions: Actions.shared.parse(actions))
+        let action = message.actions?.first { $0.id == response.actionIdentifier }
 
         // Show current topic
         if topic != "" {
@@ -132,16 +136,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         // Execute user action or click action (if any)
         if let action = action {
             handle(action: action)
-        } else if let clickUrl = clickUrl {
-            open(url: clickUrl)
+        } else if let click = message.click, let url = URL(string: click) {
+            open(url: url)
         }
     
         completionHandler()
-    }
-    
-    private func findAction(id: String, actions: [Action]?) -> Action? {
-        guard let actions = actions else { return nil }
-        return actions.first { $0.id == id }
     }
     
     private func handle(action: Action) {

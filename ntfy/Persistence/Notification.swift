@@ -70,15 +70,11 @@ struct Message: Decodable {
     var priority: Int16?
     var tags: [String]?
     var actions: [Action]?
+    var click: String?
     
     func toUserInfo() -> [AnyHashable: Any] {
         // This should mimic the way that the ntfy server encodes a message.
         // See server_firebase.go for more details.
-        
-        var actionsStr: String?
-        if let actionsData = try? JSONEncoder().encode(actions) {
-            actionsStr = String(data: actionsData, encoding: .utf8)
-        }
         
         return [
             "id": id,
@@ -88,8 +84,36 @@ struct Message: Decodable {
             "title": title ?? "",
             "priority": String(priority ?? 3),
             "tags": tags?.joined(separator: ",") ?? "",
-            "actions": actionsStr ?? ""
+            "actions": Actions.shared.encode(actions),
+            "click": click ?? ""
         ]
+    }
+    
+    static func from(userInfo: [AnyHashable: Any]) -> Message? {
+        guard let id = userInfo["id"] as? String,
+              let time = userInfo["time"] as? String,
+              let event = userInfo["event"] as? String,
+              let timeInt = Int64(time),
+              let message = userInfo["message"] as? String else {
+            Log.d(Store.tag, "Unknown or irrelevant message", userInfo)
+            return nil
+        }
+        let title = userInfo["title"] as? String
+        let priority = Int16(userInfo["priority"] as? String ?? "3") ?? 3
+        let tags = (userInfo["tags"] as? String ?? "").components(separatedBy: ",")
+        let actions = userInfo["actions"] as? String
+        let click = userInfo["click"] as? String
+        return Message(
+            id: id,
+            time: timeInt,
+            event: event,
+            message: message,
+            title: title,
+            priority: priority,
+            tags: tags,
+            actions: Actions.shared.parse(actions),
+            click: click
+        )
     }
 }
 
