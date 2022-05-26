@@ -23,12 +23,19 @@ class NotificationService: UNNotificationServiceExtension {
             let userInfo = bestAttemptContent.userInfo
             
             // Get all the things
+            let event = userInfo["event"]  as? String ?? ""
             let topic = userInfo["topic"]  as? String ?? ""
             let title = userInfo["title"] as? String
             let priority = userInfo["priority"] as? String ?? "3"
             let tags = userInfo["tags"] as? String
             let actions = userInfo["actions"] as? String ?? "[]"
 
+            // Only handle "message" events
+            if event != "message" {
+                contentHandler(request.content)
+                return
+            }
+            
             // Set notification title to short URL if there is no title. The title is always set
             // by the server, but it may be empty.
             if let title = title, title == "" {
