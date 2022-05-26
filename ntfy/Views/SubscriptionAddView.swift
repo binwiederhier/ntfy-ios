@@ -26,7 +26,10 @@ struct SubscriptionAddView: View {
                             .disableAutocapitalization()
                             .disableAutocorrection(true)
                     }
-                    Section {
+                    Section(
+                        footer:
+                            (useAnother) ? Text("Support for self-hosted servers is currently very limited. Delivery of messages is significantly delayed and not guaranteed. This is actively being developed.") : Text("")
+                    ) {
                         Toggle("Use another server", isOn: $useAnother)
                         if useAnother {
                             TextField("Server URL, e.g. https://ntfy.example.com", text: $baseUrl)
@@ -48,38 +51,40 @@ struct SubscriptionAddView: View {
                     Button(action: subscribeAction) {
                         Text("Subscribe")
                     }
-                    .disabled(!isValid(topic: topic))
+                    .disabled(!isValid())
                 }
             }
         }
     }
     
-    private func sanitize(topic: String) -> String {
-        return topic.trimmingCharacters(in: [" "])
+    private var sanitizedTopic: String {
+        return topic.trimmingCharacters(in: .whitespaces)
     }
     
-    private func isValid(topic: String) -> Bool {
-        let sanitizedTopic = sanitize(topic: topic)
+    private func isValid() -> Bool {
         if sanitizedTopic.isEmpty {
             return false
         } else if sanitizedTopic.range(of: "^[-_A-Za-z0-9]{1,64}$", options: .regularExpression, range: nil, locale: nil) == nil {
             return false
-        } else if store.getSubscription(baseUrl: Config.appBaseUrl, topic: topic) != nil {
+        } else if store.getSubscription(baseUrl: selectedBaseUrl, topic: topic) != nil {
             return false
         }
         return true
     }
     
     private func subscribeAction() {
-        let baseUrl = (useAnother) ? baseUrl : Config.appBaseUrl
         DispatchQueue.global(qos: .background).async {
-            subscriptionManager.subscribe(baseUrl: baseUrl, topic: sanitize(topic: topic))
+            subscriptionManager.subscribe(baseUrl: selectedBaseUrl, topic: sanitizedTopic)
         }
         isShowing = false
     }
     
     private func cancelAction() {
         isShowing = false
+    }
+    
+    private var selectedBaseUrl: String {
+        return (useAnother) ? baseUrl : Config.appBaseUrl
     }
 }
 

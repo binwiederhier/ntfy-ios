@@ -81,14 +81,15 @@ class Store: ObservableObject {
     
     func save(notificationFromUserInfo userInfo: [AnyHashable: Any]) {
         guard let id = userInfo["id"] as? String,
-              let topic = userInfo["topic"] as? String,
               let time = userInfo["time"] as? String,
+              let event = userInfo["event"] as? String,
+              let topic = userInfo["topic"] as? String,
               let timeInt = Int64(time),
               let message = userInfo["message"] as? String else {
             Log.d(Store.tag, "Unknown or irrelevant message", userInfo)
             return
         }
-        let baseUrl = Config.appBaseUrl // Firebase messages all come from the main ntfy server
+        let baseUrl = userInfo["base_url"] as? String ?? Config.appBaseUrl // Firebase messages all come from the main ntfy server
         guard let subscription = getSubscription(baseUrl: baseUrl, topic: topic) else {
             Log.d(Store.tag, "Subscription for topic \(topic) unknown")
             return
@@ -99,10 +100,12 @@ class Store: ObservableObject {
         let m = Message(
             id: id,
             time: timeInt,
+            event: event,
             message: message,
             title: title,
             priority: priority,
-            tags: tags
+            tags: tags,
+            actions: nil // TODO: Actions
         )
         save(notificationFromMessage: m, withSubscription: subscription)
     }
@@ -116,6 +119,7 @@ class Store: ObservableObject {
             notification.title = message.title ?? ""
             notification.priority = (message.priority != nil && message.priority != 0) ? message.priority! : 3
             notification.tags = message.tags?.joined(separator: ",") ?? ""
+            // TODO: actions
             subscription.addToNotifications(notification)
             subscription.lastNotificationId = message.id
             try context.save()
@@ -181,9 +185,10 @@ class Store: ObservableObject {
 extension Store {
     static let sampleData = [
         "stats": [
-            Message(id: "1", time: 1653048956, message: "In the last 24 hours, hyou had 5,000 users across 13 countries visit your website", title: "Record visitor numbers", priority: 4, tags: ["smile", "server123", "de"]),
-            Message(id: "2", time: 1653058956, message: "201 users/h\n80 IPs", title: "This is a title", priority: 1, tags: []),
-            Message(id: "3", time: 1643058956, message: "This message does not have a title, but is instead super long. Like really really long. It can't be any longer I think. I mean, there is s 4,000 byte limit of the message, so I guess I have to make this 4,000 bytes long. Or do I? 😁 I don't know. It's quite tedious to come up with something so long, so I'll stop now. Bye!", title: nil, priority: 5, tags: ["facepalm"])
+            // TODO: Message with action
+            Message(id: "1", time: 1653048956, event: "message", message: "In the last 24 hours, hyou had 5,000 users across 13 countries visit your website", title: "Record visitor numbers", priority: 4, tags: ["smile", "server123", "de"], actions: nil),
+            Message(id: "2", time: 1653058956, event: "message", message: "201 users/h\n80 IPs", title: "This is a title", priority: 1, tags: [], actions: nil),
+            Message(id: "3", time: 1643058956, event: "message", message: "This message does not have a title, but is instead super long. Like really really long. It can't be any longer I think. I mean, there is s 4,000 byte limit of the message, so I guess I have to make this 4,000 bytes long. Or do I? 😁 I don't know. It's quite tedious to come up with something so long, so I'll stop now. Bye!", title: nil, priority: 5, tags: ["facepalm"], actions: nil)
         ],
         "backups": [],
         "announcements": [],

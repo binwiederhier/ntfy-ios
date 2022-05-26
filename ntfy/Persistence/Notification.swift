@@ -64,14 +64,36 @@ extension Notification {
 struct Message: Decodable {
     var id: String
     var time: Int64
+    var event: String
     var message: String?
     var title: String?
     var priority: Int16?
     var tags: [String]?
     var actions: [Action]?
+    
+    func toUserInfo() -> [AnyHashable: Any] {
+        // This should mimic the way that the ntfy server encodes a message.
+        // See server_firebase.go for more details.
+        
+        var actionsStr: String?
+        if let actionsData = try? JSONEncoder().encode(actions) {
+            actionsStr = String(data: actionsData, encoding: .utf8)
+        }
+        
+        return [
+            "id": id,
+            "event": event,
+            "time": String(time),
+            "message": message ?? "",
+            "title": title ?? "",
+            "priority": String(priority ?? 3),
+            "tags": tags?.joined(separator: ",") ?? "",
+            "actions": actionsStr ?? ""
+        ]
+    }
 }
 
-struct Action: Decodable {
+struct Action: Encodable, Decodable {
     var id: String
     var action: String
     var label: String

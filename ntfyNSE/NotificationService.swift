@@ -24,6 +24,7 @@ class NotificationService: UNNotificationServiceExtension {
             
             // Get all the things
             let event = userInfo["event"]  as? String ?? ""
+            let baseUrl = userInfo["base_url"]  as? String ?? Config.appBaseUrl
             let topic = userInfo["topic"]  as? String ?? ""
             let title = userInfo["title"] as? String
             let priority = userInfo["priority"] as? String ?? "3"
@@ -39,7 +40,7 @@ class NotificationService: UNNotificationServiceExtension {
             // Set notification title to short URL if there is no title. The title is always set
             // by the server, but it may be empty.
             if let title = title, title == "" {
-                bestAttemptContent.title = topicShortUrl(baseUrl: Config.appBaseUrl, topic: topic)
+                bestAttemptContent.title = topicShortUrl(baseUrl: baseUrl, topic: topic)
             }
             
             // Emojify title or message
