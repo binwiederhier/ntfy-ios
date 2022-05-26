@@ -50,7 +50,14 @@ struct SubscriptionAddView: View {
     
     private func isValid(topic: String) -> Bool {
         let sanitizedTopic = sanitize(topic: topic)
-        return !sanitizedTopic.isEmpty && (sanitizedTopic.range(of: "^[-_A-Za-z0-9]{1,64}$", options: .regularExpression, range: nil, locale: nil) != nil)
+        if sanitizedTopic.isEmpty {
+            return false
+        } else if sanitizedTopic.range(of: "^[-_A-Za-z0-9]{1,64}$", options: .regularExpression, range: nil, locale: nil) == nil {
+            return false
+        } else if store.getSubscription(baseUrl: Config.appBaseUrl, topic: topic) != nil {
+            return false
+        }
+        return true
     }
     
     private func subscribeAction() {

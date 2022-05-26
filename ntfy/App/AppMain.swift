@@ -2,7 +2,6 @@ import SwiftUI
 import Firebase
 
 // TODO: Verify whether model version needs to be specified
-// TODO: Disallow adding same topic twice!!
 // TODO: Errors are not shown to the user, but instead just logged
 
 @main

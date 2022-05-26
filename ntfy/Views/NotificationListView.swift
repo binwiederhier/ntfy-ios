@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 enum ActiveAlert {
     case clear, unsubscribe, selected
@@ -282,6 +283,10 @@ struct NotificationRowView: View {
             }
         }
         .padding(.all, 4)
+        .onTapGesture {
+            // TODO: This gives no feedback to the user, and it only works if the text is tapped
+            UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
+        }
     }
 }
 
