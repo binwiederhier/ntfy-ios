@@ -10,7 +10,11 @@ extension Subscription {
     }
     
     func topicName() -> String {
-        return topic ?? "<unknown>"
+        return topic ?? "?"
+    }
+    
+    func urlHash() -> String {
+        return topicHash(baseUrl: baseUrl ?? "?", topic: topic ?? "?")
     }
     
     func notificationCount() -> Int {

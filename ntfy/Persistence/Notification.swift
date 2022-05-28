@@ -71,6 +71,7 @@ struct Message: Decodable {
     var tags: [String]?
     var actions: [Action]?
     var click: String?
+    var pollId: String?
     
     func toUserInfo() -> [AnyHashable: Any] {
         // This should mimic the way that the ntfy server encodes a message.
@@ -85,7 +86,8 @@ struct Message: Decodable {
             "priority": String(priority ?? 3),
             "tags": tags?.joined(separator: ",") ?? "",
             "actions": Actions.shared.encode(actions),
-            "click": click ?? ""
+            "click": click ?? "",
+            "poll_id": pollId ?? ""
         ]
     }
     
@@ -103,6 +105,7 @@ struct Message: Decodable {
         let tags = (userInfo["tags"] as? String ?? "").components(separatedBy: ",")
         let actions = userInfo["actions"] as? String
         let click = userInfo["click"] as? String
+        let pollId = userInfo["poll_id"] as? String
         return Message(
             id: id,
             time: timeInt,
@@ -112,7 +115,8 @@ struct Message: Decodable {
             priority: priority,
             tags: tags,
             actions: Actions.shared.parse(actions),
-            click: click
+            click: click,
+            pollId: pollId
         )
     }
 }

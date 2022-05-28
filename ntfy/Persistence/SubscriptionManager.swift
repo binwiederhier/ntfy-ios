@@ -9,7 +9,11 @@ struct SubscriptionManager {
     
     func subscribe(baseUrl: String, topic: String) {
         Log.d(tag, "Subscribing to \(topicUrl(baseUrl: baseUrl, topic: topic))")
-        Messaging.messaging().subscribe(toTopic: topic)
+        if baseUrl == Config.appBaseUrl {
+            Messaging.messaging().subscribe(toTopic: topic)
+        } else {
+            Messaging.messaging().subscribe(toTopic: topicHash(baseUrl: baseUrl, topic: topic))
+        }
         let subscription = store.saveSubscription(baseUrl: baseUrl, topic: topic)
         poll(subscription)
     }
@@ -17,8 +21,12 @@ struct SubscriptionManager {
     func unsubscribe(_ subscription: Subscription) {
         Log.d(tag, "Unsubscribing from \(subscription.urlString())")
         DispatchQueue.main.async {
-            if let topic = subscription.topic {
-                Messaging.messaging().unsubscribe(fromTopic: topic)
+            if let baseUrl = subscription.baseUrl, let topic = subscription.topic {
+                if baseUrl == Config.appBaseUrl {
+                    Messaging.messaging().unsubscribe(fromTopic: topic)
+                } else {
+                    Messaging.messaging().unsubscribe(fromTopic: topicHash(baseUrl: baseUrl, topic: topic))
+                }
             }
             store.delete(subscription: subscription)
         }

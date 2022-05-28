@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 func topicUrl(baseUrl: String, topic: String) -> String {
     return "\(baseUrl)/\(topic)"
@@ -8,6 +9,12 @@ func topicShortUrl(baseUrl: String, topic: String) -> String {
     return topicUrl(baseUrl: baseUrl, topic: topic)
         .replacingOccurrences(of: "http://", with: "")
         .replacingOccurrences(of: "https://", with: "")
+}
+
+func topicHash(baseUrl: String, topic: String) -> String {
+    let data = Data(topicUrl(baseUrl: baseUrl, topic: topic).utf8)
+    let digest = SHA256.hash(data: data)
+    return digest.compactMap { String(format: "%02x", $0)}.joined()
 }
 
 func parseAllTags(_ tags: String?) -> [String] {

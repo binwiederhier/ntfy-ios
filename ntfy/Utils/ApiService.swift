@@ -5,12 +5,33 @@ class ApiService {
     static let shared = ApiService()
     
     func poll(subscription: Subscription, completionHandler: @escaping ([Message]?, Error?) -> Void) {
-        guard let url = URL(string: subscription.urlString()) else { return }
+        guard let url = URL(string: subscription.urlString()) else {
+            // FIXME
+            return
+        }
         let since = subscription.lastNotificationId ?? "all"
         let urlString = "\(url)/json?poll=1&since=\(since)"
         
         Log.d(tag, "Polling from \(urlString)")
         fetchJsonData(urlString: urlString, completionHandler: completionHandler)
+    }
+    
+    func poll(subscription: Subscription, messageId: String, completionHandler: @escaping (Message?, Error?) -> Void) {
+        let url = URL(string: "\(subscription.urlString())/json?poll=1&id=\(messageId)")!
+        Log.d(tag, "Polling single message from \(url)")
+        
+        URLSession.shared.dataTask(with: URLRequest(url: url)) { (data, response, error) in
+            if let error = error {
+                completionHandler(nil, error)
+                return
+            }
+            do {
+                let message = try JSONDecoder().decode(Message.self, from: data!)
+                completionHandler(message, nil)
+            } catch {
+                completionHandler(nil, error)
+            }
+        }.resume()
     }
 
     func publish(

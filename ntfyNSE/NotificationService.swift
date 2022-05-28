@@ -1,5 +1,6 @@
 import UserNotifications
 import CoreData
+import CryptoKit
 
 /// This app extension is responsible for persisting the incoming notification to the data store (Core Data). It will eventually be the entity that
 /// fetches notification content from selfhosted servers (when a "poll request" is received). This is not implemented yet.
@@ -22,11 +23,37 @@ class NotificationService: UNNotificationServiceExtension {
         if let bestAttemptContent = bestAttemptContent {
             let store = Store.shared
             let userInfo = bestAttemptContent.userInfo
+            let baseUrl = userInfo["base_url"]  as? String ?? Config.appBaseUrl
+            let topic = userInfo["topic"]  as? String ?? ""
             guard let message = Message.from(userInfo: userInfo) else {
                 Log.w(Store.tag, "Message cannot be parsed from userInfo", userInfo)
                 contentHandler(request.content)
                 return
             }
+            if message.event == "poll_request" {
+                let subscription = store.getSubscriptions()?.first { $0.urlHash() == topic }
+                guard let subscription = subscription, let pollId = message.pollId else {
+                    Log.w(tag, "Cannot find subscription", message)
+                    contentHandler(request.content)
+                    return
+                }
+                //let semaphore = DispatchSemaphore(value: 0)
+                ApiService.shared.poll(subscription: subscription, messageId: pollId) { message, error in
+                    guard let message = message else {
+                        Log.w(self.tag, "Error fetching message", error)
+                        contentHandler(request.content)
+                        return
+                    }
+                    bestAttemptContent.title = message.title ?? subscription.urlString()
+                    bestAttemptContent.body = message.message ?? ""
+                    contentHandler(bestAttemptContent)
+                    //semaphore.signal()
+                }
+                //semaphore.wait(timeout: .distantFuture)
+                Thread.sleep(forTimeInterval: 5)
+                return
+            }
+            
             if message.event != "message" {
                 Log.w(tag, "Irrelevant message received", message)
                 contentHandler(request.content)
@@ -34,8 +61,6 @@ class NotificationService: UNNotificationServiceExtension {
             }
             
             // Only handle "message" events
-            let baseUrl = userInfo["base_url"]  as? String ?? Config.appBaseUrl
-            let topic = userInfo["topic"]  as? String ?? ""
             guard let subscription = store.getSubscription(baseUrl: baseUrl, topic: topic) else {
                 Log.w(tag, "Subscription for topic \(topic) unknown")
                 contentHandler(request.content)
@@ -114,5 +139,13 @@ class NotificationService: UNNotificationServiceExtension {
         if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
             contentHandler(bestAttemptContent)
         }
+    }
+    
+    func handleMessage() {
+        
+    }
+    
+    func handlePollRequest() {
+        
     }
 }
