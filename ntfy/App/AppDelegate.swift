@@ -125,33 +125,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         
         // Execute user action or click action (if any)
         if let action = action {
-            handle(action: action)
+            ActionExecutor.execute(action)
         } else if let click = message.click, click != "", let url = URL(string: click) {
-            open(url: url)
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
     
         completionHandler()
-    }
-    
-    private func handle(action: Action) {
-        Log.d(tag, "Executing user action", action)
-        switch action.action {
-        case "view":
-            if let url = URL(string: action.url ?? "") {
-                open(url: url)
-            } else {
-                Log.w(tag, "Unable to parse action URL", action)
-            }
-        case "http":
-            Actions.shared.http(action)
-        default:
-            Log.w(tag, "Action \(action.action) not supported", action)
-        }
-    }
-    
-    private func open(url: URL) {
-        Log.d(tag, "Opening URL \(url)")
-        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 }
 

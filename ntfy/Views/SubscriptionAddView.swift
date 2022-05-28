@@ -20,7 +20,7 @@ struct SubscriptionAddView: View {
                 Form {
                     Section(
                         footer:
-                            Text("Topics may not be password protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
+                            Text("Topics are not password protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
                     ) {
                         TextField("Topic name, e.g. phil_alerts", text: $topic)
                             .disableAutocapitalization()
@@ -28,7 +28,7 @@ struct SubscriptionAddView: View {
                     }
                     Section(
                         footer:
-                            (useAnother) ? Text("Support for self-hosted servers is currently very limited. Delivery of messages is significantly delayed and not guaranteed. This is actively being developed.") : Text("")
+                            (useAnother) ? Text("Support for self-hosted servers is currently limited. To ensure instant delivery, be sure to set upstream-base-url in your server's config, otherwise messages may arrive with significant delay. Auth is not yet supported.") : Text("")
                     ) {
                         Toggle("Use another server", isOn: $useAnother)
                         if useAnother {

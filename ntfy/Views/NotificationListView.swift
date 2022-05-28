@@ -56,7 +56,7 @@ struct NotificationListView: View {
                     }){
                         Image(systemName: "chevron.left")
                     }
-                    .padding([.top, .bottom, .trailing], 20)
+                    .padding([.top, .bottom, .trailing], 40)
                 }
             }
             ToolbarItem(placement: .principal) {
@@ -90,7 +90,7 @@ struct NotificationListView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
-                            .padding([.leading], 20)
+                            .padding([.leading], 40)
                     }
                 }
             }
@@ -145,7 +145,7 @@ struct NotificationListView: View {
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
                         .padding(.bottom)
-
+                    
                     if #available(iOS 15.0, *) {
                         Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
                             .foregroundColor(.gray)
@@ -269,10 +269,12 @@ struct NotificationRowView: View {
                         .frame(width: 16, height: 16)
                 }
             }
+            .padding([.bottom], 2)
             if let title = notification.formatTitle(), title != "" {
                 Text(title)
                     .font(.headline)
                     .bold()
+                    .padding([.bottom], 2)
             }
             Text(notification.formatMessage())
                 .font(.body)
@@ -280,6 +282,24 @@ struct NotificationRowView: View {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
                     .font(.subheadline)
                     .foregroundColor(.gray)
+                    .padding([.top], 2)
+            }
+            if !notification.actionsList().isEmpty {
+                HStack {
+                    ForEach(notification.actionsList()) { action in
+                        if #available(iOS 15, *) {
+                            Button(action.label) {
+                                ActionExecutor.execute(action)
+                            }
+                            .buttonStyle(.bordered)
+                        } else {
+                            Button(action.label) {
+                                ActionExecutor.execute(action)
+                            }
+                        }
+                    }
+                }
+                .padding([.top], 5)
             }
         }
         .padding(.all, 4)
@@ -305,3 +325,4 @@ struct NotificationListView_Previews: PreviewProvider {
         }
     }
 }
+

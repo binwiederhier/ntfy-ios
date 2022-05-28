@@ -58,6 +58,10 @@ extension Notification {
     func nonEmojiTags() -> [String] {
         return parseNonEmojiTags(tags)
     }
+    
+    func actionsList() -> [Action] {
+        return Actions.shared.parse(actions) ?? []
+    }
 }
 
 /// This is the "on the wire" message as it is received from the ntfy server
@@ -125,7 +129,7 @@ struct Message: Decodable {
     }
 }
 
-struct Action: Encodable, Decodable {
+struct Action: Encodable, Decodable, Identifiable {
     var id: String
     var action: String
     var label: String
