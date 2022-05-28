@@ -65,6 +65,7 @@ struct Message: Decodable {
     var id: String
     var time: Int64
     var event: String
+    var topic: String
     var message: String?
     var title: String?
     var priority: Int16?
@@ -79,8 +80,9 @@ struct Message: Decodable {
         
         return [
             "id": id,
-            "event": event,
             "time": String(time),
+            "event": event,
+            "topic": topic,
             "message": message ?? "",
             "title": title ?? "",
             "priority": String(priority ?? 3),
@@ -95,6 +97,7 @@ struct Message: Decodable {
         guard let id = userInfo["id"] as? String,
               let time = userInfo["time"] as? String,
               let event = userInfo["event"] as? String,
+              let topic = userInfo["topic"] as? String,
               let timeInt = Int64(time),
               let message = userInfo["message"] as? String else {
             Log.d(Store.tag, "Unknown or irrelevant message", userInfo)
@@ -110,6 +113,7 @@ struct Message: Decodable {
             id: id,
             time: timeInt,
             event: event,
+            topic: topic,
             message: message,
             title: title,
             priority: priority,

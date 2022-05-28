@@ -9,125 +9,35 @@ import CryptoKit
 /// select Debug -> Attach to Process by PID or Name, and select the extension. Don't forget to set a breakpoint, or you're not gonna have a good time.
 class NotificationService: UNNotificationServiceExtension {
     private let tag = "NotificationService"
-    private let actionsCategory = "ntfyActions" // It seems ok to re-use the same category
+    private var store: Store?
     
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+        self.store = Store.shared
         self.contentHandler = contentHandler
         self.bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
         Log.d(tag, "Notification received (in service)") // Logs from extensions are not printed in Xcode!
 
         if let bestAttemptContent = bestAttemptContent {
-            let store = Store.shared
             let userInfo = bestAttemptContent.userInfo
             let baseUrl = userInfo["base_url"]  as? String ?? Config.appBaseUrl
-            let topic = userInfo["topic"]  as? String ?? ""
             guard let message = Message.from(userInfo: userInfo) else {
-                Log.w(Store.tag, "Message cannot be parsed from userInfo", userInfo)
+                Log.w(tag, "Message cannot be parsed from userInfo", userInfo)
                 contentHandler(request.content)
                 return
             }
-            if message.event == "poll_request" {
-                let subscription = store.getSubscriptions()?.first { $0.urlHash() == topic }
-                guard let subscription = subscription, let pollId = message.pollId else {
-                    Log.w(tag, "Cannot find subscription", message)
-                    contentHandler(request.content)
-                    return
-                }
-                //let semaphore = DispatchSemaphore(value: 0)
-                ApiService.shared.poll(subscription: subscription, messageId: pollId) { message, error in
-                    guard let message = message else {
-                        Log.w(self.tag, "Error fetching message", error)
-                        contentHandler(request.content)
-                        return
-                    }
-                    bestAttemptContent.title = message.title ?? subscription.urlString()
-                    bestAttemptContent.body = message.message ?? ""
-                    contentHandler(bestAttemptContent)
-                    //semaphore.signal()
-                }
-                //semaphore.wait(timeout: .distantFuture)
-                Thread.sleep(forTimeInterval: 5)
-                return
-            }
-            
-            if message.event != "message" {
+            switch message.event {
+            case "poll_request":
+                handlePollRequest(request, bestAttemptContent, message, contentHandler)
+            case "message":
+                handleMessage(request, bestAttemptContent, baseUrl, message, contentHandler)
+            default:
                 Log.w(tag, "Irrelevant message received", message)
                 contentHandler(request.content)
-                return
             }
-            
-            // Only handle "message" events
-            guard let subscription = store.getSubscription(baseUrl: baseUrl, topic: topic) else {
-                Log.w(tag, "Subscription for topic \(topic) unknown")
-                contentHandler(request.content)
-                return
-            }
-
-            // Set notification title to short URL if there is no title. The title is always set
-            // by the server, but it may be empty.
-            if let title = message.title, title == "" {
-                bestAttemptContent.title = topicShortUrl(baseUrl: baseUrl, topic: topic)
-            }
-            
-            // Emojify title or message
-            let emojiTags = parseEmojiTags(message.tags)
-            if !emojiTags.isEmpty {
-                if let title = message.title, title != "" {
-                    bestAttemptContent.title = emojiTags.joined(separator: "") + " " + bestAttemptContent.title
-                } else {
-                    bestAttemptContent.body = emojiTags.joined(separator: "") + " " + bestAttemptContent.body
-                }
-            }
-            
-            // Add custom actions
-            //
-            // We re-define the categories every time here, which is weird, but it works. When tapped, the action sets the
-            // actionIdentifier in the application(didReceive) callback. This logic is handled in the AppDelegate. This approach
-            // is described in a comment in https://stackoverflow.com/questions/30103867/changing-action-titles-in-interactive-notifications-at-run-time#comment122812568_30107065
-            //
-            // We also must set the .foreground flag, which brings the notification to the foreground and avoids an error about
-            // permissions. This is described in https://stackoverflow.com/a/44580916/1440785
-            if let actions = message.actions, !actions.isEmpty {
-                bestAttemptContent.categoryIdentifier = actionsCategory
-
-                let center = UNUserNotificationCenter.current()
-                let notificationActions = actions.map { UNNotificationAction(identifier: $0.id, title: $0.label, options: [.foreground]) }
-                let category = UNNotificationCategory(identifier: actionsCategory, actions: notificationActions, intentIdentifiers: [])
-                center.setNotificationCategories([category])
-            }
-                        
-            // Play a sound, and group by topic
-            bestAttemptContent.sound = .default
-            bestAttemptContent.threadIdentifier = topic
-
-            // Map priorities to interruption level (light up screen, ...) and relevance (order)
-            if #available(iOS 15.0, *) {
-                switch message.priority {
-                case 1:
-                    bestAttemptContent.interruptionLevel = .passive
-                    bestAttemptContent.relevanceScore = 0
-                case 2:
-                    bestAttemptContent.interruptionLevel = .passive
-                    bestAttemptContent.relevanceScore = 0.25
-                case 4:
-                    bestAttemptContent.interruptionLevel = .timeSensitive
-                    bestAttemptContent.relevanceScore = 0.75
-                case 5:
-                    bestAttemptContent.interruptionLevel = .critical
-                    bestAttemptContent.relevanceScore = 1
-                default:
-                    bestAttemptContent.interruptionLevel = .active
-                    bestAttemptContent.relevanceScore = 0.5
-                }
-            }
-            
-            // Save notification to store, and display it
-            Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
-            contentHandler(bestAttemptContent)
         }
     }
     
@@ -141,11 +51,49 @@ class NotificationService: UNNotificationServiceExtension {
         }
     }
     
-    func handleMessage() {
+    private func handleMessage(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ baseUrl: String, _ message: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
+        // Modify notification based on message
+        content.modify(message: message, baseUrl: baseUrl)
         
+        // Save notification to store, and display it
+        guard let subscription = store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
+            Log.w(tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
+            contentHandler(request.content)
+            return
+        }
+        Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
+        contentHandler(content)
     }
     
-    func handlePollRequest() {
+    private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
+        let subscription = store?.getSubscriptions()?.first { $0.urlHash() == pollRequest.topic }
+        let baseUrl = subscription?.baseUrl
+        guard
+            let subscription = subscription,
+            let pollId = pollRequest.pollId,
+            let baseUrl = baseUrl
+        else {
+            Log.w(tag, "Cannot find subscription", pollRequest)
+            contentHandler(request.content)
+            return
+        }
         
+        // Poll original server
+        let semaphore = DispatchSemaphore(value: 0)
+        ApiService.shared.poll(subscription: subscription, messageId: pollId) { message, error in
+            guard let message = message else {
+                Log.w(self.tag, "Error fetching message", error)
+                contentHandler(request.content)
+                return
+            }
+            self.handleMessage(request, content, baseUrl, message, contentHandler)
+            semaphore.signal()
+        }
+        
+        // Note: If notifications only show up as "New message", it may be because the "return" statement
+        // happens before the contentHandler() is called. We add this semaphore here to synchronize the threads.
+        // I don't know if this is necessary, but it feels like the right thing to do.
+        
+        _ = semaphore.wait(timeout: DispatchTime.now() + 25) // 30 seconds is the max for the entire extension
     }
 }

@@ -41,3 +41,4 @@ func parseNonEmojiTags(_ tags: String?) -> [String] {
     return parseAllTags(tags)
         .filter { EmojiManager.shared.getEmojiByAlias(alias: $0) == nil }
 }
+
