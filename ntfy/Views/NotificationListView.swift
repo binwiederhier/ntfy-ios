@@ -60,7 +60,9 @@ struct NotificationListView: View {
                 }
             }
             ToolbarItem(placement: .principal) {
-                Text(subscription.displayName()).font(.headline)
+                Text(subscription.displayName())
+                    .font(.headline)
+                    .lineLimit(1)
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 if (self.editMode == .active) {
@@ -221,8 +223,9 @@ struct NotificationListView: View {
         notificationCenter.getDeliveredNotifications { notifications in
             let ids = notifications
                 .filter { notification in
-                    if let topic = notification.request.content.userInfo["topic"] as? String {
-                        return topic == subscription.topic // TODO: This is not enough for selfhosted servers
+                    let userInfo = notification.request.content.userInfo
+                    if let baseUrl = userInfo["base_url"] as? String, let topic = userInfo["topic"] as? String {
+                        return baseUrl == subscription.baseUrl && topic == subscription.topic
                     }
                     return false
                 }
@@ -291,11 +294,21 @@ struct NotificationRowView: View {
                             Button(action.label) {
                                 ActionExecutor.execute(action)
                             }
-                            .buttonStyle(.bordered)
+                            .buttonStyle(.borderedProminent)
                         } else {
-                            Button(action.label) {
+                            Button(action: {
                                 ActionExecutor.execute(action)
+                            }) {
+                                Text(action.label)
+                                    .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
+                                    .foregroundColor(.white)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color.white, lineWidth: 2)
+                                    )
                             }
+                            .background(Color.accentColor)
+                            .cornerRadius(10)
                         }
                     }
                 }

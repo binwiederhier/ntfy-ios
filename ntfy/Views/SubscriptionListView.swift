@@ -174,5 +174,6 @@ struct SubscriptionsListView_Previews: PreviewProvider {
         SubscriptionListView()
             .environment(\.managedObjectContext, store.context)
             .environmentObject(store)
+            .environmentObject(AppDelegate())
     }
 }
