@@ -1,8 +1,10 @@
 import Foundation
 
 class ApiService {
-    private let tag = "ApiService"
     static let shared = ApiService()
+    static let userAgent = "ntfy/\(Config.version) (build \(Config.build); iOS \(Config.osVersion))"
+    
+    private let tag = "ApiService"
     
     func poll(subscription: Subscription, completionHandler: @escaping ([Message]?, Error?) -> Void) {
         guard let url = URL(string: subscription.urlString()) else {
@@ -20,7 +22,10 @@ class ApiService {
         let url = URL(string: "\(subscription.urlString())/json?poll=1&id=\(messageId)")!
         Log.d(tag, "Polling single message from \(url)")
         
-        URLSession.shared.dataTask(with: URLRequest(url: url)) { (data, response, error) in
+        var request = URLRequest(url: url)
+        request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
+
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 completionHandler(nil, error)
                 return
@@ -47,6 +52,7 @@ class ApiService {
         Log.d(tag, "Publishing to \(url)")
         
         request.httpMethod = "POST"
+        request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
         request.setValue(title, forHTTPHeaderField: "Title")
         request.setValue(String(priority), forHTTPHeaderField: "Priority")
         request.setValue(tags.joined(separator: ","), forHTTPHeaderField: "Tags")
@@ -62,15 +68,15 @@ class ApiService {
 
     private func fetchJsonData<T: Decodable>(urlString: String, completionHandler: @escaping ([T]?, Error?) -> ()) {
         guard let url = URL(string: urlString) else { return }
-        let request = URLRequest(url: url)
-     
+        var request = URLRequest(url: url)
+        request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
+
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
-                print(error)
+                Log.e(self.tag, "Error fetching data", error)
                 completionHandler(nil, error)
                 return
             }
-
             do {
                 let lines = String(decoding: data!, as: UTF8.self).split(whereSeparator: \.isNewline)
                 var notifications: [T] = []
@@ -79,7 +85,7 @@ class ApiService {
                 }
                 completionHandler(notifications, nil)
             } catch {
-                print(error)
+                Log.e(self.tag, "Error fetching data", error)
                 completionHandler(nil, error)
             }
         }.resume()

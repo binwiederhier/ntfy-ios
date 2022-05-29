@@ -13,7 +13,7 @@ struct AppMain: App {
 
     init() {
         Log.d(tag, "Launching ntfy 🥳. Welcome!")
-        Log.d(tag, "Base URL is \(Config.appBaseUrl)")
+        Log.d(tag, "Base URL is \(Config.appBaseUrl), user agent is \(ApiService.userAgent)")
         
         // We must configure Firebase here, and not in the AppDelegate. For some reason
         // configuring it there did not work.
