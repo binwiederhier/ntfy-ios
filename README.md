@@ -1,8 +1,6 @@
 #  ntfy iOS App
 This is the iOS app for [ntfy](https://github.com/binwiederhier/ntfy) ([ntfy.sh](https://ntfy.sh)).
 
-**Project status: The app is under HEAVY DEVELOPMENT.**
-
 ## Relevant Links
 
 - [Android App - Feature Parity](docs/FEATURE_PARITY.md)
