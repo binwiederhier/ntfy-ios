@@ -6,7 +6,7 @@ class ApiService {
     
     private let tag = "ApiService"
     
-    func poll(subscription: Subscription, completionHandler: @escaping ([Message]?, Error?) -> Void) {
+    func poll(subscription: Subscription, user: BasicUser?, completionHandler: @escaping ([Message]?, Error?) -> Void) {
         guard let url = URL(string: subscription.urlString()) else {
             // FIXME
             return
@@ -14,17 +14,15 @@ class ApiService {
         let since = subscription.lastNotificationId ?? "all"
         let urlString = "\(url)/json?poll=1&since=\(since)"
         
-        Log.d(tag, "Polling from \(urlString)")
-        fetchJsonData(urlString: urlString, completionHandler: completionHandler)
+        Log.d(tag, "Polling from \(urlString) with user \(user?.username ?? "anonymous")")
+        fetchJsonData(urlString: urlString, user: user, completionHandler: completionHandler)
     }
     
-    func poll(subscription: Subscription, messageId: String, completionHandler: @escaping (Message?, Error?) -> Void) {
+    func poll(subscription: Subscription, messageId: String, user: BasicUser?, completionHandler: @escaping (Message?, Error?) -> Void) {
         let url = URL(string: "\(subscription.urlString())/json?poll=1&id=\(messageId)")!
-        Log.d(tag, "Polling single message from \(url)")
+        Log.d(tag, "Polling single message from \(url) with user \(user?.username ?? "anonymous")")
         
-        var request = URLRequest(url: url)
-        request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
-
+        let request = newRequest(url: url, user: user)
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 completionHandler(nil, error)
@@ -41,18 +39,18 @@ class ApiService {
 
     func publish(
         subscription: Subscription,
+        user: BasicUser?,
         message: String,
         title: String,
         priority: Int = 3,
         tags: [String] = []
     ) {
         guard let url = URL(string: subscription.urlString()) else { return }
-        var request = URLRequest(url: url)
+        var request = newRequest(url: url, user: user)
 
         Log.d(tag, "Publishing to \(url)")
         
         request.httpMethod = "POST"
-        request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
         request.setValue(title, forHTTPHeaderField: "Title")
         request.setValue(String(priority), forHTTPHeaderField: "Priority")
         request.setValue(tags.joined(separator: ","), forHTTPHeaderField: "Tags")
@@ -65,12 +63,32 @@ class ApiService {
             Log.d(self.tag, "Publishing message succeeded", response)
         }.resume()
     }
+    
+    func checkAuth(baseUrl: String, topic: String, user: BasicUser?, completionHandler: @escaping(AuthCheckResponse?, Error?) -> Void) {
+        guard let url = URL(string: topicAuthUrl(baseUrl: baseUrl, topic: topic)) else { return }
+        let request = newRequest(url: url, user: user)
+        Log.d(tag, "Checking auth for \(url) with user \(user?.username ?? "anonymous")")
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            if let error = error {
+                Log.e(self.tag, "Error checking auth: \(error)")
+                completionHandler(nil, error)
+            }
+            if let data = data {
+                do {
+                    let result = try JSONDecoder().decode(AuthCheckResponse.self, from: data)
+                    Log.d(self.tag, "Auth result: \(result)")
+                    completionHandler(result, nil)
+                } catch {
+                    Log.e(self.tag, "Error handling auth response: \(error)")
+                    completionHandler(nil, error)
+                }
+            }
+        }.resume()
+    }
 
-    private func fetchJsonData<T: Decodable>(urlString: String, completionHandler: @escaping ([T]?, Error?) -> ()) {
+    private func fetchJsonData<T: Decodable>(urlString: String, user: BasicUser?, completionHandler: @escaping ([T]?, Error?) -> ()) {
         guard let url = URL(string: urlString) else { return }
-        var request = URLRequest(url: url)
-        request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
-
+        let request = newRequest(url: url, user: user)
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 Log.e(self.tag, "Error fetching data", error)
@@ -89,5 +107,42 @@ class ApiService {
                 completionHandler(nil, error)
             }
         }.resume()
+    }
+    
+    private func newRequest(url: URL, user: BasicUser?) -> URLRequest {
+        var request = URLRequest(url: url)
+        request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
+        if let user = user {
+            request.setValue(user.toHeader(), forHTTPHeaderField: "Authorization")
+        }
+        return request
+    }
+}
+
+struct BasicUser {
+    let username: String
+    let password: String
+    
+    func toHeader() -> String {
+        return "Basic " + String(format: "%@:%@", username, password).data(using: String.Encoding.utf8)!.base64EncodedString()
+    }
+}
+
+struct AuthCheckResponse: Codable {
+    let success: Bool?
+    let code: Int?
+    let http: Int?
+    let error: String?
+
+    enum CodingKeys: String, CodingKey {
+        case success, code, http, error
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.success = try container.decodeIfPresent(Bool.self, forKey: .success)
+        self.code = try container.decodeIfPresent(Int.self, forKey: .code)
+        self.http = try container.decodeIfPresent(Int.self, forKey: .http)
+        self.error = try container.decodeIfPresent(String.self, forKey: .error)
     }
 }

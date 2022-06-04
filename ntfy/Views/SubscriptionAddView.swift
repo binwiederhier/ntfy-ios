@@ -10,32 +10,34 @@ struct SubscriptionAddView: View {
     @State private var useAnother: Bool = false
     @State private var baseUrl: String = ""
     
+    @State private var showLogin: Bool = false
+    @State private var username: String = ""
+    @State private var password: String = ""
+
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
     
     var body: some View {
         NavigationView {
-            VStack {
-                Form {
-                    Section(
-                        footer:
-                            Text("Topics are not password protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
-                    ) {
-                        TextField("Topic name, e.g. phil_alerts", text: $topic)
+            Form {
+                Section(
+                    footer:
+                        Text("Topics are not password protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
+                ) {
+                    TextField("Topic name, e.g. phil_alerts", text: $topic)
+                        .disableAutocapitalization()
+                        .disableAutocorrection(true)
+                }
+                Section(
+                    footer:
+                        (useAnother) ? Text("Support for self-hosted servers is currently limited. To ensure instant delivery, be sure to set upstream-base-url in your server's config, otherwise messages may arrive with significant delay. Auth is not yet supported.") : Text("")
+                ) {
+                    Toggle("Use another server", isOn: $useAnother)
+                    if useAnother {
+                        TextField("Server URL, e.g. https://ntfy.example.com", text: $baseUrl)
                             .disableAutocapitalization()
                             .disableAutocorrection(true)
-                    }
-                    Section(
-                        footer:
-                            (useAnother) ? Text("Support for self-hosted servers is currently limited. To ensure instant delivery, be sure to set upstream-base-url in your server's config, otherwise messages may arrive with significant delay. Auth is not yet supported.") : Text("")
-                    ) {
-                        Toggle("Use another server", isOn: $useAnother)
-                        if useAnother {
-                            TextField("Server URL, e.g. https://ntfy.example.com", text: $baseUrl)
-                                .disableAutocapitalization()
-                                .disableAutocorrection(true)
-                        }
                     }
                 }
             }
@@ -48,11 +50,45 @@ struct SubscriptionAddView: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: subscribeAction) {
+                    Button(action: subscribeOrShowLoginAction) {
                         Text("Subscribe")
                     }
                     .disabled(!isValid())
                 }
+            }
+            .background(Group {
+                NavigationLink(
+                    destination: loginView,
+                    isActive: $showLogin
+                ) {
+                    EmptyView()
+                }
+            })
+        }
+    }
+    
+    private var loginView: some View {
+        Form {
+            Section(
+                footer:
+                    Text("This topic requires that you login with username and password. The user will be stored on your device, and will be re-used for other topics.")
+            ) {
+                TextField("Username", text: $username)
+                    .disableAutocapitalization()
+                    .disableAutocorrection(true)
+                TextField("Password", text: $password)
+                    .disableAutocapitalization()
+                    .disableAutocorrection(true)
+            }
+        }
+        .navigationTitle("Login required")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: subscribeWithUserAction) {
+                    Text("Subscribe")
+                }
+                .disabled(!isValid())
             }
         }
     }
@@ -72,11 +108,33 @@ struct SubscriptionAddView: View {
         return true
     }
     
-    private func subscribeAction() {
-        DispatchQueue.global(qos: .background).async {
-            subscriptionManager.subscribe(baseUrl: selectedBaseUrl, topic: sanitizedTopic)
+    private func subscribeOrShowLoginAction() {
+        let user = store.getUser(baseUrl: selectedBaseUrl)?.toBasicUser()
+        ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: topic, user: user) { (response, error) in
+            if response?.success == true {
+                DispatchQueue.global(qos: .background).async {
+                    subscriptionManager.subscribe(baseUrl: selectedBaseUrl, topic: sanitizedTopic)
+                }
+                isShowing = false
+            } else {
+                showLogin = true
+            }
         }
-        isShowing = false
+    }
+    
+    private func subscribeWithUserAction() {
+        let user = BasicUser(username: username, password: password)
+        ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: topic, user: user) { (response, error) in
+            if response?.success == true {
+                DispatchQueue.global(qos: .background).async {
+                    store.save(userBaseUrl: selectedBaseUrl, username: username, password: password)
+                    subscriptionManager.subscribe(baseUrl: selectedBaseUrl, topic: sanitizedTopic)
+                }
+                isShowing = false
+            } else {
+                showLogin = true
+            }
+        }
     }
     
     private func cancelAction() {
@@ -87,7 +145,6 @@ struct SubscriptionAddView: View {
         return (useAnother) ? baseUrl : Config.appBaseUrl
     }
 }
-
 
 struct SubscriptionAddView_Previews: PreviewProvider {
     @State static var isShowing = true

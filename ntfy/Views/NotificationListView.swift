@@ -187,8 +187,10 @@ struct NotificationListView: View {
         let priority = Int.random(in: 1..<6)
         let tags = Array(possibleTags.shuffled().prefix(Int.random(in: 0..<4)))
         DispatchQueue.global(qos: .background).async {
+            let user = store.getUser(baseUrl: subscription.baseUrl!)?.toBasicUser()
             ApiService.shared.publish(
                 subscription: subscription,
+                user: user,
                 message: "This is a test notification from the ntfy iOS app. It has a priority of \(priority). If you send another one, it may look different.",
                 title: "Test: You can set a title if you like",
                 priority: priority,
@@ -327,8 +329,8 @@ struct NotificationListView_Previews: PreviewProvider {
     static var previews: some View {
         let store = Store.preview
         Group {
-            let subscriptionWithNotifications = store.makeSubscription(store.context, "stats", Store.sampleData["stats"]!)
-            let subscriptionWithoutNotifications = store.makeSubscription(store.context, "announcements", Store.sampleData["announcements"]!)
+            let subscriptionWithNotifications = store.makeSubscription(store.context, "stats", Store.sampleMessages["stats"]!)
+            let subscriptionWithoutNotifications = store.makeSubscription(store.context, "announcements", Store.sampleMessages["announcements"]!)
             NotificationListView(subscription: subscriptionWithNotifications)
                 .environment(\.managedObjectContext, store.context)
                 .environmentObject(store)

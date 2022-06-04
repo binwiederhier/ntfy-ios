@@ -74,9 +74,29 @@ class Store: ObservableObject {
         return try? context.fetch(Subscription.fetchRequest())
     }
     
+    func getUser(baseUrl: String) -> User? {
+        let fetchRequest = User.fetchRequest()
+        let baseUrlPredicate = NSPredicate(format: "baseUrl = %@", baseUrl)
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [baseUrlPredicate])
+        return try? context.fetch(fetchRequest).first
+    }
+    
     func delete(subscription: Subscription) {
         context.delete(subscription)
         try? context.save()
+    }
+    
+    func save(userBaseUrl baseUrl: String, username: String, password: String) {
+        do {
+            let user = User(context: context)
+            user.baseUrl = baseUrl
+            user.username = username
+            user.password = password
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot store user", error)
+            rollbackAndRefresh()
+        }
     }
     
     func save(notificationFromMessage message: Message, withSubscription subscription: Subscription) {
@@ -153,7 +173,7 @@ class Store: ObservableObject {
 }
 
 extension Store {
-    static let sampleData = [
+    static let sampleMessages = [
         "stats": [
             // TODO: Message with action
             Message(id: "1", time: 1653048956, event: "message", topic: "stats", message: "In the last 24 hours, hyou had 5,000 users across 13 countries visit your website", title: "Record visitor numbers", priority: 4, tags: ["smile", "server123", "de"], actions: nil),
@@ -163,15 +183,20 @@ extension Store {
         "backups": [],
         "announcements": [],
         "alerts": [],
-        "plaground": []
+        "playground": []
     ]
     
     static var preview: Store = {
         let store = Store(inMemory: true)
         store.context.perform {
-            sampleData.forEach { topic, messages in
+            // Subscriptions and notifications
+            sampleMessages.forEach { topic, messages in
                 store.makeSubscription(store.context, topic, messages)
             }
+            
+            // Users
+            store.save(userBaseUrl: "https://ntfy.sh", username: "testuser", password: "testuser")
+            store.save(userBaseUrl: "https://ntfy.example.com", username: "phil", password: "phil12")
         }
         return store
     }()

@@ -11,6 +11,10 @@ func topicShortUrl(baseUrl: String, topic: String) -> String {
         .replacingOccurrences(of: "https://", with: "")
 }
 
+func topicAuthUrl(baseUrl: String, topic: String) -> String {
+    return "\(baseUrl)/\(topic)/auth"
+}
+
 func topicHash(baseUrl: String, topic: String) -> String {
     let data = Data(topicUrl(baseUrl: baseUrl, topic: topic).utf8)
     let digest = SHA256.hash(data: data)
@@ -41,4 +45,3 @@ func parseNonEmojiTags(_ tags: String?) -> [String] {
     return parseAllTags(tags)
         .filter { EmojiManager.shared.getEmojiByAlias(alias: $0) == nil }
 }
-

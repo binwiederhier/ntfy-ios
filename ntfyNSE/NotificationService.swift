@@ -79,8 +79,9 @@ class NotificationService: UNNotificationServiceExtension {
         }
         
         // Poll original server
+        let user = store?.getUser(baseUrl: baseUrl)?.toBasicUser()
         let semaphore = DispatchSemaphore(value: 0)
-        ApiService.shared.poll(subscription: subscription, messageId: pollId) { message, error in
+        ApiService.shared.poll(subscription: subscription, messageId: pollId, user: user) { message, error in
             guard let message = message else {
                 Log.w(self.tag, "Error fetching message", error)
                 contentHandler(request.content)

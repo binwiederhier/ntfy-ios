@@ -37,8 +37,9 @@ struct SubscriptionManager {
     }
     
     func poll(_ subscription: Subscription, completionHandler: @escaping ([Message]) -> Void) {
-        Log.d(tag, "Polling from \(subscription.urlString())")
-        ApiService.shared.poll(subscription: subscription) { messages, error in
+        let user = store.getUser(baseUrl: subscription.baseUrl!)?.toBasicUser()
+        Log.d(tag, "Polling from \(subscription.urlString()) with user \(user?.username ?? "anonymous")")
+        ApiService.shared.poll(subscription: subscription, user: user) { messages, error in
             guard let messages = messages else {
                 Log.e(tag, "Polling failed", error)
                 completionHandler([])

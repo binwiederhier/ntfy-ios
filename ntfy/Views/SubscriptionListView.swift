@@ -168,7 +168,7 @@ struct SubscriptionItemRowView: View {
     }
 }
 
-struct SubscriptionsListView_Previews: PreviewProvider {
+struct SubscriptionListView_Previews: PreviewProvider {
     static var previews: some View {
         let store = Store.preview // Store.previewEmpty
         SubscriptionListView()
