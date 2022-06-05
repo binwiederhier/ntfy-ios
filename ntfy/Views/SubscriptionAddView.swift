@@ -205,7 +205,7 @@ struct SubscriptionAddView: View {
     }
     
     private var selectedBaseUrl: String {
-        return (useAnother) ? baseUrl : Config.appBaseUrl
+        return (useAnother) ? baseUrl : store.getDefaultBaseUrl()
     }
     
     private func resetAndHide() {

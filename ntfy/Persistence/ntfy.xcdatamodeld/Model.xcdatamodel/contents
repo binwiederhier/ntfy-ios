@@ -16,6 +16,10 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
+    <entity name="Preference" representedClassName="Preference" syncable="YES" codeGenerationType="class">
+        <attribute name="key" optional="YES" attributeType="String"/>
+        <attribute name="value" optional="YES" attributeType="String"/>
+    </entity>
     <entity name="Subscription" representedClassName="Subscription" syncable="YES" codeGenerationType="class">
         <attribute name="baseUrl" attributeType="String"/>
         <attribute name="lastNotificationId" optional="YES" attributeType="String"/>
@@ -42,5 +46,6 @@
         <element name="Notification" positionX="-54" positionY="9" width="128" height="164"/>
         <element name="Subscription" positionX="-262.4760131835938" positionY="11.46405029296875" width="128" height="89"/>
         <element name="User" positionX="-162" positionY="81" width="128" height="74"/>
+        <element name="Preference" positionX="-162" positionY="81" width="128" height="59"/>
     </elements>
 </model>

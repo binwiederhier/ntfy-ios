@@ -23,7 +23,6 @@ class NotificationService: UNNotificationServiceExtension {
 
         if let bestAttemptContent = bestAttemptContent {
             let userInfo = bestAttemptContent.userInfo
-            let baseUrl = userInfo["base_url"]  as? String ?? Config.appBaseUrl
             guard let message = Message.from(userInfo: userInfo) else {
                 Log.w(tag, "Message cannot be parsed from userInfo", userInfo)
                 contentHandler(request.content)
@@ -33,6 +32,7 @@ class NotificationService: UNNotificationServiceExtension {
             case "poll_request":
                 handlePollRequest(request, bestAttemptContent, message, contentHandler)
             case "message":
+                let baseUrl = userInfo["base_url"]  as? String ?? Config.appBaseUrl // messages only come for the main server
                 handleMessage(request, bestAttemptContent, baseUrl, message, contentHandler)
             default:
                 Log.w(tag, "Irrelevant message received", message)

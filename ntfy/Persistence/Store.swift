@@ -9,6 +9,7 @@ class Store: ObservableObject {
     static let tag = "Store"
     static let appGroup = "group.io.heckel.ntfy" // Must match app group of ntfy = ntfyNSE targets
     static let modelName = "ntfy" // Must match .xdatamodeld folder
+    static let prefKeyDefaultBaseUrl = "defaultBaseUrl"
     
     private let container: NSPersistentContainer
     var context: NSManagedObjectContext {
@@ -50,6 +51,27 @@ class Store: ObservableObject {
           .store(in: &cancellables)
     }
     
+    func rollbackAndRefresh() {
+        // Hack: We refresh all objects, since failing to store a notification usually means
+        // that the app extension stored the notification first. This is a way to update the
+        // UI properly when it is in the foreground and the app extension stores a notification.
+        
+        context.rollback()
+        hardRefresh()
+    }
+    
+    func hardRefresh() {
+        // `refreshAllObjects` only refreshes objects from which the cache is invalid. With a staleness intervall of -1 the cache never invalidates.
+        // We set the `stalenessInterval` to 0 to make sure that changes in the app extension get processed correctly.
+        // From: https://www.avanderlee.com/swift/core-data-app-extension-data-sharing/
+        
+        context.stalenessInterval = 0
+        context.refreshAllObjects()
+        context.stalenessInterval = -1
+    }
+    
+    // MARK: Subscriptions
+    
     func saveSubscription(baseUrl: String, topic: String) -> Subscription {
         let subscription = Subscription(context: context)
         subscription.baseUrl = baseUrl
@@ -74,35 +96,12 @@ class Store: ObservableObject {
         return try? context.fetch(Subscription.fetchRequest())
     }
     
-    func getUser(baseUrl: String) -> User? {
-        let fetchRequest = User.fetchRequest()
-        let baseUrlPredicate = NSPredicate(format: "baseUrl = %@", baseUrl)
-        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [baseUrlPredicate])
-        return try? context.fetch(fetchRequest).first
-    }
-    
-    func delete(user: User) {
-        context.delete(user)
-        try? context.save()
-    }
-    
     func delete(subscription: Subscription) {
         context.delete(subscription)
         try? context.save()
     }
     
-    func saveUser(baseUrl: String, username: String, password: String) {
-        do {
-            let user = getUser(baseUrl: baseUrl) ?? User(context: context)
-            user.baseUrl = baseUrl
-            user.username = username
-            user.password = password
-            try context.save()
-        } catch let error {
-            Log.w(Store.tag, "Cannot store user", error)
-            rollbackAndRefresh()
-        }
-    }
+    // MARK: Notifications
     
     func save(notificationFromMessage message: Message, withSubscription subscription: Subscription) {
         do {
@@ -157,23 +156,58 @@ class Store: ObservableObject {
         }
     }
     
-    func rollbackAndRefresh() {
-        // Hack: We refresh all objects, since failing to store a notification usually means
-        // that the app extension stored the notification first. This is a way to update the
-        // UI properly when it is in the foreground and the app extension stores a notification.
-        
-        context.rollback()
-        hardRefresh()
+    // MARK: Users
+    
+    func saveUser(baseUrl: String, username: String, password: String) {
+        do {
+            let user = getUser(baseUrl: baseUrl) ?? User(context: context)
+            user.baseUrl = baseUrl
+            user.username = username
+            user.password = password
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot store user", error)
+            rollbackAndRefresh()
+        }
     }
     
-    func hardRefresh() {
-        // `refreshAllObjects` only refreshes objects from which the cache is invalid. With a staleness intervall of -1 the cache never invalidates.
-        // We set the `stalenessInterval` to 0 to make sure that changes in the app extension get processed correctly.
-        // From: https://www.avanderlee.com/swift/core-data-app-extension-data-sharing/
-        
-        context.stalenessInterval = 0
-        context.refreshAllObjects()
-        context.stalenessInterval = -1
+    func getUser(baseUrl: String) -> User? {
+        let request = User.fetchRequest()
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "baseUrl = %@", baseUrl)])
+        return try? context.fetch(request).first
+    }
+    
+    func delete(user: User) {
+        context.delete(user)
+        try? context.save()
+    }
+    
+    // MARK: Preferences
+    
+    func saveDefaultBaseUrl(baseUrl: String?) {
+        do {
+            let pref = getPreference(key: Store.prefKeyDefaultBaseUrl) ?? Preference(context: context)
+            pref.key = Store.prefKeyDefaultBaseUrl
+            pref.value = baseUrl ?? Config.appBaseUrl
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot store preference", error)
+            rollbackAndRefresh()
+        }
+    }
+    
+    func getDefaultBaseUrl() -> String {
+        let baseUrl = getPreference(key: Store.prefKeyDefaultBaseUrl)?.value
+        if baseUrl == nil || baseUrl?.isEmpty == true {
+            return Config.appBaseUrl
+        }
+        return baseUrl!
+    }
+    
+    private func getPreference(key: String) -> Preference? {
+        let request = Preference.fetchRequest()
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "key = %@", key)])
+        return try? context.fetch(request).first
     }
 }
 

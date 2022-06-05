@@ -52,5 +52,3 @@ struct ActionExecutor {
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 }
-
-

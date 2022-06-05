@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import StoreKit
 
 struct SettingsView: View {
     @EnvironmentObject private var store: Store
@@ -7,7 +8,10 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("General")) {
+                Section(
+                    header: Text("General"),
+                    footer: Text("When subscribing to new topics, this server will be used as a default.")
+                ) {
                     DefaultServerView()
                 }
                 Section(
@@ -17,13 +21,7 @@ struct SettingsView: View {
                     UserTableView()
                 }
                 Section(header: Text("About")) {
-                    HStack {
-                        Text("Version")
-                        Spacer()
-                        Text("ntfy \(Config.version) (\(Config.build))")
-                            .foregroundColor(.gray)
-
-                    }
+                    AboutView()
                 }
             }
             .navigationTitle("Settings")
@@ -35,18 +33,32 @@ struct SettingsView: View {
 
 struct DefaultServerView: View {
     @EnvironmentObject private var store: Store
+    @FetchRequest(sortDescriptors: []) var prefs: FetchedResults<Preference>
     @State private var showDialog = false
-    @State private var defaultBaseUrl = ""
+    @State private var newDefaultBaseUrl: String = "x"
+    
+    private var defaultBaseUrl: String {
+        prefs
+            .filter { $0.key == Store.prefKeyDefaultBaseUrl }
+            .first?
+            .value ?? Config.appBaseUrl
+    }
     
     var body: some View {
         Button(action: {
+            if defaultBaseUrl == Config.appBaseUrl {
+                newDefaultBaseUrl = ""
+            } else {
+                newDefaultBaseUrl = defaultBaseUrl
+            }
             showDialog = true
         }) {
             HStack {
+                let _ = newDefaultBaseUrl
                 Text("Default server")
                     .foregroundColor(.primary)
                 Spacer()
-                Text("ntfy.sh")
+                Text(shortUrl(url: defaultBaseUrl))
                     .foregroundColor(.gray)
             }
             .contentShape(Rectangle())
@@ -57,21 +69,29 @@ struct DefaultServerView: View {
                     Section(
                         footer: Text("When subscribing to new topics, this server will be used as a default. Note that if you pick your own ntfy server, you must configure upstream-base-url to receive instant push notifications.")
                     ) {
-                        TextField(Config.appBaseUrl, text: $defaultBaseUrl)
-                            .disableAutocapitalization()
-                            .disableAutocorrection(true)
+                        HStack {
+                            TextField(Config.appBaseUrl, text: $newDefaultBaseUrl)
+                                .disableAutocapitalization()
+                                .disableAutocorrection(true)
+                            if !newDefaultBaseUrl.isEmpty {
+                                Button {
+                                    newDefaultBaseUrl = ""
+                                } label: {
+                                    Image(systemName: "clear.fill")
+                                }
+                            }
+                        }
+                        
                     }
                 }
                 .navigationTitle("Default server")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        
                         Button(action: cancelAction) {
                             Text("Cancel")
                         }
                     }
-                    
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: saveAction) {
                             Text("Save")
@@ -84,6 +104,11 @@ struct DefaultServerView: View {
     }
     
     private func saveAction() {
+        if newDefaultBaseUrl == "" {
+            store.saveDefaultBaseUrl(baseUrl: nil)
+        } else {
+            store.saveDefaultBaseUrl(baseUrl: newDefaultBaseUrl)
+        }
         resetAndHide()
     }
     
@@ -92,7 +117,7 @@ struct DefaultServerView: View {
     }
     
     private func isValid() -> Bool {
-        if !defaultBaseUrl.isEmpty && defaultBaseUrl.range(of: "^https?://.+", options: .regularExpression, range: nil, locale: nil) == nil {
+        if !newDefaultBaseUrl.isEmpty && newDefaultBaseUrl.range(of: "^https?://.+", options: .regularExpression, range: nil, locale: nil) == nil {
             return false
         }
         return true
@@ -100,10 +125,6 @@ struct DefaultServerView: View {
     
     private func resetAndHide() {
         showDialog = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            // Hide first and then reset, otherwise we'll see the text fields change
-            defaultBaseUrl = ""
-        }
     }
 }
 
@@ -148,7 +169,7 @@ struct UserTableView: View {
                 Form {
                     Section(
                         footer: (selectedUser == nil)
-                            ? Text("You can add a user here. All topics for the given server will use this user.")
+                        ? Text("You can add a user here. All topics for the given server will use this user.")
                         : Text("Edit the username or password for \(shortUrl(url: baseUrl)) here. This user is used for all topics of this server. Leave the password blank to leave it unchanged.")
                     ) {
                         if selectedUser == nil {
@@ -165,34 +186,34 @@ struct UserTableView: View {
                 .navigationTitle(selectedUser == nil ? "Add user" : "Edit user")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            // Sigh, for iOS 14 we need to add a "Delete" menu item, because it doesn't support
-                            // swipe actions. Quite annoying.
-                            
-                            if #available(iOS 15.0, *) {
-                                Button(action: cancelAction) {
-                                    Text("Cancel")
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        // Sigh, for iOS 14 we need to add a "Delete" menu item, because it doesn't support
+                        // swipe actions. Quite annoying.
+                        
+                        if #available(iOS 15.0, *) {
+                            Button(action: cancelAction) {
+                                Text("Cancel")
+                            }
+                        } else {
+                            if selectedUser == nil {
+                                Button("Cancel") {
+                                    cancelAction()
                                 }
                             } else {
-                                if selectedUser == nil {
+                                Menu {
                                     Button("Cancel") {
                                         cancelAction()
                                     }
-                                } else {
-                                    Menu {
-                                        Button("Cancel") {
-                                            cancelAction()
-                                        }
-                                        Button("Delete") {
-                                            deleteAction()
-                                        }
-                                    } label: {
-                                        Image(systemName: "ellipsis.circle")
-                                            .padding([.leading], 40)
+                                    Button("Delete") {
+                                        deleteAction()
                                     }
+                                } label: {
+                                    Image(systemName: "ellipsis.circle")
+                                        .padding([.leading], 40)
                                 }
                             }
                         }
+                    }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: saveAction) {
                             Text("Save")
@@ -287,6 +308,58 @@ struct UserRowView: View {
                 .foregroundColor(.gray)
         }
         .padding(.all, 4)
+    }
+}
+
+struct AboutView: View {
+    var body: some View {
+        Group {
+            Button(action: {
+                open(url: "https://ntfy.sh/docs")
+            }) {
+                HStack {
+                    Text("Read the docs")
+                    Spacer()
+                    Text("ntfy.sh/docs")
+                        .foregroundColor(.gray)
+                    Image(systemName: "link")
+                }
+            }
+            Button(action: {
+                open(url: "https://github.com/binwiederhier/ntfy/issues")
+            }) {
+                HStack {
+                    Text("Report a bug")
+                    Spacer()
+                    Text("github.com")
+                        .foregroundColor(.gray)
+                    Image(systemName: "link")
+                }
+            }
+            Button(action: {
+                open(url: "itms-apps://itunes.apple.com/app/id1625396347")
+            }) {
+                HStack {
+                    Text("Rate the app")
+                    Spacer()
+                    Text("App Store")
+                        .foregroundColor(.gray)
+                    Image(systemName: "star.fill")
+                }
+            }
+            HStack {
+                Text("Version")
+                Spacer()
+                Text("ntfy \(Config.version) (\(Config.build))")
+                    .foregroundColor(.gray)
+            }
+        }
+        .foregroundColor(.primary)
+    }
+    
+    private func open(url: String) {
+        guard let url = URL(string: url) else { return }
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 }
 
