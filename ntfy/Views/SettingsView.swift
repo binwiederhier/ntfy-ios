@@ -35,7 +35,7 @@ struct DefaultServerView: View {
     @EnvironmentObject private var store: Store
     @FetchRequest(sortDescriptors: []) var prefs: FetchedResults<Preference>
     @State private var showDialog = false
-    @State private var newDefaultBaseUrl: String = "x"
+    @State private var newDefaultBaseUrl: String = ""
     
     private var defaultBaseUrl: String {
         prefs
@@ -81,7 +81,6 @@ struct DefaultServerView: View {
                                 }
                             }
                         }
-                        
                     }
                 }
                 .navigationTitle("Default server")
