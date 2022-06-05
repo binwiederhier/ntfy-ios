@@ -127,7 +127,7 @@ struct SubscriptionAddView: View {
         ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: topic, user: user) { (response, error) in
             if response?.success == true {
                 DispatchQueue.global(qos: .background).async {
-                    store.save(userBaseUrl: selectedBaseUrl, username: username, password: password)
+                    store.saveUser(baseUrl: selectedBaseUrl, username: username, password: password)
                     subscriptionManager.subscribe(baseUrl: selectedBaseUrl, topic: sanitizedTopic)
                 }
                 isShowing = false

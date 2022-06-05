@@ -86,9 +86,9 @@ class Store: ObservableObject {
         try? context.save()
     }
     
-    func save(userBaseUrl baseUrl: String, username: String, password: String) {
+    func saveUser(baseUrl: String, username: String, password: String) {
         do {
-            let user = User(context: context)
+            let user = getUser(baseUrl: baseUrl) ?? User(context: context)
             user.baseUrl = baseUrl
             user.username = username
             user.password = password
@@ -195,8 +195,8 @@ extension Store {
             }
             
             // Users
-            store.save(userBaseUrl: "https://ntfy.sh", username: "testuser", password: "testuser")
-            store.save(userBaseUrl: "https://ntfy.example.com", username: "phil", password: "phil12")
+            store.saveUser(baseUrl: "https://ntfy.sh", username: "testuser", password: "testuser")
+            store.saveUser(baseUrl: "https://ntfy.example.com", username: "phil", password: "phil12")
         }
         return store
     }()
