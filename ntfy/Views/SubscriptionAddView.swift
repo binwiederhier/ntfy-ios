@@ -97,7 +97,7 @@ struct SubscriptionAddView: View {
         VStack(alignment: .leading, spacing: 0) {
             Form {
                 Section(
-                    footer: Text("This topic requires that you login with username and password. The user will be stored on your device, and will be re-used for other topics.")
+                    footer: Text("This topic requires that you log in with username and password. The user will be stored on your device, and will be re-used for other topics.")
                 ) {
                     TextField("Username", text: $username)
                         .disableAutocapitalization()

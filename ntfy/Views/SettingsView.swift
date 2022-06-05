@@ -88,11 +88,34 @@ struct UsersView: View {
                 .navigationTitle(selectedUser == nil ? "Add user" : "Edit user")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button(action: cancelAction) {
-                            Text("Cancel")
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            // Sigh, for iOS 14 we need to add a "Delete" menu item, because it doesn't support
+                            // swipe actions. Quite annoying.
+                            
+                            if #available(iOS 15.0, *) {
+                                Button(action: cancelAction) {
+                                    Text("Cancel")
+                                }
+                            } else {
+                                if selectedUser == nil {
+                                    Button("Cancel") {
+                                        cancelAction()
+                                    }
+                                } else {
+                                    Menu {
+                                        Button("Cancel") {
+                                            cancelAction()
+                                        }
+                                        Button("Delete") {
+                                            deleteAction()
+                                        }
+                                    } label: {
+                                        Image(systemName: "ellipsis.circle")
+                                            .padding([.leading], 40)
+                                    }
+                                }
+                            }
                         }
-                    }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: saveAction) {
                             Text("Save")
@@ -114,6 +137,11 @@ struct UsersView: View {
     }
     
     private func cancelAction() {
+        resetAndHide()
+    }
+    
+    private func deleteAction() {
+        store.delete(user: selectedUser!)
         resetAndHide()
     }
     
