@@ -60,7 +60,7 @@ struct NotificationListView: View {
                 }
             }
             ToolbarItem(placement: .principal) {
-                Text(subscription.displayName())
+                Text(subscription.topicName())
                     .font(.headline)
                     .lineLimit(1)
             }

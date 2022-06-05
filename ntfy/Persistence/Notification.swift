@@ -7,18 +7,17 @@ extension Notification {
         let calendar = Calendar.current
 
         if calendar.isDateInYesterday(date) {
-            return "Yesterday"
+            return "yesterday"
         }
 
         let dateFormatter = DateFormatter()
 
         if calendar.isDateInToday(date) {
-            dateFormatter.dateFormat = "h:mm a"
-            dateFormatter.amSymbol = "AM"
-            dateFormatter.pmSymbol = "PM"
-        } else {
-            dateFormatter.dateStyle = .medium
+            dateFormatter.dateStyle = .none
             dateFormatter.timeStyle = .short
+        } else {
+            dateFormatter.dateStyle = .short
+            dateFormatter.timeStyle = .none
         }
 
         return dateFormatter.string(from: date)
