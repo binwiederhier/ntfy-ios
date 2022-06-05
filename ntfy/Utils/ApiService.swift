@@ -64,23 +64,32 @@ class ApiService {
         }.resume()
     }
     
-    func checkAuth(baseUrl: String, topic: String, user: BasicUser?, completionHandler: @escaping(AuthCheckResponse?, Error?) -> Void) {
+    func checkAuth(baseUrl: String, topic: String, user: BasicUser?, completionHandler: @escaping(AuthResult) -> Void) {
         guard let url = URL(string: topicAuthUrl(baseUrl: baseUrl, topic: topic)) else { return }
         let request = newRequest(url: url, user: user)
         Log.d(tag, "Checking auth for \(url) with user \(user?.username ?? "anonymous")")
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 Log.e(self.tag, "Error checking auth: \(error)")
-                completionHandler(nil, error)
-            }
-            if let data = data {
+                completionHandler(.Error(error.localizedDescription))
+            } else if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+                if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                    completionHandler(.Unauthorized)
+                } else {
+                    completionHandler(.Error("Unexpected response from server: \(httpResponse.statusCode)"))
+                }
+            } else if let data = data {
                 do {
                     let result = try JSONDecoder().decode(AuthCheckResponse.self, from: data)
                     Log.d(self.tag, "Auth result: \(result)")
-                    completionHandler(result, nil)
+                    if result.success == true {
+                        completionHandler(.Success)
+                    } else {
+                        completionHandler(.Error("Unexpected response from server"))
+                    }
                 } catch {
                     Log.e(self.tag, "Error handling auth response: \(error)")
-                    completionHandler(nil, error)
+                    completionHandler(.Error("Unexpected response from server. Is this a ntfy server?"))
                 }
             }
         }.resume()
@@ -126,6 +135,12 @@ struct BasicUser {
     func toHeader() -> String {
         return "Basic " + String(format: "%@:%@", username, password).data(using: String.Encoding.utf8)!.base64EncodedString()
     }
+}
+
+enum AuthResult {
+    case Success
+    case Unauthorized
+    case Error(String)
 }
 
 struct AuthCheckResponse: Codable {

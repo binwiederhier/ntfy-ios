@@ -12,7 +12,10 @@ struct SettingsView: View {
                  Text("Manage users")
                  }
                  }*/
-                Section(header: Text("Users")) {
+                Section(
+                    header: Text("Users"),
+                    footer: Text("To access read-protected topics, you may add or edit users here. All topics for a given server will use the same user.")
+                ) {
                     UsersView()
                 }
                 Section(header: Text("About")) {
@@ -20,7 +23,7 @@ struct SettingsView: View {
                         Text("Version")
                             .foregroundColor(.gray)
                         Spacer()
-                        Text("ntfy 1.1")
+                        Text("ntfy \(Config.version) (\(Config.build))")
                     }
                 }
             }
@@ -58,6 +61,7 @@ struct UsersView: View {
                 Image(systemName: "plus")
                 Text("Add user")
             }
+            .padding(.all, 4)
             .onTapGesture {
                 showDialog = true
             }
@@ -65,20 +69,20 @@ struct UsersView: View {
         .sheet(isPresented: $showDialog) {
             NavigationView {
                 Form {
-                    Section(footer:
-                                Text("You can add a user here. All topics for the given server will use this user.")
+                    Section(
+                        footer: (selectedUser == nil)
+                            ? Text("You can add a user here. All topics for the given server will use this user.")
+                        : Text("Edit the username or password for \(shortUrl(url: baseUrl)) here. This user is used for all topics of this server. Leave the password blank to leave it unchanged.")
                     ) {
                         if selectedUser == nil {
-                            TextField("Service URL, e.g. https://ntfy.example.com", text: $baseUrl)
+                            TextField("Service URL, e.g. https://ntfy.home.io", text: $baseUrl)
                                 .disableAutocapitalization()
                                 .disableAutocorrection(true)
                         }
                         TextField("Username", text: $username)
                             .disableAutocapitalization()
                             .disableAutocorrection(true)
-                        TextField("Password", text: $password)
-                            .disableAutocapitalization()
-                            .disableAutocorrection(true)
+                        SecureField("Password", text: $password)
                     }
                 }
                 .navigationTitle(selectedUser == nil ? "Add user" : "Edit user")
@@ -101,6 +105,10 @@ struct UsersView: View {
     }
     
     private func saveAction() {
+        var password = password
+        if let user = selectedUser, password == "" {
+            password = user.password ?? "?" // If password is blank, leave unchanged
+        }
         store.saveUser(baseUrl: baseUrl, username: username, password: password)
         resetAndHide()
     }
@@ -110,22 +118,52 @@ struct UsersView: View {
     }
     
     private func isValid() -> Bool {
-        return true // FIXME: validate
+        if selectedUser == nil { // New user
+            if baseUrl.range(of: "^https?://.+", options: .regularExpression, range: nil, locale: nil) == nil {
+                return false
+            } else if username.isEmpty || password.isEmpty {
+                return false
+            }
+        } else { // Existing user
+            if username.isEmpty {
+                return false
+            }
+        }
+        return true
     }
     
     private func resetAndHide() {
-        selectedUser = nil
-        baseUrl = ""
-        username = ""
-        password = ""
         showDialog = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            // Hide first and then reset, otherwise we'll see the text fields change
+            selectedUser = nil
+            baseUrl = ""
+            username = ""
+            password = ""
+        }
     }
 }
 
 struct UserRowView: View {
+    @EnvironmentObject private var store: Store
     @ObservedObject var user: User
     
     var body: some View {
+        if #available(iOS 15.0, *) {
+            userRow
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        store.delete(user: user)
+                    } label: {
+                        Label("Delete", systemImage: "trash.circle")
+                    }
+                }
+        } else {
+            userRow
+        }
+    }
+    
+    private var userRow: some View {
         HStack {
             Image(systemName: "person.fill")
             VStack(alignment: .leading, spacing: 0) {

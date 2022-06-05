@@ -6,9 +6,7 @@ func topicUrl(baseUrl: String, topic: String) -> String {
 }
 
 func topicShortUrl(baseUrl: String, topic: String) -> String {
-    return topicUrl(baseUrl: baseUrl, topic: topic)
-        .replacingOccurrences(of: "http://", with: "")
-        .replacingOccurrences(of: "https://", with: "")
+    return shortUrl(url: topicUrl(baseUrl: baseUrl, topic: topic))
 }
 
 func topicAuthUrl(baseUrl: String, topic: String) -> String {
@@ -19,6 +17,12 @@ func topicHash(baseUrl: String, topic: String) -> String {
     let data = Data(topicUrl(baseUrl: baseUrl, topic: topic).utf8)
     let digest = SHA256.hash(data: data)
     return digest.compactMap { String(format: "%02x", $0)}.joined()
+}
+
+func shortUrl(url: String) -> String {
+    return url
+        .replacingOccurrences(of: "http://", with: "")
+        .replacingOccurrences(of: "https://", with: "")
 }
 
 func parseAllTags(_ tags: String?) -> [String] {
