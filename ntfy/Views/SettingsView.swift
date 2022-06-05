@@ -123,6 +123,8 @@ struct UsersView: View {
                 return false
             } else if username.isEmpty || password.isEmpty {
                 return false
+            } else if store.getUser(baseUrl: baseUrl) != nil {
+                return false
             }
         } else { // Existing user
             if username.isEmpty {
