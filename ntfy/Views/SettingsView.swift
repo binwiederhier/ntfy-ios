@@ -7,34 +7,107 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
-                /*Section(header: Text("General")) {
-                 NavigationLink(destination: UsersView()) {
-                 Text("Manage users")
-                 }
-                 }*/
+                Section(header: Text("General")) {
+                    DefaultServerView()
+                }
                 Section(
                     header: Text("Users"),
                     footer: Text("To access read-protected topics, you may add or edit users here. All topics for a given server will use the same user.")
                 ) {
-                    UsersView()
+                    UserTableView()
                 }
                 Section(header: Text("About")) {
                     HStack {
                         Text("Version")
-                            .foregroundColor(.gray)
                         Spacer()
                         Text("ntfy \(Config.version) (\(Config.build))")
+                            .foregroundColor(.gray)
+
                     }
                 }
             }
             .navigationTitle("Settings")
-            
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
-struct UsersView: View {
+
+struct DefaultServerView: View {
+    @EnvironmentObject private var store: Store
+    @State private var showDialog = false
+    @State private var defaultBaseUrl = ""
+    
+    var body: some View {
+        Button(action: {
+            showDialog = true
+        }) {
+            HStack {
+                Text("Default server")
+                    .foregroundColor(.primary)
+                Spacer()
+                Text("ntfy.sh")
+                    .foregroundColor(.gray)
+            }
+            .contentShape(Rectangle())
+        }
+        .sheet(isPresented: $showDialog) {
+            NavigationView {
+                Form {
+                    Section(
+                        footer: Text("When subscribing to new topics, this server will be used as a default. Note that if you pick your own ntfy server, you must configure upstream-base-url to receive instant push notifications.")
+                    ) {
+                        TextField(Config.appBaseUrl, text: $defaultBaseUrl)
+                            .disableAutocapitalization()
+                            .disableAutocorrection(true)
+                    }
+                }
+                .navigationTitle("Default server")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        
+                        Button(action: cancelAction) {
+                            Text("Cancel")
+                        }
+                    }
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: saveAction) {
+                            Text("Save")
+                        }
+                        .disabled(!isValid())
+                    }
+                }
+            }
+        }
+    }
+    
+    private func saveAction() {
+        resetAndHide()
+    }
+    
+    private func cancelAction() {
+        resetAndHide()
+    }
+    
+    private func isValid() -> Bool {
+        if !defaultBaseUrl.isEmpty && defaultBaseUrl.range(of: "^https?://.+", options: .regularExpression, range: nil, locale: nil) == nil {
+            return false
+        }
+        return true
+    }
+    
+    private func resetAndHide() {
+        showDialog = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            // Hide first and then reset, otherwise we'll see the text fields change
+            defaultBaseUrl = ""
+        }
+    }
+}
+
+struct UserTableView: View {
     @EnvironmentObject private var store: Store
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \User.baseUrl, ascending: true)]) var users: FetchedResults<User>
     
@@ -49,22 +122,26 @@ struct UsersView: View {
         let _ = selectedUser?.username // Workaround for FB7823148, see https://developer.apple.com/forums/thread/652080
         List {
             ForEach(users) { user in
-                UserRowView(user: user)
-                    .onTapGesture {
-                        selectedUser = user
-                        baseUrl = user.baseUrl ?? "?"
-                        username = user.username ?? "?"
-                        showDialog = true
-                    }
+                Button(action: {
+                    selectedUser = user
+                    baseUrl = user.baseUrl ?? "?"
+                    username = user.username ?? "?"
+                    showDialog = true
+                }) {
+                    UserRowView(user: user)
+                        .foregroundColor(.primary)
+                }
             }
-            HStack {
-                Image(systemName: "plus")
-                Text("Add user")
+            Button(action: {
+                showDialog = true
+            }) {
+                HStack {
+                    Image(systemName: "plus")
+                    Text("Add user")
+                }
+                .foregroundColor(.primary)
             }
             .padding(.all, 4)
-            .onTapGesture {
-                showDialog = true
-            }
         }
         .sheet(isPresented: $showDialog) {
             NavigationView {
@@ -164,7 +241,7 @@ struct UsersView: View {
     
     private func resetAndHide() {
         showDialog = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             // Hide first and then reset, otherwise we'll see the text fields change
             selectedUser = nil
             baseUrl = ""
