@@ -58,7 +58,7 @@ extension Notification {
         return parseNonEmojiTags(tags)
     }
     
-    func actionsList() -> [Action] {
+    func actionsList() -> [MessageAction] {
         return Actions.shared.parse(actions) ?? []
     }
 }
@@ -73,9 +73,10 @@ struct Message: Decodable {
     var title: String?
     var priority: Int16?
     var tags: [String]?
-    var actions: [Action]?
+    var actions: [MessageAction]?
     var click: String?
     var pollId: String?
+    var attachment: MessageAttachment?
     
     func toUserInfo() -> [AnyHashable: Any] {
         // This should mimic the way that the ntfy server encodes a message.
@@ -92,7 +93,12 @@ struct Message: Decodable {
             "tags": tags?.joined(separator: ",") ?? "",
             "actions": Actions.shared.encode(actions),
             "click": click ?? "",
-            "poll_id": pollId ?? ""
+            "poll_id": pollId ?? "",
+            "attachment_name": attachment?.name ?? "",
+            "attachment_url": attachment?.url ?? "",
+            "attachment_size": attachment?.size ?? "",
+            "attachment_type": attachment?.type ?? "",
+            "attachment_expires": attachment?.expires ?? "",
         ]
     }
     
@@ -112,6 +118,16 @@ struct Message: Decodable {
         let actions = userInfo["actions"] as? String
         let click = userInfo["click"] as? String
         let pollId = userInfo["poll_id"] as? String
+        var attachment: MessageAttachment?
+        if let attachmentName = userInfo["attachment_name"] as? String, let attachmentUrl = userInfo["attachment_url"] as? String {
+            attachment = MessageAttachment(
+                name: attachmentName,
+                url: attachmentUrl,
+                type: userInfo["attachment_type"] as? String ?? "",
+                size: Int64(userInfo["attachment_size"] as? String ?? ""), // default is invalid number -> nil
+                expires: Int64(userInfo["attachment_expires"] as? String ?? "") // default is invalid number -> nil
+            )
+        }
         return Message(
             id: id,
             time: timeInt,
@@ -123,12 +139,13 @@ struct Message: Decodable {
             tags: tags,
             actions: Actions.shared.parse(actions),
             click: click,
-            pollId: pollId
+            pollId: pollId,
+            attachment: attachment
         )
     }
 }
 
-struct Action: Encodable, Decodable, Identifiable {
+struct MessageAction: Encodable, Decodable, Identifiable {
     var id: String
     var action: String
     var label: String
@@ -137,4 +154,12 @@ struct Action: Encodable, Decodable, Identifiable {
     var headers: [String: String]?
     var body: String?
     var clear: Bool?
+}
+
+struct MessageAttachment: Decodable {
+    var name: String
+    var url: String
+    var type: String?
+    var size: Int64?
+    var expires: Int64?
 }

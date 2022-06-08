@@ -4,7 +4,7 @@ import UIKit
 struct ActionExecutor {
     private static let tag = "ActionExecutor"
         
-    static func execute(_ action: Action) {
+    static func execute(_ action: MessageAction) {
         Log.d(tag, "Executing user action", action)
         switch action.action {
         case "view":
@@ -20,7 +20,7 @@ struct ActionExecutor {
         }
     }
     
-    private static func http(_ action: Action) {
+    private static func http(_ action: MessageAction) {
         guard let actionUrl = action.url, let url = URL(string: actionUrl) else {
             Log.w(tag, "Unable to execute HTTP action, no or invalid URL", action)
             return
