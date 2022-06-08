@@ -114,6 +114,15 @@ class Store: ObservableObject {
             notification.tags = message.tags?.joined(separator: ",") ?? ""
             notification.actions = Actions.shared.encode(message.actions)
             notification.click = message.click ?? ""
+            if let att = message.attachment {
+                let attachment = Attachment(context: context)
+                attachment.name = att.name
+                attachment.url = att.url
+                attachment.type = att.type
+                attachment.size = att.size ?? 0
+                attachment.expires = att.expires ?? 0
+                notification.attachment = attachment
+            }
             subscription.addToNotifications(notification)
             subscription.lastNotificationId = message.id
             try context.save()

@@ -20,7 +20,7 @@ class NotificationService: UNNotificationServiceExtension {
         self.bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
         Log.d(tag, "Notification received (in service)") // Logs from extensions are not printed in Xcode!
-
+        
         if let bestAttemptContent = bestAttemptContent {
             let userInfo = bestAttemptContent.userInfo
             guard let message = Message.from(userInfo: userInfo) else {
@@ -55,6 +55,25 @@ class NotificationService: UNNotificationServiceExtension {
         // Modify notification based on message
         content.modify(message: message, baseUrl: baseUrl)
         
+        
+        //maybeDownloadAttachment(message: message)
+        
+        if let attachment = message.attachment {
+            do {
+                let imageData = NSData(contentsOf: URL(string: attachment.url)!)
+                /*guard let contentUrl = DownloadManager.download(attachmentId: message.id, data: imageData, options: nil) else {
+                    return
+                }
+                let imageAttachment = try UNNotificationAttachment.init(identifier: message.id, url: contentUrl, options: nil)
+                */
+                if let imageAttachment = UNNotificationAttachment.create(imageFileIdentifier: message.id, data: imageData!, options: nil) {
+                    content.attachments = [imageAttachment]
+                }
+            } catch {
+                print("Unable to load data: \(error)")
+            }
+        }
+        
         // Save notification to store, and display it
         guard let subscription = store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
             Log.w(tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
@@ -63,6 +82,21 @@ class NotificationService: UNNotificationServiceExtension {
         }
         Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
         contentHandler(content)
+    }
+    
+    private func maybeDownloadAttachment(message: Message) {
+        // https://medium.com/gits-apps-insight/processing-notification-data-using-notification-service-extension-6a2b5ea2da17
+        
+        /*guard let attachment = message.attachment else { return }
+        do {
+            let imageData = try Data(contentsOf: URL(string: attachment.url)!)
+            guard let contentUrl = DownloadManager.download(attachmentId: message.id, data: imageData, options: nil) else {
+                return
+            }
+            bestAttemptContent.attachments = [attachment]
+        } catch {
+            print("Unable to load data: \(error)")
+        }*/
     }
     
     private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
@@ -87,6 +121,7 @@ class NotificationService: UNNotificationServiceExtension {
                 contentHandler(request.content)
                 return
             }
+            // FIXME: Check that notification is not already there (in DB and via notification center!)
             self.handleMessage(request, content, baseUrl, message, contentHandler)
             semaphore.signal()
         }
@@ -96,5 +131,26 @@ class NotificationService: UNNotificationServiceExtension {
         // I don't know if this is necessary, but it feels like the right thing to do.
         
         _ = semaphore.wait(timeout: DispatchTime.now() + 25) // 30 seconds is the max for the entire extension
+    }
+}
+
+extension UNNotificationAttachment {
+    /// Save the image to disk
+    static func create(imageFileIdentifier: String, data: NSData, options: [NSObject : AnyObject]?) -> UNNotificationAttachment? {
+        let fileManager = FileManager.default
+        let tmpSubFolderName = ProcessInfo.processInfo.globallyUniqueString
+        let tmpSubFolderURL = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(tmpSubFolderName, isDirectory: true)
+
+        do {
+            // https://stackoverflow.com/questions/45226847/unnotificationattachment-failing-to-attach-image#comment108519977_51081941
+            try fileManager.createDirectory(at: tmpSubFolderURL!, withIntermediateDirectories: true, attributes: nil)
+            let fileURL = tmpSubFolderURL?.appendingPathComponent(imageFileIdentifier + ".jpg")
+            try data.write(to: fileURL!, options: [])
+            let imageAttachment = try UNNotificationAttachment.init(identifier: imageFileIdentifier, url: fileURL!, options: options)
+            return imageAttachment
+        } catch let error {
+            print("error \(error)")
+        }
+        return nil
     }
 }

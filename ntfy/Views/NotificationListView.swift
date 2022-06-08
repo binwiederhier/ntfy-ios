@@ -283,6 +283,9 @@ struct NotificationRowView: View {
             }
             Text(notification.formatMessage())
                 .font(.body)
+            if let attachment = notification.attachment {
+                NotificationAttachmentView(attachment: attachment)
+            }
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
                     .font(.subheadline)
@@ -324,6 +327,40 @@ struct NotificationRowView: View {
         }
     }
 }
+
+struct NotificationAttachmentView: View {
+    @ObservedObject var attachment: Attachment
+
+    var body: some View {
+        HStack {
+            Image(systemName: "paperclip")
+            VStack(alignment: .leading) {
+                Text(attachment.name ?? "?")
+                    .font(.footnote)
+                HStack {
+                    if let size = attachment.sizeString() {
+                        Text(size)
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                    }
+                    if (attachment.isDownloaded()) {
+                        Text("Downloaded")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                    } else {
+                        Text("Not downloaded")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                        Text(attachment.expiresString())
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 struct NotificationListView_Previews: PreviewProvider {
     static var previews: some View {

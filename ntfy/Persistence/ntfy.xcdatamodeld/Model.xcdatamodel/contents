@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="20086" systemVersion="21F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Attachment" representedClassName="Attachment" syncable="YES" codeGenerationType="class">
+        <attribute name="contentUrl" optional="YES" attributeType="String"/>
         <attribute name="expires" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="size" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
@@ -56,6 +57,6 @@
         <element name="Preference" positionX="-162" positionY="81" width="128" height="59"/>
         <element name="Subscription" positionX="-262.4760131835938" positionY="11.46405029296875" width="128" height="89"/>
         <element name="User" positionX="-162" positionY="81" width="128" height="74"/>
-        <element name="Attachment" positionX="-153" positionY="90" width="128" height="119"/>
+        <element name="Attachment" positionX="-153" positionY="90" width="128" height="134"/>
     </elements>
 </model>
