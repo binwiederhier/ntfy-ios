@@ -162,4 +162,5 @@ struct MessageAttachment: Decodable {
     var type: String?
     var size: Int64?
     var expires: Int64?
+    var contentUrl: String? // Never sent from remote (used only locally)
 }

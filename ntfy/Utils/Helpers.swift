@@ -49,3 +49,34 @@ func parseNonEmojiTags(_ tags: String?) -> [String] {
     return parseAllTags(tags)
         .filter { EmojiManager.shared.getEmojiByAlias(alias: $0) == nil }
 }
+
+extension Data {
+    func mimeType() -> String {
+        var b: UInt8 = 0
+        self.copyBytes(to: &b, count: 1)
+        switch b {
+        case 0xFF:
+            return "image/jpeg"
+        case 0x89:
+            return "image/png"
+        case 0x47:
+            return "image/gif"
+        default:
+            return "application/octet-stream"
+        }
+    }
+    
+    func guessExtension() -> String {
+        switch mimeType() {
+        case "image/jpeg":
+            return ".jpg"
+        case "image/png":
+            return ".png"
+        case "image/gif":
+            return ".gif"
+        default:
+            return ".bin"
+        }
+    }
+}
+

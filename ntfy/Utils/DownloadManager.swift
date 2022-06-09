@@ -1,28 +1,20 @@
 import Foundation
-
+import MobileCoreServices
+import UniformTypeIdentifiers
 
 struct DownloadManager {
     static private let attachmentDir = "attachments"
     
-    static func download(attachmentId: String, data: Data, options: [NSObject : AnyObject]?) -> URL? {
+    static func download(id: String, data: Data, options: [NSObject : AnyObject]?) throws -> URL {
         let fileManager = FileManager.default
-        if let directory = fileManager.containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup) {
-            do {
-                let newDirectory = directory.appendingPathComponent(attachmentDir)
-                if !fileManager.fileExists(atPath: newDirectory.path) {
-                    try? fileManager.createDirectory(at: newDirectory, withIntermediateDirectories: true, attributes: nil)
-                }
-                let fileURL = newDirectory.appendingPathComponent(attachmentId)
-                do {
-                    try data.write(to: fileURL, options: [])
-                } catch {
-                    print("Unable to load data: \(error)")
-                }
-                return fileURL
-            } catch let error {
-                print("Error: \(error)")
-            }
+        let directory = try fileManager
+            .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup).orThrow()
+            .appendingPathComponent(attachmentDir)
+        if !fileManager.fileExists(atPath: directory.path) {
+            try? fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
         }
-        return nil
+        let fileURL = directory.appendingPathComponent(id + data.guessExtension()) // Images must have correct extension to be displayed correctly!
+        try data.write(to: fileURL, options: [])
+        return fileURL
     }
 }

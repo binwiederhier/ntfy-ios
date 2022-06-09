@@ -55,24 +55,8 @@ class NotificationService: UNNotificationServiceExtension {
         // Modify notification based on message
         content.modify(message: message, baseUrl: baseUrl)
         
-        
-        //maybeDownloadAttachment(message: message)
-        
-        if let attachment = message.attachment {
-            do {
-                let imageData = NSData(contentsOf: URL(string: attachment.url)!)
-                /*guard let contentUrl = DownloadManager.download(attachmentId: message.id, data: imageData, options: nil) else {
-                    return
-                }
-                let imageAttachment = try UNNotificationAttachment.init(identifier: message.id, url: contentUrl, options: nil)
-                */
-                if let imageAttachment = UNNotificationAttachment.create(imageFileIdentifier: message.id, data: imageData!, options: nil) {
-                    content.attachments = [imageAttachment]
-                }
-            } catch {
-                print("Unable to load data: \(error)")
-            }
-        }
+        // If there is one (and it's eligible), download attachment
+        maybeDownloadAttachment(message, content)
         
         // Save notification to store, and display it
         guard let subscription = store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
@@ -84,19 +68,24 @@ class NotificationService: UNNotificationServiceExtension {
         contentHandler(content)
     }
     
-    private func maybeDownloadAttachment(message: Message) {
-        // https://medium.com/gits-apps-insight/processing-notification-data-using-notification-service-extension-6a2b5ea2da17
-        
-        /*guard let attachment = message.attachment else { return }
+    private func maybeDownloadAttachment(_ message: Message, _ content: UNMutableNotificationContent) {
+        // This helped a lot: https://medium.com/gits-apps-insight/processing-notification-data-using-notification-service-extension-6a2b5ea2da17
+        guard var attachment = message.attachment else { return }
         do {
-            let imageData = try Data(contentsOf: URL(string: attachment.url)!)
-            guard let contentUrl = DownloadManager.download(attachmentId: message.id, data: imageData, options: nil) else {
-                return
-            }
-            bestAttemptContent.attachments = [attachment]
+            // Parse URL and download
+            let url = try URL(string: attachment.url).orThrow("URL \(attachment.url) is not valid")
+            let data = try Data(contentsOf: url)
+            let contentUrl = try DownloadManager.download(id: message.id, data: data, options: nil)
+
+            // Once downloaded, set "contentUrl" in attachment, so we persist it later.
+            attachment.contentUrl = contentUrl.absoluteString
+            
+            // Now try to attach it to the notification
+            let notificationAttachment = try UNNotificationAttachment.init(identifier: message.id, url: contentUrl, options: nil)
+            content.attachments = [notificationAttachment]
         } catch {
-            print("Unable to load data: \(error)")
-        }*/
+            Log.w(tag, "Error downloading attachment", error)
+        }
     }
     
     private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
