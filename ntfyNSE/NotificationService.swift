@@ -64,7 +64,7 @@ class NotificationService: UNNotificationServiceExtension {
             contentHandler(request.content)
             return
         }
-        Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
+        Store.shared.saveNotification(fromMessage: message, withSubscription: subscription)
         contentHandler(content)
     }
     
@@ -73,9 +73,12 @@ class NotificationService: UNNotificationServiceExtension {
         guard var attachment = message.attachment else { return }
         do {
             // Parse URL and download
+            
+            // FIXME: Make this aync and reusable in notification list
+            
             let url = try URL(string: attachment.url).orThrow("URL \(attachment.url) is not valid")
             let data = try Data(contentsOf: url)
-            let contentUrl = try DownloadManager.download(id: message.id, data: data, options: nil)
+            let contentUrl = try AttachmentManager.download(id: message.id, data: data, options: nil)
 
             // Once downloaded, set "contentUrl" in attachment, so we persist it later.
             attachment.contentUrl = contentUrl.absoluteString

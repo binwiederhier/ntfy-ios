@@ -1,4 +1,8 @@
 import Foundation
+import SwiftUI
+import UIKit
+
+let attachmentTag = "Attachment"
 
 extension Attachment {
     func sizeString() -> String? {
@@ -25,5 +29,18 @@ extension Attachment {
         let date = NSDate(timeIntervalSince1970: TimeInterval(self.expires))
         let formatter = RelativeDateTimeFormatter()
         return "Expires \(formatter.localizedString(for: date as Date, relativeTo: Date()))"
+    }
+    
+    func asImage() -> Image? {
+        guard let contentUrl = contentUrl else { return nil }
+        do {
+            let url = try URL(string: contentUrl).orThrow("URL \(contentUrl) is not valid")
+            let data = try Data(contentsOf: url)
+            let image = try UIImage(data: data).orThrow("Cannot load image from data")
+            return Image(uiImage: image)
+        } catch {
+            Log.w(attachmentTag, "Error loading image attachment", error)
+            return nil
+        }
     }
 }

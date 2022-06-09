@@ -49,7 +49,7 @@ struct SubscriptionManager {
             if !messages.isEmpty {
                 DispatchQueue.main.sync {
                     for message in messages {
-                        store.save(notificationFromMessage: message, withSubscription: subscription)
+                        store.saveNotification(fromMessage: message, withSubscription: subscription)
                     }
                 }
             }

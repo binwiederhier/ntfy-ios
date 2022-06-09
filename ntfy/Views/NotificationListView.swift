@@ -284,7 +284,8 @@ struct NotificationRowView: View {
             Text(notification.formatMessage())
                 .font(.body)
             if let attachment = notification.attachment {
-                NotificationAttachmentView(attachment: attachment)
+                NotificationAttachmentView(notification: notification, attachment: attachment)
+                    .padding([.top, .bottom], 20)
             }
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
@@ -329,8 +330,74 @@ struct NotificationRowView: View {
 }
 
 struct NotificationAttachmentView: View {
+    @ObservedObject var notification: Notification
     @ObservedObject var attachment: Attachment
+    @EnvironmentObject private var store: Store
+    
+    var body: some View {
+        Menu {
+            if attachment.isDownloaded() {
+                Button {
+                    // FIXME
+                } label: {
+                    Text("Open file")
+                }
+                Button {
+                    // FIXME
+                } label: {
+                    Text("Save file")
+                }
+                Button {
+                    // FIXME
+                    do {
+                        let fileManager = FileManager.default
+                        let contentUrl = try attachment.contentUrl.orThrow()
+                        let url = try URL(string: contentUrl).orThrow("URL \(contentUrl) is not valid")
+                        
+                        Log.d("aaa", "Deleting file \(url.path)")
+                        try fileManager.removeItem(atPath: url.path)
+                        attachment.contentUrl = nil
+                        store.save()
+                    } catch {
+                        print("sfsfd \(error)")
+                    }
+                } label: {
+                    Text("Delete file")
+                }
+            } else if !attachment.isExpired() {
+                Button {
+                    do {
+                        // FIXME
+                        let url = try URL(string: attachment.url ?? "?").orThrow("URL \(attachment.url) is not valid")
+                        let data = try Data(contentsOf: url)
+                        let contentUrl = try AttachmentManager.download(id: notification.id ?? "?", data: data, options: nil)
+                        attachment.contentUrl = contentUrl.absoluteString
+                        store.save()
+                    } catch {
+                        print("sfsfd \(error)")
+                    }
+                } label: {
+                    Text("Download file")
+                }
+            }
+        } label: {
+            if let image = attachment.asImage() {
+                image
+                    .resizable()
+                    .scaledToFit()
+            } else {
+                NotificationAttachmentDetailView(attachment: attachment)
+            }
+        }
+        
+    }
+    
+}
 
+
+struct NotificationAttachmentDetailView: View {
+    @ObservedObject var attachment: Attachment
+    
     var body: some View {
         HStack {
             Image(systemName: "paperclip")
@@ -358,9 +425,9 @@ struct NotificationAttachmentView: View {
                 }
             }
         }
+        .foregroundColor(.primary)
     }
 }
-
 
 struct NotificationListView_Previews: PreviewProvider {
     static var previews: some View {

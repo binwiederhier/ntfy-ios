@@ -1,8 +1,7 @@
 import Foundation
 import MobileCoreServices
-import UniformTypeIdentifiers
 
-struct DownloadManager {
+struct AttachmentManager {
     static private let attachmentDir = "attachments"
     
     static func download(id: String, data: Data, options: [NSObject : AnyObject]?) throws -> URL {
