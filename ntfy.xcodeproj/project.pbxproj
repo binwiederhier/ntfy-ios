@@ -49,6 +49,7 @@
 		94B736DE28502B51003D69FB /* AttachmentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B736DC28502947003D69FB /* AttachmentManager.swift */; };
 		94B736E028516F3F003D69FB /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B736DF28516F3E003D69FB /* Optional.swift */; };
 		94B736E128516FAD003D69FB /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B736DF28516F3E003D69FB /* Optional.swift */; };
+		94B736E22853D254003D69FB /* Attachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B736DA2850241A003D69FB /* Attachment.swift */; };
 		94CD1966283E662900973B93 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 94CD1965283E662900973B93 /* emojis.json */; };
 		94CD1967283E662900973B93 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 94CD1965283E662900973B93 /* emojis.json */; };
 		94CD196A283E666900973B93 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CD1969283E666900973B93 /* EmojiManager.swift */; };
@@ -405,6 +406,7 @@
 				9474F2132834755A00CDE4DD /* Notification.swift in Sources */,
 				94E9196C28353E0100F30170 /* Log.swift in Sources */,
 				9474F2152834758700CDE4DD /* Helpers.swift in Sources */,
+				94B736E22853D254003D69FB /* Attachment.swift in Sources */,
 				9474F1E7282F3FFD00CDE4DD /* NotificationService.swift in Sources */,
 				94CD196B283E666900973B93 /* EmojiManager.swift in Sources */,
 				94867144283ECD370093C7A4 /* Actions.swift in Sources */,

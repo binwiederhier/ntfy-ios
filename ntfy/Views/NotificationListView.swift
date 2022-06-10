@@ -330,9 +330,9 @@ struct NotificationRowView: View {
     }
 }
 
-
-
 struct NotificationAttachmentView: View {
+    private let tag = "NotificationAttachmentView"
+
     @ObservedObject var notification: Notification
     @ObservedObject var attachment: Attachment
     @EnvironmentObject private var store: Store
@@ -341,22 +341,7 @@ struct NotificationAttachmentView: View {
         Menu {
             if attachment.isDownloaded() {
                 Button {
-                    // FIXME
-                    print(notification.id)
-                    do{
-                        let fileManager = FileManager.default
-                        let directory = try fileManager
-                            .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup).orThrow()
-                            //.appendingPathComponent("attachments")
-                        try? directory.disableFileProtection()
-                        try? directory.parentDirectory?.disableFileProtection()
-                        try? directory.parentDirectory?.parentDirectory?.disableFileProtection()
-                        try? directory.parentDirectory?.parentDirectory?.parentDirectory?.disableFileProtection()
-                        print(try fileManager.contentsOfDirectory(atPath: directory.path))
-                    } catch {
-                        print(error)
-                    }
-                    
+                   // FIXME
                 } label: {
                     Text("Open file")
                 }
@@ -372,12 +357,12 @@ struct NotificationAttachmentView: View {
                         let contentUrl = try attachment.contentUrl.orThrow()
                         let url = try URL(string: contentUrl).orThrow("URL \(contentUrl) is not valid")
                         
-                        Log.d("aaa", "Deleting file \(url.path)")
+                        Log.d(tag, "Deleting file \(url.path)")
                         try? fileManager.removeItem(atPath: url.path)
                         attachment.contentUrl = nil
                         store.save()
                     } catch {
-                        print("sfsfd \(error)")
+                        Log.w(tag, "Unable to delete file", error)
                     }
                 } label: {
                     Text("Delete file")
@@ -385,6 +370,8 @@ struct NotificationAttachmentView: View {
             } else if !attachment.isExpired() {
                 Button {
                     AttachmentManager.download(url: attachment.url ?? "", id: notification.id ?? "?") { _, contentUrl, error in
+                        // FIXME: Delete tempFileUrl
+                        
                         attachment.contentUrl = contentUrl // May be nil!
                         store.save()
                     }
@@ -392,9 +379,6 @@ struct NotificationAttachmentView: View {
                     Text("Download file")
                 }
             }
-            
-            // 2022-06-09 03:26:06.776000-0400 ntfyApp [WARNING ⚠️] Attachment: Error loading image attachment from file:///private/var/mobile/Containers/Shared/AppGroup/C133CAD1-A47F-4A3B-9874-8065E6D0E11C/attachments/8r57dXwxjrlk.jpg
-
         } label: {
             if let image = attachment.asImage() {
                 image
@@ -404,11 +388,8 @@ struct NotificationAttachmentView: View {
                 NotificationAttachmentDetailView(attachment: attachment)
             }
         }
-        
     }
-    
 }
-
 
 struct NotificationAttachmentDetailView: View {
     @ObservedObject var attachment: Attachment

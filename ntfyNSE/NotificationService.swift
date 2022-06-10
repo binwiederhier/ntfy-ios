@@ -73,7 +73,7 @@ class NotificationService: UNNotificationServiceExtension {
     
     // This helped a lot: https://medium.com/gits-apps-insight/processing-notification-data-using-notification-service-extension-6a2b5ea2da17
     private func maybeDownloadAttachment(_ message: Message, _ content: UNMutableNotificationContent, completionHandler: @escaping (String?) -> Void) {
-        guard let attachment = message.attachment else { // FIXME: check expired
+        guard let attachment = message.attachment, timeExpired(attachment.expires) else { // FIXME: check expired
             completionHandler(nil)
             return
         }
@@ -125,26 +125,5 @@ class NotificationService: UNNotificationServiceExtension {
         // I don't know if this is necessary, but it feels like the right thing to do.
         
         _ = semaphore.wait(timeout: DispatchTime.now() + 25) // 30 seconds is the max for the entire extension
-    }
-}
-
-extension UNNotificationAttachment {
-    /// Save the image to disk
-    static func create(imageFileIdentifier: String, data: NSData, options: [NSObject : AnyObject]?) -> UNNotificationAttachment? {
-        let fileManager = FileManager.default
-        let tmpSubFolderName = ProcessInfo.processInfo.globallyUniqueString
-        let tmpSubFolderURL = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(tmpSubFolderName, isDirectory: true)
-
-        do {
-            // https://stackoverflow.com/questions/45226847/unnotificationattachment-failing-to-attach-image#comment108519977_51081941
-            try fileManager.createDirectory(at: tmpSubFolderURL!, withIntermediateDirectories: true, attributes: nil)
-            let fileURL = tmpSubFolderURL?.appendingPathComponent(imageFileIdentifier + ".jpg")
-            try data.write(to: fileURL!, options: [])
-            let imageAttachment = try UNNotificationAttachment.init(identifier: imageFileIdentifier, url: fileURL!, options: options)
-            return imageAttachment
-        } catch let error {
-            print("error \(error)")
-        }
-        return nil
     }
 }

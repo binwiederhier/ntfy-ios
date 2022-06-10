@@ -19,7 +19,7 @@ extension Attachment {
     }
 
     func isExpired() -> Bool {
-        return TimeInterval(self.expires) < NSDate().timeIntervalSince1970
+        return timeExpired(self.expires)
     }
 
     func expiresString() -> String {
@@ -44,4 +44,9 @@ extension Attachment {
             return nil
         }
     }
+}
+
+func timeExpired(_ expires: Int64?) -> Bool {
+    guard let expires = expires else { return false }
+    return expires > 0 && TimeInterval(expires) < NSDate().timeIntervalSince1970
 }

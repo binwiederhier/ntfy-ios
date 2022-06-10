@@ -231,13 +231,6 @@ class Store: ObservableObject {
     }
 }
 
-// https://stackoverflow.com/a/59009657/1440785
-extension URL {
-    var parentDirectory: URL? { try? resourceValues(forKeys: [.parentDirectoryURLKey]).parentDirectory }
-    var fileProtection: URLFileProtection? { try? resourceValues(forKeys: [.fileProtectionKey]).fileProtection }
-    func disableFileProtection() throws { try (self as NSURL).setResourceValue(URLFileProtection.none, forKey: .fileProtectionKey) }
-}
-
 extension Store {
     static let sampleMessages = [
         "stats": [

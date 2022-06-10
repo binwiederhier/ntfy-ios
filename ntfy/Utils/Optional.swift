@@ -18,6 +18,11 @@ extension Optional {
         throw NilError(msg: msg)
     }
     
+    func or(_ w: Wrapped) -> Wrapped {
+        if let wrapped = self { return wrapped }
+        return w
+    }
+    
     struct NilError: Error {
         var msg: String
     }
