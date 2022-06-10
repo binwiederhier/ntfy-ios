@@ -131,6 +131,7 @@ class Store: ObservableObject {
                 attachment.type = att.type
                 attachment.size = att.size ?? 0
                 attachment.expires = att.expires ?? 0
+                attachment.contentUrl = att.contentUrl
                 notification.attachment = attachment
             }
             subscription.addToNotifications(notification)
@@ -228,6 +229,13 @@ class Store: ObservableObject {
         request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "key = %@", key)])
         return try? context.fetch(request).first
     }
+}
+
+// https://stackoverflow.com/a/59009657/1440785
+extension URL {
+    var parentDirectory: URL? { try? resourceValues(forKeys: [.parentDirectoryURLKey]).parentDirectory }
+    var fileProtection: URLFileProtection? { try? resourceValues(forKeys: [.fileProtectionKey]).fileProtection }
+    func disableFileProtection() throws { try (self as NSURL).setResourceValue(URLFileProtection.none, forKey: .fileProtectionKey) }
 }
 
 extension Store {

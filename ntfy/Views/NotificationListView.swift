@@ -285,7 +285,8 @@ struct NotificationRowView: View {
                 .font(.body)
             if let attachment = notification.attachment {
                 NotificationAttachmentView(notification: notification, attachment: attachment)
-                    .padding([.top, .bottom], 20)
+                    .padding([.top, .bottom], 10)
+                    //.frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .leading)
             }
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
@@ -329,6 +330,8 @@ struct NotificationRowView: View {
     }
 }
 
+
+
 struct NotificationAttachmentView: View {
     @ObservedObject var notification: Notification
     @ObservedObject var attachment: Attachment
@@ -339,6 +342,21 @@ struct NotificationAttachmentView: View {
             if attachment.isDownloaded() {
                 Button {
                     // FIXME
+                    print(notification.id)
+                    do{
+                        let fileManager = FileManager.default
+                        let directory = try fileManager
+                            .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup).orThrow()
+                            //.appendingPathComponent("attachments")
+                        try? directory.disableFileProtection()
+                        try? directory.parentDirectory?.disableFileProtection()
+                        try? directory.parentDirectory?.parentDirectory?.disableFileProtection()
+                        try? directory.parentDirectory?.parentDirectory?.parentDirectory?.disableFileProtection()
+                        print(try fileManager.contentsOfDirectory(atPath: directory.path))
+                    } catch {
+                        print(error)
+                    }
+                    
                 } label: {
                     Text("Open file")
                 }
@@ -355,7 +373,7 @@ struct NotificationAttachmentView: View {
                         let url = try URL(string: contentUrl).orThrow("URL \(contentUrl) is not valid")
                         
                         Log.d("aaa", "Deleting file \(url.path)")
-                        try fileManager.removeItem(atPath: url.path)
+                        try? fileManager.removeItem(atPath: url.path)
                         attachment.contentUrl = nil
                         store.save()
                     } catch {
@@ -366,20 +384,17 @@ struct NotificationAttachmentView: View {
                 }
             } else if !attachment.isExpired() {
                 Button {
-                    do {
-                        // FIXME
-                        let url = try URL(string: attachment.url ?? "?").orThrow("URL \(attachment.url) is not valid")
-                        let data = try Data(contentsOf: url)
-                        let contentUrl = try AttachmentManager.download(id: notification.id ?? "?", data: data, options: nil)
-                        attachment.contentUrl = contentUrl.absoluteString
+                    AttachmentManager.download(url: attachment.url ?? "", id: notification.id ?? "?") { contentUrl, error in
+                        attachment.contentUrl = contentUrl // May be nil!
                         store.save()
-                    } catch {
-                        print("sfsfd \(error)")
                     }
                 } label: {
                     Text("Download file")
                 }
             }
+            
+            // 2022-06-09 03:26:06.776000-0400 ntfyApp [WARNING ⚠️] Attachment: Error loading image attachment from file:///private/var/mobile/Containers/Shared/AppGroup/C133CAD1-A47F-4A3B-9874-8065E6D0E11C/attachments/8r57dXwxjrlk.jpg
+
         } label: {
             if let image = attachment.asImage() {
                 image

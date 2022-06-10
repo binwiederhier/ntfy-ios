@@ -33,13 +33,14 @@ extension Attachment {
     
     func asImage() -> Image? {
         guard let contentUrl = contentUrl else { return nil }
+        let url = URL(fileURLWithPath: contentUrl)
         do {
-            let url = try URL(string: contentUrl).orThrow("URL \(contentUrl) is not valid")
             let data = try Data(contentsOf: url)
             let image = try UIImage(data: data).orThrow("Cannot load image from data")
+            Log.d(attachmentTag, "Successfulluy loaded image attachment from \(contentUrl), URL: \(url)")
             return Image(uiImage: image)
         } catch {
-            Log.w(attachmentTag, "Error loading image attachment", error)
+            Log.w(attachmentTag, "Error loading image attachment from \(contentUrl), URL: \(url)", error)
             return nil
         }
     }

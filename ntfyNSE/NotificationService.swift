@@ -54,40 +54,44 @@ class NotificationService: UNNotificationServiceExtension {
     private func handleMessage(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ baseUrl: String, _ message: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
         // Modify notification based on message
         content.modify(message: message, baseUrl: baseUrl)
-        
+                
         // If there is one (and it's eligible), download attachment
-        maybeDownloadAttachment(message, content)
-        
-        // Save notification to store, and display it
-        guard let subscription = store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
-            Log.w(tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
-            contentHandler(request.content)
-            return
+        maybeDownloadAttachment(message, content) { contentUrl in
+            guard let subscription = self.store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
+                Log.w(self.tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
+                contentHandler(request.content)
+                return
+            }
+            var message = message
+            if message.attachment != nil {
+                message.attachment!.contentUrl = contentUrl
+            }
+            Store.shared.saveNotification(fromMessage: message, withSubscription: subscription)
+            contentHandler(content)
         }
-        Store.shared.saveNotification(fromMessage: message, withSubscription: subscription)
-        contentHandler(content)
     }
     
-    private func maybeDownloadAttachment(_ message: Message, _ content: UNMutableNotificationContent) {
-        // This helped a lot: https://medium.com/gits-apps-insight/processing-notification-data-using-notification-service-extension-6a2b5ea2da17
-        guard var attachment = message.attachment else { return }
-        do {
-            // Parse URL and download
-            
-            // FIXME: Make this aync and reusable in notification list
-            
-            let url = try URL(string: attachment.url).orThrow("URL \(attachment.url) is not valid")
-            let data = try Data(contentsOf: url)
-            let contentUrl = try AttachmentManager.download(id: message.id, data: data, options: nil)
-
-            // Once downloaded, set "contentUrl" in attachment, so we persist it later.
-            attachment.contentUrl = contentUrl.absoluteString
-            
-            // Now try to attach it to the notification
-            let notificationAttachment = try UNNotificationAttachment.init(identifier: message.id, url: contentUrl, options: nil)
-            content.attachments = [notificationAttachment]
-        } catch {
-            Log.w(tag, "Error downloading attachment", error)
+    // This helped a lot: https://medium.com/gits-apps-insight/processing-notification-data-using-notification-service-extension-6a2b5ea2da17
+    private func maybeDownloadAttachment(_ message: Message, _ content: UNMutableNotificationContent, completionHandler: @escaping (String?) -> Void) {
+        guard let attachment = message.attachment else { // FIXME: check expired
+            completionHandler(nil)
+            return
+        }
+        AttachmentManager.download(url: attachment.url, id: message.id) { contentUrl, error in
+            if let contentUrl = contentUrl {
+                do {
+                    // Attach it to the notification
+                    let url = URL(fileURLWithPath: contentUrl)
+                    // contentUrl    String    "/private/var/mobile/Containers/Shared/AppGroup/C133CAD1-A47F-4A3B-9874-8065E6D0E11C/attachments/M4e21pWffaiI.jpg"
+                    //                          /private/var/mobile/Containers/Shared/AppGroup/C133CAD1-A47F-4A3B-9874-8065E6D0E11C/attachments/M4e21pWffaiI.jpg
+                    //let notificationAttachment = try UNNotificationAttachment.init(identifier: message.id, url: url, options: nil)
+                    //content.attachments = [notificationAttachment]
+                } catch {
+                    Log.w(self.tag, "Error attaching image to notification", error)
+                }
+            }
+            // Return file path as "contentUrl" in attachment (regardless of whether we displayed it, or not)
+            completionHandler(contentUrl) // May be nil!
         }
     }
     
