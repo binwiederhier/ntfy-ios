@@ -77,15 +77,13 @@ class NotificationService: UNNotificationServiceExtension {
             completionHandler(nil)
             return
         }
-        AttachmentManager.download(url: attachment.url, id: message.id) { contentUrl, error in
-            if let contentUrl = contentUrl {
+        AttachmentManager.download(url: attachment.url, id: message.id) { tempFileUrl, contentUrl, error in
+            if let tempFileUrl = tempFileUrl {
                 do {
                     // Attach it to the notification
-                    let url = URL(fileURLWithPath: contentUrl)
-                    // contentUrl    String    "/private/var/mobile/Containers/Shared/AppGroup/C133CAD1-A47F-4A3B-9874-8065E6D0E11C/attachments/M4e21pWffaiI.jpg"
-                    //                          /private/var/mobile/Containers/Shared/AppGroup/C133CAD1-A47F-4A3B-9874-8065E6D0E11C/attachments/M4e21pWffaiI.jpg
-                    //let notificationAttachment = try UNNotificationAttachment.init(identifier: message.id, url: url, options: nil)
-                    //content.attachments = [notificationAttachment]
+                    let url = URL(fileURLWithPath: tempFileUrl)
+                    let notificationAttachment = try UNNotificationAttachment.init(identifier: message.id, url: url, options: nil)
+                    content.attachments = [notificationAttachment]
                 } catch {
                     Log.w(self.tag, "Error attaching image to notification", error)
                 }

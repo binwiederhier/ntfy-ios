@@ -384,7 +384,7 @@ struct NotificationAttachmentView: View {
                 }
             } else if !attachment.isExpired() {
                 Button {
-                    AttachmentManager.download(url: attachment.url ?? "", id: notification.id ?? "?") { contentUrl, error in
+                    AttachmentManager.download(url: attachment.url ?? "", id: notification.id ?? "?") { _, contentUrl, error in
                         attachment.contentUrl = contentUrl // May be nil!
                         store.save()
                     }
