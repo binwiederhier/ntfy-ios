@@ -52,16 +52,17 @@ class NotificationService: UNNotificationServiceExtension {
     }
     
     private func handleMessage(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ baseUrl: String, _ message: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
+        guard let subscription = self.store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
+            Log.w(self.tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
+            contentHandler(request.content)
+            return
+        }
+        
         // Modify notification based on message
         content.modify(message: message, baseUrl: baseUrl)
-                
+      
         // If there is one (and it's eligible), download attachment
         maybeDownloadAttachment(message, content) { contentUrl in
-            guard let subscription = self.store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
-                Log.w(self.tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
-                contentHandler(request.content)
-                return
-            }
             var message = message
             if message.attachment != nil {
                 message.attachment!.contentUrl = contentUrl
@@ -73,23 +74,30 @@ class NotificationService: UNNotificationServiceExtension {
     
     // This helped a lot: https://medium.com/gits-apps-insight/processing-notification-data-using-notification-service-extension-6a2b5ea2da17
     private func maybeDownloadAttachment(_ message: Message, _ content: UNMutableNotificationContent, completionHandler: @escaping (String?) -> Void) {
-        guard let attachment = message.attachment, timeExpired(attachment.expires) else {
+        guard let attachment = message.attachment, !timeExpired(attachment.expires) else {
             completionHandler(nil)
             return
         }
-        AttachmentManager.download(url: attachment.url, id: message.id) { tempFileUrl, contentUrl, error in
-            if let tempFileUrl = tempFileUrl {
+        AttachmentManager.download(url: attachment.url, id: message.id, withMaxLength: 300000) { contentUrl, error in
+            if let contentUrl = contentUrl {
                 do {
+                    // Create temp file copy of the file (for the iOS notification). Turns out that iOS deletes
+                    // the notification attachment file after it has been displayed. This took me days to figure out!
+                    let fileManager = FileManager.default
+                    let tempFileUrl = fileManager.temporaryDirectory
+                        .appendingPathComponent(NSUUID().uuidString)
+                        .appendingPathExtension(contentUrl.pathExtension)
+                    try fileManager.copyItem(at: contentUrl, to: tempFileUrl)
+                    
                     // Attach it to the notification
-                    let url = URL(fileURLWithPath: tempFileUrl)
-                    let notificationAttachment = try UNNotificationAttachment.init(identifier: message.id, url: url, options: nil)
+                    let notificationAttachment = try UNNotificationAttachment.init(identifier: message.id, url: tempFileUrl, options: nil)
                     content.attachments = [notificationAttachment]
                 } catch {
                     Log.w(self.tag, "Error attaching image to notification", error)
                 }
             }
             // Return file path as "contentUrl" in attachment (regardless of whether we displayed it, or not)
-            completionHandler(contentUrl) // May be nil!
+            completionHandler(contentUrl?.path) // May be nil!
         }
     }
     
