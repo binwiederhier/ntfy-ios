@@ -369,11 +369,13 @@ struct NotificationAttachmentView: View {
                 }
             } else if !attachment.isExpired() {
                 Button {
-                    AttachmentManager.download(url: attachment.url ?? "", id: notification.id ?? "?") { _, contentUrl, error in
+                    AttachmentManager.downloadWithMaxSize(url: attachment.url ?? "", id: notification.id ?? "?", maxLength: 1048576) { _, contentUrl, error in
                         // FIXME: Delete tempFileUrl
                         
-                        attachment.contentUrl = contentUrl // May be nil!
-                        store.save()
+                        DispatchQueue.main.async {
+                            attachment.contentUrl = contentUrl // May be nil!
+                            store.save()
+                        }
                     }
                 } label: {
                     Text("Download file")

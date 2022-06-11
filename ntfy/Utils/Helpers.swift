@@ -50,6 +50,19 @@ func parseNonEmojiTags(_ tags: String?) -> [String] {
         .filter { EmojiManager.shared.getEmojiByAlias(alias: $0) == nil }
 }
 
+func formatSize(_ size: Int64) -> String {
+    if (size < 1000) { return "\(size) bytes" }
+    let exp = Int(log2(Double(size)) / log2(1000.0))
+    let unit = ["KB", "MB", "GB", "TB", "PB", "EB"][exp - 1]
+    let number = Double(size) / pow(1000, Double(exp))
+    return String(format: "%.1f %@", number, unit)
+}
+
+func timeExpired(_ expires: Int64?) -> Bool {
+    guard let expires = expires else { return false }
+    return expires > 0 && TimeInterval(expires) < NSDate().timeIntervalSince1970
+}
+
 extension Data {
     func mimeType() -> String {
         var b: UInt8 = 0
