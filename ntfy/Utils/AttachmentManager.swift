@@ -8,72 +8,42 @@ enum DownloadError: Error {
 }
 
 struct AttachmentManager {
-    static let tag = "AttachmentManager"
+    static private let tag = "AttachmentManager"
     static private let attachmentDir = "attachments"
     static private let bufferSize = 131072 // 128 KB
     
-    static func download(url: String, id: String, completionHandler: @escaping (URL?, Error?) -> Void) {
-        guard let url = URL(string: url), let attachmentDir = createAttachmentDir() else {
-            completionHandler(nil, DownloadError.invalidUrlOrDirectory)
-            return
-        }
-        URLSession.shared.downloadTask(with: url) { (tempFileUrl, response, error) in
-            Log.d(self.tag, "Attachment download complete", tempFileUrl, response, error)
-            if let error = error {
-                Log.w(self.tag, "Download attachment error", error)
-                completionHandler(nil, error)
-                return
-            }
-            guard let response = response, let tempFileUrl = tempFileUrl else {
-                Log.w(self.tag, "Response or temp file URL are empty")
-                completionHandler(nil, DownloadError.unexpectedResponse)
-                return
-            }
-            do {
-                let fileManager = FileManager.default
-                let data = try Data(contentsOf: tempFileUrl)
-                let ext = data.guessExtension()
-                
-                // Rename temp file to target URL (with extension, required for it to be displayed correctly!)
-                let contentUrl = attachmentDir.appendingPathComponent(id + ext)
-                try fileManager.moveItem(at: tempFileUrl, to: contentUrl)
-                
-                Log.d(self.tag, "Attachment successfully saved to \(contentUrl.path)")
-                completionHandler(contentUrl, nil)
-            } catch {
-                Log.w(self.tag, "Error saving attachment", error)
-                completionHandler(nil, error)
-            }
-        }.resume()
-    }
-    
-    static func download(url: String, id: String, withMaxLength maxLength: Int64, completionHandler: @escaping (URL?, Error?) -> Void) {
+    static func download(url: String, id: String, maxLength: Int64, timeout: TimeInterval, completionHandler: @escaping (URL?, Error?) -> Void) {
         if #available(iOS 15, *) {
-            stream(url: url, id: id, maxLength: maxLength, completionHandler: completionHandler)
+            downloadStream(url: url, id: id, maxLength: maxLength, timeout: timeout, completionHandler: completionHandler)
         } else {
-            
+            downloadNoStream(url: url, id: id, maxLength: maxLength, timeout: timeout, completionHandler: completionHandler)
         }
     }
     
     @available(iOS 15, *)
-    private static func stream(url: String, id: String, maxLength: Int64, completionHandler: @escaping (URL?, Error?) -> Void) {
+    private static func downloadStream(url: String, id: String, maxLength: Int64, timeout: TimeInterval, completionHandler: @escaping (URL?, Error?) -> Void) {
         Task {
             Log.d(self.tag, "Streaming \(url)")
-            let fileManager = FileManager.default
             guard let url = URL(string: url), let attachmentDir = createAttachmentDir() else {
                 completionHandler(nil, DownloadError.invalidUrlOrDirectory)
                 return
             }
             do {
-                let (asyncBytes, urlResponse) = try await URLSession.shared.bytes(from: url)
+                let sessionConfig = URLSessionConfiguration.default
+                sessionConfig.timeoutIntervalForRequest = timeout
+                sessionConfig.timeoutIntervalForResource = timeout
+
+                let session = URLSession.init(configuration: sessionConfig)
+                let (asyncBytes, urlResponse) = try await session.bytes(from: url)
                 let expectedLength = urlResponse.expectedContentLength
                 
                 // Fail fast: If Content-Length header set and it's >maxLength, fail
-                if expectedLength > maxLength {
+                if maxLength > 0 && expectedLength > maxLength {
                     throw DownloadError.maxSizeReached
                 }
                 
                 // Open temporary file handle
+                let fileManager = FileManager.default
                 var contentUrl = attachmentDir.appendingPathComponent(id)
                 try? fileManager.removeItem(atPath: contentUrl.path)
                 fileManager.createFile(atPath: contentUrl.path, contents: nil)
@@ -116,6 +86,7 @@ struct AttachmentManager {
                 // Rename temp file to add extension (required for it to be displayed correctly!)
                 let contentUrlWithExt = URL(fileURLWithPath: contentUrl.path + ext)
                 if contentUrl != contentUrlWithExt {
+                    try? fileManager.removeItem(at: contentUrlWithExt)
                     try fileManager.moveItem(at: contentUrl, to: contentUrlWithExt)
                     contentUrl = contentUrlWithExt
                 }
@@ -129,9 +100,50 @@ struct AttachmentManager {
         }
     }
     
-    private static func fakeStream(url: String, id: String, completionHandler: @escaping (String?, String?, Error?) -> Void) async {
+    private static func downloadNoStream(url: String, id: String, maxLength: Int64, timeout: TimeInterval, completionHandler: @escaping (URL?, Error?) -> Void) {
+        guard let url = URL(string: url), let attachmentDir = createAttachmentDir() else {
+            completionHandler(nil, DownloadError.invalidUrlOrDirectory)
+            return
+        }
         
+        // FIXME: Do a HEAD request first to bail out early
+        
+        URLSession.shared.downloadTask(with: url) { (tempFileUrl, response, error) in
+            Log.d(self.tag, "Attachment download complete", tempFileUrl, response, error)
+            guard
+                let response = response,
+                let httpResponse = response as? HTTPURLResponse,
+                let tempFileUrl = tempFileUrl,
+                (200...299).contains(httpResponse.statusCode),
+                error == nil
+            else {
+                Log.w(self.tag, "Attachment download failed")
+                completionHandler(nil, DownloadError.unexpectedResponse)
+                return
+            }
+            do {
+                let fileManager = FileManager.default
+                let data = try Data(contentsOf: tempFileUrl)
+                let ext = data.guessExtension()
+                
+                // Sad sad late fail: Bail out if t
+                if maxLength > 0 && data.count > maxLength {
+                    throw DownloadError.maxSizeReached
+                }
+               
+                // Rename temp file to target URL (with extension, required for it to be displayed correctly!)
+                let contentUrl = attachmentDir.appendingPathComponent(id + ext)
+                try fileManager.moveItem(at: tempFileUrl, to: contentUrl)
+                
+                Log.d(self.tag, "Attachment successfully saved to \(contentUrl.path)")
+                completionHandler(contentUrl, nil)
+            } catch {
+                Log.w(self.tag, "Error saving attachment", error)
+                completionHandler(nil, error)
+            }
+        }.resume()
     }
+    
     
     private static func createAttachmentDir() -> URL? {
         do {

@@ -9,6 +9,8 @@ import CryptoKit
 /// select Debug -> Attach to Process by PID or Name, and select the extension. Don't forget to set a breakpoint, or you're not gonna have a good time.
 class NotificationService: UNNotificationServiceExtension {
     private let tag = "NotificationService"
+    private let attachmentMaxLength = Int64(1048576) // 1 MB
+    private let attachmentTimeoutSeconds = 23.0
     private var store: Store?
     
     var contentHandler: ((UNNotificationContent) -> Void)?
@@ -78,7 +80,7 @@ class NotificationService: UNNotificationServiceExtension {
             completionHandler(nil)
             return
         }
-        AttachmentManager.download(url: attachment.url, id: message.id, withMaxLength: 300000) { contentUrl, error in
+        AttachmentManager.download(url: attachment.url, id: message.id, maxLength: attachmentMaxLength, timeout: attachmentTimeoutSeconds) { contentUrl, error in
             if let contentUrl = contentUrl {
                 do {
                     // Create temp file copy of the file (for the iOS notification). Turns out that iOS deletes

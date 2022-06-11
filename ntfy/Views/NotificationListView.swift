@@ -338,6 +338,16 @@ struct NotificationAttachmentView: View {
     @EnvironmentObject private var store: Store
     
     var body: some View {
+        VStack {
+            if let image = attachment.asImage() {
+                image
+                    .resizable()
+                    .scaledToFill()
+                    //.frame(maxWidth: .infinity, maxHeight: 200)
+                    //.clipped()
+                    .background(Color.red)
+            }
+        
         Menu {
             if attachment.isDownloaded() {
                 Button {
@@ -370,7 +380,7 @@ struct NotificationAttachmentView: View {
             } else if !attachment.isExpired() {
                 Button {
                     if let url = attachment.url, let id = notification.id {
-                        AttachmentManager.download(url: url, id: id, withMaxLength: 1048576) { contentUrl, error in
+                        AttachmentManager.download(url: url, id: id, maxLength: 0, timeout: .infinity) { contentUrl, error in
                             DispatchQueue.main.async {
                                 attachment.contentUrl = contentUrl?.path // May be nil!
                                 store.save()
@@ -383,13 +393,19 @@ struct NotificationAttachmentView: View {
             }
         } label: {
             if let image = attachment.asImage() {
-                image
+                /*image
                     .resizable()
-                    .scaledToFit()
+                    .scaledToFill()
+                    //.frame(maxWidth: .infinity, maxHeight: 200)
+                    //.clipped()
+                    .background(Color.red)
+                 */
+                Text("hi")
             } else {
                 NotificationAttachmentDetailView(attachment: attachment)
             }
         }
+    }
     }
 }
 
