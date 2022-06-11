@@ -357,6 +357,19 @@ struct NotificationAttachmentView: View {
                 }
                 Button {
                     // FIXME
+                    do {
+                        let fileManager = FileManager.default
+                        let contentUrl = try attachment.contentUrl.orThrow().toURL()
+                        let contentData = try Data(contentsOf: contentUrl)
+                        let targetUrl = try fileManager
+                            .url(for: .downloadsDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                            .appendingPathComponent(attachment.name ?? "attachment" + contentData.guessExtension())
+                        Log.d(tag, "Saving file to \(targetUrl)")
+                        try contentData.write(to: targetUrl)
+                        Log.d(tag, "Saved file to \(targetUrl)")
+                    } catch {
+                        Log.w(tag, "Unable to save filexx", error)
+                    }
                 } label: {
                     Text("Save file")
                 }
@@ -364,11 +377,9 @@ struct NotificationAttachmentView: View {
                     // FIXME
                     do {
                         let fileManager = FileManager.default
-                        let contentUrl = try attachment.contentUrl.orThrow()
-                        let url = try URL(string: contentUrl).orThrow("URL \(contentUrl) is not valid")
-                        
-                        Log.d(tag, "Deleting file \(url.path)")
-                        try? fileManager.removeItem(atPath: url.path)
+                        let contentUrl = try attachment.contentUrl.orThrow().toURL()
+                        Log.d(tag, "Deleting file \(contentUrl.path)")
+                        try? fileManager.removeItem(atPath: contentUrl.path)
                         attachment.contentUrl = nil
                         store.save()
                     } catch {
@@ -393,14 +404,9 @@ struct NotificationAttachmentView: View {
             }
         } label: {
             if let image = attachment.asImage() {
-                /*image
+                image
                     .resizable()
-                    .scaledToFill()
-                    //.frame(maxWidth: .infinity, maxHeight: 200)
-                    //.clipped()
-                    .background(Color.red)
-                 */
-                Text("hi")
+                    .scaledToFit()
             } else {
                 NotificationAttachmentDetailView(attachment: attachment)
             }

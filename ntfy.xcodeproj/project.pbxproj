@@ -50,6 +50,7 @@
 		94B736E028516F3F003D69FB /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B736DF28516F3E003D69FB /* Optional.swift */; };
 		94B736E128516FAD003D69FB /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B736DF28516F3E003D69FB /* Optional.swift */; };
 		94B736E22853D254003D69FB /* Attachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B736DA2850241A003D69FB /* Attachment.swift */; };
+		94B736E42855263F003D69FB /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B736E32855263F003D69FB /* String.swift */; };
 		94CD1966283E662900973B93 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 94CD1965283E662900973B93 /* emojis.json */; };
 		94CD1967283E662900973B93 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 94CD1965283E662900973B93 /* emojis.json */; };
 		94CD196A283E666900973B93 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CD1969283E666900973B93 /* EmojiManager.swift */; };
@@ -116,6 +117,7 @@
 		94B736DA2850241A003D69FB /* Attachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachment.swift; sourceTree = "<group>"; };
 		94B736DC28502947003D69FB /* AttachmentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentManager.swift; sourceTree = "<group>"; };
 		94B736DF28516F3E003D69FB /* Optional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Optional.swift; sourceTree = "<group>"; };
+		94B736E32855263F003D69FB /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		94CD1965283E662900973B93 /* emojis.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = emojis.json; sourceTree = "<group>"; };
 		94CD1969283E666900973B93 /* EmojiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -246,6 +248,7 @@
 				948671462841B0B20093C7A4 /* NotificationContent.swift */,
 				94B736DC28502947003D69FB /* AttachmentManager.swift */,
 				94B736DF28516F3E003D69FB /* Optional.swift */,
+				94B736E32855263F003D69FB /* String.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -384,6 +387,7 @@
 				94B736E028516F3F003D69FB /* Optional.swift in Sources */,
 				9486714A2841D0CE0093C7A4 /* ActionExecutor.swift in Sources */,
 				9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */,
+				94B736E42855263F003D69FB /* String.swift in Sources */,
 				9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */,
 				94CD196A283E666900973B93 /* EmojiManager.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */,
