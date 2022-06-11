@@ -73,7 +73,7 @@ class NotificationService: UNNotificationServiceExtension {
     
     // This helped a lot: https://medium.com/gits-apps-insight/processing-notification-data-using-notification-service-extension-6a2b5ea2da17
     private func maybeDownloadAttachment(_ message: Message, _ content: UNMutableNotificationContent, completionHandler: @escaping (String?) -> Void) {
-        guard let attachment = message.attachment, timeExpired(attachment.expires) else { // FIXME: check expired
+        guard let attachment = message.attachment, timeExpired(attachment.expires) else {
             completionHandler(nil)
             return
         }

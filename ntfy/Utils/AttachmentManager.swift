@@ -2,7 +2,7 @@ import Foundation
 import MobileCoreServices
 
 enum DownloadError: Error {
-    case invalidUrl
+    case invalidUrlOrDirectory
     case maxSizeReached
     case unexpectedResponse
 }
@@ -14,7 +14,7 @@ struct AttachmentManager {
     
     static func download(url: String, id: String, completionHandler: @escaping (String?, String?, Error?) -> Void) {
         guard let url = URL(string: url) else {
-            completionHandler(nil, nil, DownloadError.invalidUrl)
+            completionHandler(nil, nil, DownloadError.invalidUrlOrDirectory)
             return
         }
         URLSession.shared.downloadTask(with: url) { (tempFileUrl, response, error) in
@@ -58,7 +58,7 @@ struct AttachmentManager {
         }.resume()
     }
     
-    static func downloadWithMaxSize(url: String, id: String, maxLength: Int64, completionHandler: @escaping (String?, String?, Error?) -> Void) {
+    static func download(url: String, id: String, withMaxLength maxLength: Int64, completionHandler: @escaping (URL?, Error?) -> Void) {
         if #available(iOS 15, *) {
             stream(url: url, id: id, maxLength: maxLength, completionHandler: completionHandler)
         } else {
@@ -67,14 +67,19 @@ struct AttachmentManager {
     }
     
     @available(iOS 15, *)
-    private static func stream(url: String, id: String, maxLength: Int64, completionHandler: @escaping (String?, String?, Error?) -> Void) {
+    private static func stream(url: String, id: String, maxLength: Int64, completionHandler: @escaping (URL?, Error?) -> Void) {
         Task {
             Log.d(self.tag, "Streaming \(url)")
-            guard let url = URL(string: url) else {
-                completionHandler(nil, nil, DownloadError.invalidUrl)
+            let fileManager = FileManager.default
+            guard
+                let url = URL(string: url),
+                let attachmentDir = fileManager
+                    .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup)?
+                    .appendingPathComponent(attachmentDir)
+            else {
+                completionHandler(nil, DownloadError.invalidUrlOrDirectory)
                 return
             }
-            
             do {
                 let (asyncBytes, urlResponse) = try await URLSession.shared.bytes(from: url)
                 let expectedLength = urlResponse.expectedContentLength
@@ -85,11 +90,12 @@ struct AttachmentManager {
                 }
                 
                 // Open temporary file handle
-                let fileManager = FileManager.default
-                let tempFileUrl = fileManager.temporaryDirectory.appendingPathComponent(id)
-                fileManager.createFile(atPath: tempFileUrl.path, contents: nil)
-                let tempFileHandle = try FileHandle(forWritingTo: tempFileUrl)
-                
+                var contentUrl = attachmentDir.appendingPathComponent(id)
+                try? fileManager.removeItem(atPath: contentUrl.path)
+                fileManager.createFile(atPath: contentUrl.path, contents: nil)
+                let fileHandle = try FileHandle(forWritingTo: contentUrl)
+                Log.d(self.tag, "Writing to \(contentUrl.path)")
+
                 // Stream to file
                 var ext = ""
                 var data = Data()
@@ -102,9 +108,8 @@ struct AttachmentManager {
                         if ext.isEmpty {
                             ext = data.guessExtension()
                         }
-                        try tempFileHandle.write(contentsOf: data)
+                        try fileHandle.write(contentsOf: data)
                         data = Data()
-                        
                         if NSDate().timeIntervalSince1970 - lastProgress >= 1 {
                             if expectedLength > 0 {
                                 Log.d(self.tag, "Download progress: \(formatSize(written)) (\(Double(written) / Double(expectedLength) * 100.0)%)")
@@ -119,25 +124,23 @@ struct AttachmentManager {
                     if ext.isEmpty {
                         ext = data.guessExtension()
                     }
-                    try tempFileHandle.write(contentsOf: data)
+                    try fileHandle.write(contentsOf: data)
                 }
-                try tempFileHandle.close()
-                Log.d(self.tag, "Download progress: \(formatSize(written)) (100%)")
+                try fileHandle.close()
+                Log.d(self.tag, "Download complete, written \(formatSize(written))")
 
                 // Rename temp file to add extension (required for it to be displayed correctly!)
-                let tempFileWithExtUrl = tempFileUrl.appendingPathExtension(ext)
-                try fileManager.moveItem(at: tempFileUrl, to: tempFileWithExtUrl)
+                let contentUrlWithExt = URL(fileURLWithPath: contentUrl.path + ext)
+                if contentUrl != contentUrlWithExt {
+                    try fileManager.moveItem(at: contentUrl, to: contentUrlWithExt)
+                    contentUrl = contentUrlWithExt
+                }
                 
-                // Copy file
-               // let contentUrl = directory.appendingPathComponent(id + ext) // Images must have correct extension to be displayed correctly!
-               // try data.write(to: contentUrl, options: [.noFileProtection])
-                
-                //Log.d(self.tag, "Attachment successfully saved to \(contentUrl.path)")*/
-                //completionHandler(tempFileWithExtUrl.path, contentUrl.path, nil)
-                completionHandler(tempFileWithExtUrl.path, tempFileWithExtUrl.path, nil)
+                Log.d(self.tag, "Attachment successfully saved to \(contentUrl.path)")
+                completionHandler(contentUrl, nil)
             } catch {
                 Log.w(self.tag, "Error when streaming \(url)", error)
-                completionHandler(nil, nil, error)
+                completionHandler(nil, error)
             }
         }
     }
