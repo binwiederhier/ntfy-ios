@@ -186,30 +186,29 @@ struct UserTableView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        // Sigh, for iOS 14 we need to add a "Delete" menu item, because it doesn't support
-                        // swipe actions. Quite annoying.
-                        
-                        if #available(iOS 15.0, *) {
-                            Button(action: cancelAction) {
-                                Text("Cancel")
+                        if selectedUser == nil {
+                            Button("Cancel") {
+                                cancelAction()
                             }
                         } else {
-                            if selectedUser == nil {
+                            Menu {
                                 Button("Cancel") {
                                     cancelAction()
                                 }
-                            } else {
-                                Menu {
-                                    Button("Cancel") {
-                                        cancelAction()
+                                if #available(iOS 15.0, *) {
+                                    Button(role: .destructive) {
+                                        deleteAction()
+                                    } label: {
+                                        Text("Delete")
                                     }
+                                } else {
                                     Button("Delete") {
                                         deleteAction()
                                     }
-                                } label: {
-                                    Image(systemName: "ellipsis.circle")
-                                        .padding([.leading], 40)
                                 }
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
+                                    .padding([.leading], 40)
                             }
                         }
                     }
@@ -276,21 +275,9 @@ struct UserRowView: View {
     @ObservedObject var user: User
     
     var body: some View {
-        if #available(iOS 15.0, *) {
-            userRow
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        store.delete(user: user)
-                    } label: {
-                        Label("Delete", systemImage: "trash.circle")
-                    }
-                }
-        } else {
-            userRow
-        }
-    }
-    
-    private var userRow: some View {
+        // I tried to add a swipe action here to delete, but for some strange reason it doesn't work,
+        // even though in the subscription list it does.
+        
         HStack {
             Image(systemName: "person.fill")
             VStack(alignment: .leading, spacing: 0) {
