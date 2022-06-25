@@ -18,7 +18,6 @@ struct SubscriptionAddView: View {
     @State private var addError: String?
     @State private var loginError: String?
 
-
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
@@ -45,7 +44,7 @@ struct SubscriptionAddView: View {
         VStack(alignment: .leading, spacing: 0) {
             Form {
                 Section(
-                    footer: Text("Topics are not password protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
+                    footer: Text("Topics may not be password-protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
                 ) {
                     TextField("Topic name, e.g. phil_alerts", text: $topic)
                         .disableAutocapitalization()
@@ -53,7 +52,7 @@ struct SubscriptionAddView: View {
                 }
                 Section(
                     footer:
-                        (useAnother) ? Text("Support for self-hosted servers is currently limited. To ensure instant delivery, be sure to set upstream-base-url in your server's config, otherwise messages may arrive with significant delay. Auth is not yet supported.") : Text("")
+                        (useAnother) ? Text("To ensure instant delivery from your self-hosted server, be sure to set upstream-base-url in your server's config, otherwise messages may arrive with significant delay.") : Text("")
                 ) {
                     Toggle("Use another server", isOn: $useAnother)
                     if useAnother {
