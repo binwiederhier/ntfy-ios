@@ -1,14 +1,14 @@
 import Foundation
 
 struct Log {
-    static var dateFormat = "yyyy-MM-dd hh:mm:ss.SSSSSSZ"
-    static var dateFormatter: DateFormatter {
+    private static let dateFormat = "yyyy-MM-dd hh:mm:ss.SSSSSSZ"
+    private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = dateFormat
-        formatter.locale = Locale.current
-        formatter.timeZone = TimeZone.current
+        formatter.locale = .current
+        formatter.timeZone = .current
         return formatter
-    }
+    }()
     
     static func d(_ tag: String, _ message: String, _ other: Any?...) {
         log(.debug, tag, message, other)
@@ -26,22 +26,22 @@ struct Log {
         log(.error, tag, message, other)
     }
     
-    static func log(_ level: LogLevel, _ tag: String, _ message: String, _ other: Any?...) {
+    private static func log(_ level: LogLevel, _ tag: String, _ message: String, _ other: Any?...) {
         print("\(dateStr()) ntfyApp [\(levelStr(level))] \(tag): \(message)")
         if !other.isEmpty {
             other.forEach { o in
-                if o != nil {
-                    print("  ", o!)
+                if let o = o {
+                    print("  ", o)
                 }
             }
         }
     }
     
-    static func dateStr() -> String {
-        return dateFormatter.string(from: Date())
+    private static func dateStr() -> String {
+        dateFormatter.string(from: Date())
     }
     
-    static func levelStr(_ level: LogLevel) -> String {
+    private static func levelStr(_ level: LogLevel) -> String {
         switch level {
         case .debug: return "DEBUG"
         case .info: return "INFO"
@@ -51,7 +51,7 @@ struct Log {
     }
 }
 
-enum LogLevel {
+private enum LogLevel {
     case debug
     case info
     case warning
