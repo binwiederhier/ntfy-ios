@@ -10,12 +10,17 @@ Note: these requirements are strictly based off of my development on this app. T
 1. Firebase account
 1. Apple Developer license? (I forget if its possible to do testing without purchasing the license)
 
-## Setup - Apple Developer
+## Setup - Apple Developer/iOS Instant Notification Setup
 
 1. [Create a new key in Apple Developer Member Center](https://developer.apple.com/account/resources/authkeys/add)
   1. Select "Apple Push Notifications service (APNs)"
 1. Download the newly created key (should have a file name similar to `AuthKey_ZZZZZZ.p8`, where `ZZZZZZ` is the **Key ID**)
 1. Record your **Team ID** - it can be seen in the top-right corner of the page, or on your Account > Membership page
+1. Next, navigate to "Project Settings" in the firebase console for your project, and select the iOS app you created. Then, click "Cloud Messaging" in the left sidebar, and scroll down to the "APNs Authentication Key" section. Click "Upload Key", and upload the key you downloaded from Apple Developer.
+
+**Note:** If you don't do the above setups for APNS, **notifications will not post instantly or sometimes at all**. This is because of the missing APNS key, which is required for firebase to send notifications to the iOS app. A snip from the firebase docs:
+
+> If you don't have an APNs authentication key, you can still send notifications to iOS devices, but they won't be delivered instantly. Instead, they'll be delivered when the device wakes up to check for new notifications or when your application sends a firebase request to check for them. The time to check for new notifications can vary from a few seconds to hours, days or even weeks. Enabling APNs authentication keys ensures that notifications are delivered instantly and is strongly recommended.
 
 ## Setup - Firebase
 
@@ -46,6 +51,15 @@ Note: these requirements are strictly based off of my development on this app. T
 1. Follow step 4 of [https://firebase.google.com/docs/ios/setup](Add Firebase to your Apple project) to install the firebase-ios-sdk in XCode, if it's not already present - you can select any packages in addition to Firebase Core / Firebase Messaging
 1. Similarly, install the SQLite.swift package dependency in XCode
 1. When running the debug build, ensure XCode is pointed to the connected iOS device - registering for push notifications does not work in the iOS simulators
+
+## Setup - PLIST Deployment and Configuration
+To have intstant notifications/better notification delivery when using firebase, you will need to add the `GoogleService-Info.plist` file to your project. Here's how to do that:
+
+1. In XCode, find the NTFY app target. **Not** the NSE app target.
+1. Find the Asset/ folder in the project navigator
+1. Drag the `GoogleService-Info.plist` file into the Asset/ folder that you get from the firebase console. It can be found in the "Project settings" > "General" > "Your apps"  with a button labled "GoogleService-Info.plist"
+
+After that, you should be all set!
 
 ## Useful resources
 
