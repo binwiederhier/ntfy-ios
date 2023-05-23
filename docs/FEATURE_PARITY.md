@@ -1,4 +1,4 @@
-#  ntfy.sh iOS - Android Feature Parity
+# ntfy.sh iOS - Android Feature Parity
 
 This document is to keep track of the feature parity between the iOS and Android ntfy.sh apps.
 
@@ -17,7 +17,7 @@ This document is to keep track of the feature parity between the iOS and Android
 | Tags and emojis                       | :white_check_mark: | :white_check_mark: |
 | Click action                          | :warning:          | :white_check_mark: | Only direct notification click                                                                                |
 | Attachments                           | :warning:          | :white_check_mark: | Not fully implemented                                                                                         |
-| User Authentication                   | :warning:          | :white_check_mark: |                                                                                                               |
+| User Authentication                   | :warning:          | :white_check_mark: | Not fully implemented                                                                                         |
 | Dark mode                             | :white_check_mark: | :white_check_mark: | Dependent on iOS dark mode, may add override in                                                               |
 | Logging                               | :x:                | :white_check_mark: | Not yet implemented                                                                                           |
 | Share to topic                        | :x:                | :white_check_mark: | Not yet implemented                                                                                           |
