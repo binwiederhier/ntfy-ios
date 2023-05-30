@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="20086" systemVersion="21F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Attachment" representedClassName="Attachment" syncable="YES" codeGenerationType="class">
+        <attribute name="contentUrl" optional="YES" attributeType="String"/>
+        <attribute name="expires" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="size" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="type" optional="YES" attributeType="String"/>
+        <attribute name="url" attributeType="String"/>
+        <relationship name="notification" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Notification" inverseName="attachment" inverseEntity="Notification"/>
+    </entity>
     <entity name="Notification" representedClassName="Notification" syncable="YES" codeGenerationType="class">
         <attribute name="actions" optional="YES" attributeType="String"/>
         <attribute name="click" optional="YES" attributeType="String"/>
@@ -9,6 +18,7 @@
         <attribute name="tags" optional="YES" attributeType="String"/>
         <attribute name="time" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="attachment" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Attachment" inverseName="notification" inverseEntity="Attachment"/>
         <relationship name="subscription" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Subscription" inverseName="notifications" inverseEntity="Subscription"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
@@ -43,9 +53,10 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="Notification" positionX="-54" positionY="9" width="128" height="164"/>
+        <element name="Notification" positionX="-54" positionY="9" width="128" height="179"/>
+        <element name="Preference" positionX="-162" positionY="81" width="128" height="59"/>
         <element name="Subscription" positionX="-262.4760131835938" positionY="11.46405029296875" width="128" height="89"/>
         <element name="User" positionX="-162" positionY="81" width="128" height="74"/>
-        <element name="Preference" positionX="-162" positionY="81" width="128" height="59"/>
+        <element name="Attachment" positionX="-153" positionY="90" width="128" height="134"/>
     </elements>
 </model>

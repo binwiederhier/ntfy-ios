@@ -56,6 +56,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         store.getSubscriptions()?.forEach { subscription in
             subscriptionManager.poll(subscription) { messages in
                 messages.forEach { message in
+                    // FIXME: Check that notification is not already there (in DB and via notification center!)
                     self.showNotification(subscription, message)
                 }
             }

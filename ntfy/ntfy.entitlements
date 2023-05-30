@@ -4,9 +4,13 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
 		<string>group.io.heckel.ntfy</string>
 	</array>
+	<key>com.apple.security.files.downloads.read-write</key>
+	<true/>
 </dict>
 </plist>

@@ -9,6 +9,8 @@ import CryptoKit
 /// select Debug -> Attach to Process by PID or Name, and select the extension. Don't forget to set a breakpoint, or you're not gonna have a good time.
 class NotificationService: UNNotificationServiceExtension {
     private let tag = "NotificationService"
+    private let attachmentMaxLength = Int64(1048576) // 1 MB
+    private let attachmentTimeoutSeconds = 23.0
     private var store: Store?
     
     var contentHandler: ((UNNotificationContent) -> Void)?
@@ -20,7 +22,7 @@ class NotificationService: UNNotificationServiceExtension {
         self.bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
         Log.d(tag, "Notification received (in service)") // Logs from extensions are not printed in Xcode!
-
+        
         if let bestAttemptContent = bestAttemptContent {
             let userInfo = bestAttemptContent.userInfo
             guard let message = Message.from(userInfo: userInfo) else {
@@ -52,17 +54,53 @@ class NotificationService: UNNotificationServiceExtension {
     }
     
     private func handleMessage(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ baseUrl: String, _ message: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
-        // Modify notification based on message
-        content.modify(message: message, baseUrl: baseUrl)
-        
-        // Save notification to store, and display it
-        guard let subscription = store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
-            Log.w(tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
+        guard let subscription = self.store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
+            Log.w(self.tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
             contentHandler(request.content)
             return
         }
-        Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
-        contentHandler(content)
+        
+        // Modify notification based on message
+        content.modify(message: message, baseUrl: baseUrl)
+      
+        // If there is one (and it's eligible), download attachment
+        maybeDownloadAttachment(message, content) { contentUrl in
+            var message = message
+            if message.attachment != nil {
+                message.attachment!.contentUrl = contentUrl
+            }
+            Store.shared.saveNotification(fromMessage: message, withSubscription: subscription)
+            contentHandler(content)
+        }
+    }
+    
+    // This helped a lot: https://medium.com/gits-apps-insight/processing-notification-data-using-notification-service-extension-6a2b5ea2da17
+    private func maybeDownloadAttachment(_ message: Message, _ content: UNMutableNotificationContent, completionHandler: @escaping (String?) -> Void) {
+        guard let attachment = message.attachment, !timeExpired(attachment.expires) else {
+            completionHandler(nil)
+            return
+        }
+        AttachmentManager.download(url: attachment.url, id: message.id, maxLength: attachmentMaxLength, timeout: attachmentTimeoutSeconds) { contentUrl, error in
+            if let contentUrl = contentUrl {
+                do {
+                    // Create temp file copy of the file (for the iOS notification). Turns out that iOS deletes
+                    // the notification attachment file after it has been displayed. This took me days to figure out!
+                    let fileManager = FileManager.default
+                    let tempFileUrl = fileManager.temporaryDirectory
+                        .appendingPathComponent(NSUUID().uuidString)
+                        .appendingPathExtension(contentUrl.pathExtension)
+                    try fileManager.copyItem(at: contentUrl, to: tempFileUrl)
+                    
+                    // Attach it to the notification
+                    let notificationAttachment = try UNNotificationAttachment.init(identifier: message.id, url: tempFileUrl, options: nil)
+                    content.attachments = [notificationAttachment]
+                } catch {
+                    Log.w(self.tag, "Error attaching image to notification", error)
+                }
+            }
+            // Return file path as "contentUrl" in attachment (regardless of whether we displayed it, or not)
+            completionHandler(contentUrl?.path) // May be nil!
+        }
     }
     
     private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
@@ -87,6 +125,7 @@ class NotificationService: UNNotificationServiceExtension {
                 contentHandler(request.content)
                 return
             }
+            // FIXME: Check that notification is not already there (in DB and via notification center!)
             self.handleMessage(request, content, baseUrl, message, contentHandler)
             semaphore.signal()
         }

@@ -16,14 +16,14 @@ class Store: ObservableObject {
         return container.viewContext
     }
     private var cancellables: Set<AnyCancellable> = []
-
+    
     init(inMemory: Bool = false) {
         let storeUrl = (inMemory) ? URL(fileURLWithPath: "/dev/null") : FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup)!
             .appendingPathComponent("ntfy.sqlite")
         let description = NSPersistentStoreDescription(url: storeUrl)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
-
+        
         // Set up container and observe changes from app extension
         container = NSPersistentContainer(name: Store.modelName)
         container.persistentStoreDescriptions = [description]
@@ -41,14 +41,23 @@ class Store: ObservableObject {
         // When a remote change comes in (= the app extension updated entities in Core Data),
         // we force refresh the view with horrible means. Please help me make this better!
         NotificationCenter.default
-          .publisher(for: .NSPersistentStoreRemoteChange)
-          .sink { value in
-              Log.d(Store.tag, "Remote change detected, refreshing view", value)
-              DispatchQueue.main.async {
-                  self.hardRefresh()
-              }
-          }
-          .store(in: &cancellables)
+            .publisher(for: .NSPersistentStoreRemoteChange)
+            .sink { value in
+                Log.d(Store.tag, "Remote change detected, refreshing view", value)
+                DispatchQueue.main.async {
+                    self.hardRefresh()
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func save() {
+        do {
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot save context", error)
+            rollbackAndRefresh()
+        }
     }
     
     func rollbackAndRefresh() {
@@ -56,6 +65,7 @@ class Store: ObservableObject {
         // that the app extension stored the notification first. This is a way to update the
         // UI properly when it is in the foreground and the app extension stores a notification.
         
+        Log.w(Store.tag, "Rolling back context")
         context.rollback()
         hardRefresh()
     }
@@ -103,7 +113,7 @@ class Store: ObservableObject {
     
     // MARK: Notifications
     
-    func save(notificationFromMessage message: Message, withSubscription subscription: Subscription) {
+    func saveNotification(fromMessage message: Message, withSubscription subscription: Subscription) {
         do {
             let notification = Notification(context: context)
             notification.id = message.id
@@ -114,6 +124,16 @@ class Store: ObservableObject {
             notification.tags = message.tags?.joined(separator: ",") ?? ""
             notification.actions = Actions.shared.encode(message.actions)
             notification.click = message.click ?? ""
+            if let att = message.attachment {
+                let attachment = Attachment(context: context)
+                attachment.name = att.name
+                attachment.url = att.url
+                attachment.type = att.type
+                attachment.size = att.size ?? 0
+                attachment.expires = att.expires ?? 0
+                attachment.contentUrl = att.contentUrl
+                notification.attachment = attachment
+            }
             subscription.addToNotifications(notification)
             subscription.lastNotificationId = message.id
             try context.save()
@@ -214,9 +234,32 @@ class Store: ObservableObject {
 extension Store {
     static let sampleMessages = [
         "stats": [
-            // TODO: Message with action
-            Message(id: "1", time: 1653048956, event: "message", topic: "stats", message: "In the last 24 hours, hyou had 5,000 users across 13 countries visit your website", title: "Record visitor numbers", priority: 4, tags: ["smile", "server123", "de"], actions: nil),
-            Message(id: "2", time: 1653058956, event: "message", topic: "stats", message: "201 users/h\n80 IPs", title: "This is a title", priority: 1, tags: [], actions: nil),
+            Message(
+                id: "1",
+                time: 1653048956,
+                event: "message",
+                topic: "stats",
+                message: "In the last 24 hours, hyou had 5,000 users across 13 countries visit your website",
+                title: "Record visitor numbers",
+                priority: 4,
+                tags: ["smile", "server123", "de"],
+                actions: [
+                    MessageAction(id: "3344", action: "view", label: "Show panel", url: "https://xyz.com", method: nil, headers: nil, body: nil, clear: nil),
+                    MessageAction(id: "3344", action: "http", label: "POST it", url: "https://xyz.com", method: nil, headers: nil, body: nil, clear: nil)
+                ]
+            ),
+            Message(
+                id: "2",
+                time: 1653058956,
+                event: "message",
+                topic: "stats",
+                message: "201 users/h\n80 IPs",
+                title: "This is a title",
+                priority: 1,
+                tags: [],
+                actions: nil,
+                attachment: MessageAttachment(name: "image.jpg", url: "https://bla.com/flower.jpg", type: nil, size: nil, expires: nil, contentUrl: nil)
+            ),
             Message(id: "3", time: 1643058956, event: "message", topic: "stats", message: "This message does not have a title, but is instead super long. Like really really long. It can't be any longer I think. I mean, there is s 4,000 byte limit of the message, so I guess I have to make this 4,000 bytes long. Or do I? 😁 I don't know. It's quite tedious to come up with something so long, so I'll stop now. Bye!", title: nil, priority: 5, tags: ["facepalm"], actions: nil)
         ],
         "backups": [],
