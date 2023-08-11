@@ -9,7 +9,7 @@ import CoreData
 class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     private let tag = "AppDelegate"
     private let pollTopic = "~poll" // See ntfy server if ever changed
-    
+    var backgroundTask: UIBackgroundTaskIdentifier = .invalid
     // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
     @Published var selectedBaseUrl: String? = nil
 
@@ -47,12 +47,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         let topic = userInfo["topic"] as? String ?? ""
         if topic != pollTopic {
             completionHandler(.noData)
-            return
         }
-
         // Poll and show new messages as notifications
         let store = Store.shared
         let subscriptionManager = SubscriptionManager(store: store)
+        
+        if UIApplication.shared.applicationState != .active {
+            // Begin a background task
+            backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "BackgroundTask") {
+                print("Timeout backgorund task \(userInfo)")
+                UIApplication.shared.endBackgroundTask(self.backgroundTask)
+                self.backgroundTask = .invalid
+            }
+            print("Start background task \(userInfo)")
+            store.getSubscriptions()?.forEach { [weak self] subscription in
+                subscriptionManager.backgroundPoll(subscription) { messages in
+                    messages.forEach { message in
+                        self?.showNotification(subscription, message)
+                    }
+                    // End the background task when it's done
+                    if let backgroundTask = self?.backgroundTask {
+                        UIApplication.shared.endBackgroundTask(backgroundTask)
+                    }
+
+                    self?.backgroundTask = .invalid
+                }
+            }
+            completionHandler(.newData)
+            return
+        }
+
         store.getSubscriptions()?.forEach { subscription in
             subscriptionManager.poll(subscription) { messages in
                 messages.forEach { message in
