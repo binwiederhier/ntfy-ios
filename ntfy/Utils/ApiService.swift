@@ -1,10 +1,22 @@
 import Foundation
+import UIKit
 
-class ApiService {
+class ApiService: NSObject, URLSessionDelegate  {
     static let shared = ApiService()
     static let userAgent = "ntfy/\(Config.version) (build \(Config.build); iOS \(Config.osVersion))"
-    
+    let session: URLSession
     private let tag = "ApiService"
+    let timeout = 10.0
+    init(session: URLSession? = nil) {
+        if let session {
+            self.session = session
+        } else {
+            let sessionConfig = URLSessionConfiguration.default
+            sessionConfig.timeoutIntervalForRequest = timeout
+            sessionConfig.timeoutIntervalForResource = timeout
+            self.session = URLSession(configuration: sessionConfig)
+        }
+    }
     
     func poll(subscription: Subscription, user: BasicUser?, completionHandler: @escaping ([Message]?, Error?) -> Void) {
         guard let url = URL(string: subscription.urlString()) else {
@@ -23,7 +35,7 @@ class ApiService {
         Log.d(tag, "Polling single message from \(url) with user \(user?.username ?? "anonymous")")
         
         let request = newRequest(url: url, user: user)
-        newSession(timeout: 30).dataTask(with: request) { (data, response, error) in
+        session.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 completionHandler(nil, error)
                 return

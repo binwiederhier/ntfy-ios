@@ -36,6 +36,31 @@ struct SubscriptionManager {
         poll(subscription) { _ in }
     }
     
+    func backgroundPoll(_ subscription: Subscription, completionHandler: @escaping ([Message]) -> Void) {
+        let user = store.getUser(baseUrl: subscription.baseUrl!)?.toBasicUser()
+        Log.d(tag, "Polling from \(subscription.urlString()) with user \(user?.username ?? "anonymous")")
+        let backgroundConfig = URLSessionConfiguration.background(withIdentifier: "com.example.myapp.background")
+        let backgroundSession = URLSession(configuration: backgroundConfig, delegate: nil, delegateQueue: nil)
+        
+        ApiService(session: backgroundSession).poll(subscription: subscription, user: user) { messages, error in
+            guard let messages = messages else {
+                Log.e(tag, "Polling failed", error)
+                completionHandler([])
+                return
+            }
+            Log.d(tag, "Polling success, \(messages.count) new message(s)", messages)
+            if !messages.isEmpty {
+                DispatchQueue.main.sync {
+                    for message in messages {
+                        store.save(notificationFromMessage: message, withSubscription: subscription)
+                    }
+                }
+            }
+            completionHandler(messages)
+        }
+    }
+    
+    
     func poll(_ subscription: Subscription, completionHandler: @escaping ([Message]) -> Void) {
         let user = store.getUser(baseUrl: subscription.baseUrl!)?.toBasicUser()
         Log.d(tag, "Polling from \(subscription.urlString()) with user \(user?.username ?? "anonymous")")
