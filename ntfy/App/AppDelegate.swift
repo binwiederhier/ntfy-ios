@@ -55,8 +55,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         let subscriptionManager = SubscriptionManager(store: store)
         
         if UIApplication.shared.applicationState != .active {
-            
-
             // Begin a background task
             backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "BackgroundTask") {
                 print("Timeout backgorund task \(userInfo)")
@@ -67,6 +65,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
             print("Start background task \(userInfo)")
             store.getSubscriptions()?.forEach { [weak self] subscription in
                 subscriptionManager.backgroundPoll(subscription) { messages in
+                    DispatchQueue.main.async {
+                        UIApplication.shared.applicationIconBadgeNumber = subscription.notificationCount()
+                    }
                     messages.forEach { message in
                         self?.showNotification(subscription, message)
                     }

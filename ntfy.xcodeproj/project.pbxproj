@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		02024E60283D7CBB0064224A /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02024E5F283D7CBB0064224A /* Extensions.swift */; };
 		6169679D2A84F8700037FEEE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6169679C2A84F8700037FEEE /* GoogleService-Info.plist */; };
+		61C5024B2A86472A00C9ED3E /* MessageInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61C5024A2A86472A00C9ED3E /* MessageInputView.swift */; };
+		61C5024E2A86626000C9ED3E /* MessageInputViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61C5024D2A86626000C9ED3E /* MessageInputViewModel.swift */; };
 		9407EDDA284ADE1F00C1C334 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407EDD9284ADE1F00C1C334 /* User.swift */; };
 		9407EDDB284ADE1F00C1C334 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407EDD9284ADE1F00C1C334 /* User.swift */; };
 		9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1C0282F2AA700CDE4DD /* AppMain.swift */; };
@@ -79,6 +81,8 @@
 /* Begin PBXFileReference section */
 		02024E5F283D7CBB0064224A /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		6169679C2A84F8700037FEEE /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		61C5024A2A86472A00C9ED3E /* MessageInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageInputView.swift; sourceTree = "<group>"; };
+		61C5024D2A86626000C9ED3E /* MessageInputViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageInputViewModel.swift; sourceTree = "<group>"; };
 		9407EDD9284ADE1F00C1C334 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		9474F1BD282F2AA700CDE4DD /* ntfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9474F1C0282F2AA700CDE4DD /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
@@ -132,6 +136,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		61C5024C2A86625000C9ED3E /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				61C5024D2A86626000C9ED3E /* MessageInputViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
 		9474F1B4282F2AA700CDE4DD = {
 			isa = PBXGroup;
 			children = (
@@ -193,6 +205,7 @@
 		9474F202283170F000CDE4DD /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				61C5024C2A86625000C9ED3E /* ViewModel */,
 				02024E5F283D7CBB0064224A /* Extensions.swift */,
 				9474F1C2282F2AA700CDE4DD /* ContentView.swift */,
 				9474F1FC2831311A00CDE4DD /* SubscriptionAddView.swift */,
@@ -200,6 +213,7 @@
 				94B736D4284AF9B2003D69FB /* SettingsView.swift */,
 				94B736D6284AF9BE003D69FB /* MainView.swift */,
 				9474F20728331F3900CDE4DD /* NotificationListView.swift */,
+				61C5024A2A86472A00C9ED3E /* MessageInputView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -373,11 +387,13 @@
 				9474F1C3282F2AA700CDE4DD /* ContentView.swift in Sources */,
 				9474F20C283321C300CDE4DD /* Notification.swift in Sources */,
 				9474F1F22830825600CDE4DD /* SubscriptionListView.swift in Sources */,
+				61C5024E2A86626000C9ED3E /* MessageInputViewModel.swift in Sources */,
 				9486714A2841D0CE0093C7A4 /* ActionExecutor.swift in Sources */,
 				9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */,
 				9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */,
 				94CD196A283E666900973B93 /* EmojiManager.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */,
+				61C5024B2A86472A00C9ED3E /* MessageInputView.swift in Sources */,
 				94867143283EC9960093C7A4 /* Actions.swift in Sources */,
 				9474F20F283326C500CDE4DD /* ApiService.swift in Sources */,
 				94B736D7284AF9BE003D69FB /* MainView.swift in Sources */,
@@ -556,7 +572,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -593,7 +609,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

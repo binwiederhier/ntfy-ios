@@ -18,6 +18,9 @@ struct NotificationListView: View {
     
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
+    @State private var showMessageInput: Bool = false
+    @State private var showAdvancedInput: Bool = false
+    @State private var message: String = ""
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -29,11 +32,75 @@ struct NotificationListView: View {
                 .refreshable {
                     subscriptionManager.poll(subscription)
                 }
+                .overlay(alignment: .bottomTrailing) {
+                    sendMessageView
+                }
         } else {
             notificationList
         }
     }
     
+    private var sendMessageView: some View {
+        HStack {
+            if showMessageInput {
+                TextField("Message", text: $message)
+                    .multilineTextAlignment(.leading)
+                    .frame(minHeight: 200)
+                    .padding()
+                    .border(Color("bgColor"))
+            }
+            VStack(spacing: 0) {
+                
+                Button {
+                    if showMessageInput {
+                        let user = self.store.getUser(baseUrl: self.subscription.baseUrl!)?.toBasicUser()
+                        DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+                                subscriptionManager.poll(subscription)
+                        }
+                        ApiService.shared.publish(
+                            subscription: self.subscription,
+                            user: user,
+                            message: message,
+                            title: "",
+                            priority: Priority.normal.rawValue,
+                            tags: []
+                        )
+                            message = ""
+                        
+                        
+                    }
+                    withAnimation {
+                        showMessageInput.toggle()
+                    }
+                } label: {
+                    Image(systemName: showMessageInput ? "paperplane" : "plus")
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(Color.accentColor)
+                        .clipShape(Circle())
+                }
+                .padding(.trailing, 30)
+                .padding(.bottom, 20)
+                
+                if (showMessageInput) {
+                    Button {
+                        withAnimation {
+                            showMessageInput.toggle()
+                            showAdvancedInput.toggle()
+                        }
+                    } label: {
+                        Image(systemName: "gear")
+                            .padding()
+                            .foregroundColor(.white)
+                            .background(Color.accentColor)
+                            .clipShape(Circle())
+                    }
+                    .padding(.trailing, 30)
+                }
+            }
+        }
+        .background(showMessageInput ? Color("bgColor") : nil)
+    }
     private var notificationList: some View {
         List(selection: $selection) {
             ForEach(subscription.notificationsSorted(), id: \.self) { notification in
@@ -60,7 +127,7 @@ struct NotificationListView: View {
                 }
             }
             ToolbarItem(placement: .principal) {
-                Text(subscription.topicName())
+                Text(subscription.urlString())
                     .font(.headline)
                     .lineLimit(1)
             }
@@ -161,6 +228,12 @@ struct NotificationListView: View {
         })
         .onAppear {
             cancelSubscriptionNotifications()
+        }
+        .sheet(isPresented: $showAdvancedInput) {
+            MessageInputView(viewModel: .init(subscription: subscription, store: store), dismiss: $showAdvancedInput)
+                .onDisappear {
+                    subscriptionManager.poll(subscription)
+                }
         }
     }
     
