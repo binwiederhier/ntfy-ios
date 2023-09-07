@@ -103,6 +103,7 @@ struct DefaultServerView: View {
     }
     
     private func saveAction() {
+        var newDefaultBaseUrl = removeTrailingSlash(url: newDefaultBaseUrl)
         if newDefaultBaseUrl == "" {
             store.saveDefaultBaseUrl(baseUrl: nil)
         } else {
@@ -116,7 +117,7 @@ struct DefaultServerView: View {
     }
     
     private func isValid() -> Bool {
-        if !newDefaultBaseUrl.isEmpty && newDefaultBaseUrl.range(of: "^https?://.+[^/]$", options: .regularExpression, range: nil, locale: nil) == nil {
+        if !newDefaultBaseUrl.isEmpty && newDefaultBaseUrl.range(of: "^https?://.+", options: .regularExpression, range: nil, locale: nil) == nil {
             return false
         }
         return true
@@ -224,6 +225,7 @@ struct UserTableView: View {
     }
     
     private func saveAction() {
+        var baseUrl = removeTrailingSlash(url: baseUrl)
         var password = password
         if let user = selectedUser, password == "" {
             password = user.password ?? "?" // If password is blank, leave unchanged
@@ -243,7 +245,7 @@ struct UserTableView: View {
     
     private func isValid() -> Bool {
         if selectedUser == nil { // New user
-            if baseUrl.range(of: "^https?://.+[^/]$", options: .regularExpression, range: nil, locale: nil) == nil {
+            if baseUrl.range(of: "^https?://.+", options: .regularExpression, range: nil, locale: nil) == nil {
                 return false
             } else if username.isEmpty || password.isEmpty {
                 return false

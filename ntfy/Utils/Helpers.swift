@@ -25,6 +25,14 @@ func shortUrl(url: String) -> String {
         .replacingOccurrences(of: "https://", with: "")
 }
 
+func removeTrailingSlash(url: String) -> String {
+    var url = url
+    while url.hasSuffix("/") {
+        url = String(url.dropLast())
+    }
+    return url
+}
+
 func parseAllTags(_ tags: String?) -> [String] {
     return (tags?.components(separatedBy: ",") ?? [])
         .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
