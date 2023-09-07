@@ -134,7 +134,7 @@ struct SubscriptionAddView: View {
             return false
         } else if sanitizedTopic.range(of: "^[-_A-Za-z0-9]{1,64}$", options: .regularExpression, range: nil, locale: nil) == nil {
             return false
-        } else if selectedBaseUrl.range(of: "^https?://.+", options: .regularExpression, range: nil, locale: nil) == nil {
+        } else if selectedBaseUrl.range(of: "^https?://.+[^/]$", options: .regularExpression, range: nil, locale: nil) == nil {
             return false
         } else if store.getSubscription(baseUrl: selectedBaseUrl, topic: topic) != nil {
             return false

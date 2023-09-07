@@ -10,7 +10,7 @@ func topicShortUrl(baseUrl: String, topic: String) -> String {
 }
 
 func topicAuthUrl(baseUrl: String, topic: String) -> String {
-    return "\(baseUrl)/\(topic)/auth"
+    return "\(topicUrl(baseUrl: baseUrl, topic: topic))/auth"
 }
 
 func topicHash(baseUrl: String, topic: String) -> String {

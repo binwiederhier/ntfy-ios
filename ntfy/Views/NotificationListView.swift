@@ -149,10 +149,10 @@ struct NotificationListView: View {
                         .padding(.bottom)
                     
                     if #available(iOS 15.0, *) {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
+                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"Hi\" \(shortUrl(url: subscription.urlString()))`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
                             .foregroundColor(.gray)
                     } else {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on https://ntfy.sh and https://ntfy.sh/docs.")
+                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"Hi\" \(shortUrl(url: subscription.urlString()))`\n\nDetailed instructions are available on https://ntfy.sh and https://ntfy.sh/docs.")
                             .foregroundColor(.gray)
                     }
                 }
