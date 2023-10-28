@@ -22,15 +22,23 @@ struct NotificationListView: View {
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
-    
+
     var body: some View {
+        let notificationReceived = Foundation.Notification.Name("notificationReceived")
+
         if #available(iOS 15.0, *) {
             notificationList
                 .refreshable {
                     subscriptionManager.poll(subscription)
+                }.onReceive(NotificationCenter.default.publisher(for: notificationReceived)) { _ in
+                    // Handle the notification
+                    subscriptionManager.poll(subscription)
                 }
         } else {
-            notificationList
+            notificationList.onReceive(NotificationCenter.default.publisher(for: notificationReceived)) { _ in
+                // Handle the notification
+                subscriptionManager.poll(subscription)
+            }
         }
     }
     

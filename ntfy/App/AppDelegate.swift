@@ -13,11 +13,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
     @Published var selectedBaseUrl: String? = nil
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Log.d(tag, "Launching AppDelegate")
-        
+
+        FirebaseApp.configure()
+        FirebaseConfiguration.shared.setLoggerLevel(.max)
+
         // Register app permissions for push notifications
         UNUserNotificationCenter.current().delegate = self
+        Messaging.messaging().delegate = self
+        
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
             guard success else {
                 Log.e(self.tag, "Failed to register for local push notifications", error)
@@ -28,13 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         
         // Register too receive remote notifications
         application.registerForRemoteNotifications()
-
-        // Set self as messaging delegate
-        Messaging.messaging().delegate = self
-        
-        // Register to "~poll" topic
-        Messaging.messaging().subscribe(toTopic: pollTopic)
-        
+                
         return true
     }
     
@@ -137,8 +136,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         Log.d(tag, "Firebase token received: \(String(describing: fcmToken))")
-        
-        // We don't actually need the FCM token, since we're just using topics.
-        // We still print it so we can see if things were successful.
+
+        // We wait until we have a registration token before subscribing to our pollTopic
+        Messaging.messaging().subscribe(toTopic: pollTopic)
     }
 }

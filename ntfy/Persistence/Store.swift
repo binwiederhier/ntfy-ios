@@ -7,7 +7,7 @@ import Combine
 class Store: ObservableObject {
     static let shared = Store()
     static let tag = "Store"
-    static let appGroup = "group.io.heckel.ntfy" // Must match app group of ntfy = ntfyNSE targets
+    static let appGroup = "group.com.tcaputi.ntfy" // Must match app group of ntfy = ntfyNSE targets
     static let modelName = "ntfy" // Must match .xdatamodeld folder
     static let prefKeyDefaultBaseUrl = "defaultBaseUrl"
     
@@ -43,9 +43,13 @@ class Store: ObservableObject {
         NotificationCenter.default
           .publisher(for: .NSPersistentStoreRemoteChange)
           .sink { value in
-              Log.d(Store.tag, "Remote change detected, refreshing view", value)
+              // TODO: this could probably broadcast the name of the channel
+              // so that only relevant views can update.
+              Log.d(Store.tag, "Remote change detected, refreshing views", value)
+
               DispatchQueue.main.async {
                   self.hardRefresh()
+                  NotificationCenter.default.post(name: .notificationReceived, object: nil)
               }
           }
           .store(in: &cancellables)
@@ -265,4 +269,8 @@ extension Store {
         notification.tags = message.tags?.joined(separator: ",") ?? ""
         return notification
     }
+}
+
+extension Foundation.Notification.Name {
+    static let notificationReceived = Foundation.Notification.Name("notificationReceived")
 }
