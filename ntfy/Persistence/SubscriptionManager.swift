@@ -37,6 +37,13 @@ struct SubscriptionManager {
     }
     
     func poll(_ subscription: Subscription, completionHandler: @escaping ([Message]) -> Void) {
+        // This is a bit of a hack but it prevents us from polling dead subscriptions
+        if (subscription.baseUrl == nil) {
+            Log.d(tag, "Attempting to poll dead subscription failed")
+            completionHandler([])
+            return
+        }
+        
         let user = store.getUser(baseUrl: subscription.baseUrl!)?.toBasicUser()
         Log.d(tag, "Polling from \(subscription.urlString()) with user \(user?.username ?? "anonymous")")
         ApiService.shared.poll(subscription: subscription, user: user) { messages, error in

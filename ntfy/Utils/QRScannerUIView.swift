@@ -45,14 +45,28 @@ struct QRScannerUIView: UIViewRepresentable {
 
     class Coordinator: NSObject, AVCaptureMetadataOutputObjectsDelegate {
         var onCodeDetected: (String) -> Void
+        private var lastScanDate: Date?
+        private let debounceInterval: TimeInterval = 3.0
 
         init(onCodeDetected: @escaping (String) -> Void) {
             self.onCodeDetected = onCodeDetected
         }
+        
+        func qrCodeScanned(_ code: String) {
+            let now = Date()
+
+            // If it's the first scan or the interval since the last scan is more than the debounce interval
+            if let lastScan = lastScanDate, now.timeIntervalSince(lastScan) < debounceInterval {
+                return
+            }
+
+            onCodeDetected(code)
+            lastScanDate = now
+        }
 
         func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
             if let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject, let stringValue = metadataObject.stringValue {
-                onCodeDetected(stringValue)
+                qrCodeScanned(stringValue)
             }
         }
     }
