@@ -50,6 +50,7 @@
 		94CD196A283E666900973B93 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CD1969283E666900973B93 /* EmojiManager.swift */; };
 		94CD196B283E666900973B93 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CD1969283E666900973B93 /* EmojiManager.swift */; };
 		94E9196C28353E0100F30170 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F216283531A200CDE4DD /* Log.swift */; };
+		E278CB332AECECCA004B9143 /* QRScannerUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E278CB322AECECCA004B9143 /* QRScannerUIView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -111,6 +112,7 @@
 		94B736D6284AF9BE003D69FB /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		94CD1965283E662900973B93 /* emojis.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = emojis.json; sourceTree = "<group>"; };
 		94CD1969283E666900973B93 /* EmojiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiManager.swift; sourceTree = "<group>"; };
+		E278CB322AECECCA004B9143 /* QRScannerUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerUIView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -237,6 +239,7 @@
 				94867142283EC9950093C7A4 /* Actions.swift */,
 				948671462841B0B20093C7A4 /* NotificationContent.swift */,
 				948671492841D0CE0093C7A4 /* ActionExecutor.swift */,
+				E278CB322AECECCA004B9143 /* QRScannerUIView.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -375,6 +378,7 @@
 				9474F1F22830825600CDE4DD /* SubscriptionListView.swift in Sources */,
 				9486714A2841D0CE0093C7A4 /* ActionExecutor.swift in Sources */,
 				9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */,
+				E278CB332AECECCA004B9143 /* QRScannerUIView.swift in Sources */,
 				9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */,
 				94CD196A283E666900973B93 /* EmojiManager.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */,

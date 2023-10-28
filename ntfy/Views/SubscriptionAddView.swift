@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFoundation
 
 struct SubscriptionAddView: View {
     private let tag = "SubscriptionAddView"
@@ -17,6 +18,7 @@ struct SubscriptionAddView: View {
     @State private var loading = false
     @State private var addError: String?
     @State private var loginError: String?
+    @State private var hasCameraPermission: Bool = false
 
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -24,19 +26,29 @@ struct SubscriptionAddView: View {
     
     var body: some View {
         NavigationView {
+            VStack {
+                addView
+                // TODO: hide this if permission not granted
+                QRScannerUIView { code in
+                    onQRCodeScanned(text: code)
+                }
+                .frame(height: 250) // You can adjust the height as needed.
+                .padding()
+                .onAppear(perform: checkCameraPermission)
+            }
+            
             // This is a little weird, but it works. The nagivation link for the login view
-            // is rendered in the backgroun (it's hidden), abd we toggle it manually.
+            // is rendered in the background (it's hidden), abd we toggle it manually.
             // If anyone has a better way to do a two-page layout let me know.
             
-            addView
-                .background(Group {
-                    NavigationLink(
-                        destination: loginView,
-                        isActive: $showLogin
-                    ) {
-                        EmptyView()
-                    }
-                })
+            .background(Group {
+                NavigationLink(
+                    destination: loginView,
+                    isActive: $showLogin
+                ) {
+                    EmptyView()
+                }
+            })
         }
     }
     
@@ -127,6 +139,55 @@ struct SubscriptionAddView: View {
     
     private var sanitizedTopic: String {
         return topic.trimmingCharacters(in: .whitespaces)
+    }
+    
+    private func checkCameraPermission() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            self.hasCameraPermission = true
+
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    self.hasCameraPermission = granted
+                    if !granted {
+                        self.hasCameraPermission = false
+                    }
+                }
+            }
+
+        case .denied, .restricted:
+            self.hasCameraPermission = false
+
+        @unknown default:
+            break
+        }
+    }
+    
+    func onQRCodeScanned(text: String){
+        // Check if the text is a valid URL with HTTP or HTTPS scheme
+        guard let url = URL(string: text), let scheme = url.scheme, ["http", "https"].contains(scheme) else {
+            return
+        }
+        
+        // Extract the base URL without the path
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.path = ""
+        guard let foundBaseUrl = components?.url else {
+            return
+        }
+        
+        // Extract the route from the original URL
+        baseUrl = foundBaseUrl.absoluteString
+        useAnother = baseUrl != store.getDefaultBaseUrl()
+        
+        topic = url.path
+        if (topic.hasPrefix("/")) {
+            topic.removeFirst()
+        }
+
+        print("------> \(baseUrl) : \(topic) : \(useAnother)")
+        subscribeOrShowLoginAction()
     }
     
     private func isAddViewValid() -> Bool {
