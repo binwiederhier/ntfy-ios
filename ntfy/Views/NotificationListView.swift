@@ -286,7 +286,7 @@ struct NotificationRowView: View {
             if let attachment = notification.attachment {
                 NotificationAttachmentView(notification: notification, attachment: attachment)
                     .padding([.top, .bottom], 10)
-                    //.frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .leading)
+                //.frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .leading)
             }
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
@@ -332,86 +332,77 @@ struct NotificationRowView: View {
 
 struct NotificationAttachmentView: View {
     private let tag = "NotificationAttachmentView"
-
+    
     @ObservedObject var notification: Notification
     @ObservedObject var attachment: Attachment
     @EnvironmentObject private var store: Store
     
     var body: some View {
         VStack {
-            if let image = attachment.asImage() {
-                image
-                    .resizable()
-                    .scaledToFill()
-                    //.frame(maxWidth: .infinity, maxHeight: 200)
-                    //.clipped()
-                    .background(Color.red)
-            }
-        
-        Menu {
-            if attachment.isDownloaded() {
-                Button {
-                   // FIXME
-                } label: {
-                    Text("Open file")
-                }
-                Button {
-                    // FIXME
-                    do {
-                        let fileManager = FileManager.default
-                        let contentUrl = try attachment.contentUrl.orThrow().toURL()
-                        let contentData = try Data(contentsOf: contentUrl)
-                        let targetUrl = try fileManager
-                            .url(for: .downloadsDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                            .appendingPathComponent(attachment.name ?? "attachment" + contentData.guessExtension())
-                        Log.d(tag, "Saving file to \(targetUrl)")
-                        try contentData.write(to: targetUrl)
-                        Log.d(tag, "Saved file to \(targetUrl)")
-                    } catch {
-                        Log.w(tag, "Unable to save filexx", error)
+            Menu {
+                if attachment.isDownloaded() {
+                    Button {
+                        // FIXME
+                    } label: {
+                        Text("Open file")
                     }
-                } label: {
-                    Text("Save file")
-                }
-                Button {
-                    // FIXME
-                    do {
-                        let fileManager = FileManager.default
-                        let contentUrl = try attachment.contentUrl.orThrow().toURL()
-                        Log.d(tag, "Deleting file \(contentUrl.path)")
-                        try? fileManager.removeItem(atPath: contentUrl.path)
-                        attachment.contentUrl = nil
-                        store.save()
-                    } catch {
-                        Log.w(tag, "Unable to delete file", error)
+                    Button {
+                        // FIXME
+                        do {
+                            let fileManager = FileManager.default
+                            let contentUrl = try attachment.contentUrl.orThrow().toURL()
+                            let contentData = try Data(contentsOf: contentUrl)
+                            let targetUrl = try fileManager
+                                .url(for: .downloadsDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                                .appendingPathComponent(attachment.name ?? "attachment" + contentData.guessExtension())
+                            Log.d(tag, "Saving file to \(targetUrl)")
+                            try contentData.write(to: targetUrl)
+                            Log.d(tag, "Saved file to \(targetUrl)")
+                        } catch {
+                            Log.w(tag, "Unable to save file", error)
+                        }
+                    } label: {
+                        Text("Save file")
                     }
-                } label: {
-                    Text("Delete file")
-                }
-            } else if !attachment.isExpired() {
-                Button {
-                    if let url = attachment.url, let id = notification.id {
-                        AttachmentManager.download(url: url, id: id, maxLength: 0, timeout: .infinity) { contentUrl, error in
-                            DispatchQueue.main.async {
-                                attachment.contentUrl = contentUrl?.path // May be nil!
-                                store.save()
+                    Button {
+                        // FIXME
+                        do {
+                            let fileManager = FileManager.default
+                            let contentUrl = try attachment.contentUrl.orThrow().toURL()
+                            Log.d(tag, "Deleting file \(contentUrl.path)")
+                            try? fileManager.removeItem(atPath: contentUrl.path)
+                            attachment.contentUrl = nil
+                            store.save()
+                        } catch {
+                            Log.w(tag, "Unable to delete file", error)
+                        }
+                    } label: {
+                        Text("Delete file")
+                    }
+                } else if !attachment.isExpired() {
+                    Button {
+                        if let url = attachment.url, let id = notification.id {
+                            AttachmentManager.download(url: url, id: id, maxLength: 0, timeout: .infinity) { contentUrl, error in
+                                DispatchQueue.main.async {
+                                    attachment.contentUrl = contentUrl?.path // May be nil!
+                                    store.save()
+                                }
                             }
                         }
+                    } label: {
+                        Text("Download file")
                     }
-                } label: {
-                    Text("Download file")
+                }
+            } label: {
+                if let image = attachment.asImage() {
+                    image
+                        .resizable()
+                        .scaledToFit()
+                } else {
+                    NotificationAttachmentDetailView(attachment: attachment)
                 }
             }
-        } label: {
-            if let image = attachment.asImage() {
-                image
-                    .resizable()
-                    .scaledToFit()
-            } else {
-                NotificationAttachmentDetailView(attachment: attachment)
-            }
         }
-    }
     }
 }
 
