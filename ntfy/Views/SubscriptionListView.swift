@@ -15,7 +15,7 @@ struct SubscriptionListView: View {
     }
     
     var body: some View {
-        let notificationReceived = Foundation.Notification.Name("notificationReceived")
+        let shouldPoll = Foundation.Notification.Name("shouldPoll")
 
         NavigationView {
             if #available(iOS 15.0, *) {
@@ -24,7 +24,7 @@ struct SubscriptionListView: View {
                         subscriptions.forEach { subscription in
                             subscriptionManager.poll(subscription)
                         }
-                    }.onReceive(NotificationCenter.default.publisher(for: notificationReceived)) { _ in
+                    }.onReceive(NotificationCenter.default.publisher(for: shouldPoll)) { _ in
                         // Handle the notification
                         subscriptions.forEach { subscription in
                             subscriptionManager.poll(subscription)
@@ -32,7 +32,7 @@ struct SubscriptionListView: View {
                     }
             } else {
                 subscriptionList
-                    .onReceive(NotificationCenter.default.publisher(for: notificationReceived)) { _ in
+                    .onReceive(NotificationCenter.default.publisher(for: shouldPoll)) { _ in
                         // Handle the notification
                         subscriptions.forEach { subscription in
                             subscriptionManager.poll(subscription)

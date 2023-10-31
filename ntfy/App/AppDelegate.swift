@@ -33,6 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         
         // Register too receive remote notifications
         application.registerForRemoteNotifications()
+        NotificationCenter.default.post(name: .shouldPoll, object: nil)
                 
         return true
     }
@@ -97,7 +98,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = notification.request.content.userInfo
         Log.d(tag, "Notification received via userNotificationCenter(willPresent)", userInfo)
-        NotificationCenter.default.post(name: .notificationReceived, object: nil)
+        NotificationCenter.default.post(name: .shouldPoll, object: nil)
         completionHandler([[.banner, .sound]])
     }
     
@@ -130,7 +131,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
     
-        NotificationCenter.default.post(name: .notificationReceived, object: nil)
+        NotificationCenter.default.post(name: .shouldPoll, object: nil)
         completionHandler()
     }
 }

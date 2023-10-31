@@ -49,7 +49,6 @@ class Store: ObservableObject {
 
               DispatchQueue.main.async {
                   self.hardRefresh()
-                  NotificationCenter.default.post(name: .notificationReceived, object: nil)
               }
           }
           .store(in: &cancellables)
@@ -272,5 +271,5 @@ extension Store {
 }
 
 extension Foundation.Notification.Name {
-    static let notificationReceived = Foundation.Notification.Name("notificationReceived")
+    static let shouldPoll = Foundation.Notification.Name("shouldPoll")
 }
