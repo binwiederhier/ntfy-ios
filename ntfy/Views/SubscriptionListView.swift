@@ -7,7 +7,7 @@ struct SubscriptionListView: View {
     let tag = "SubscriptionList"
     
     @EnvironmentObject private var store: Store
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Subscription.topic, ascending: true)]) var subscriptions: FetchedResults<Subscription>
+    @ObservedObject var subscriptionsModel = SubscriptionsObservable()
     @State private var showingAddDialog = false
     
     private var subscriptionManager: SubscriptionManager {
@@ -15,33 +15,20 @@ struct SubscriptionListView: View {
     }
     
     var body: some View {
-        let shouldPoll = Foundation.Notification.Name("shouldPoll")
-
         NavigationView {
             if #available(iOS 15.0, *) {
                 subscriptionList
                     .refreshable {
-                        subscriptions.forEach { subscription in
-                            subscriptionManager.poll(subscription)
-                        }
-                    }.onReceive(NotificationCenter.default.publisher(for: shouldPoll)) { _ in
-                        // Handle the notification
-                        subscriptions.forEach { subscription in
+                        subscriptionsModel.subscriptions.forEach { subscription in
                             subscriptionManager.poll(subscription)
                         }
                     }
             } else {
                 subscriptionList
-                    .onReceive(NotificationCenter.default.publisher(for: shouldPoll)) { _ in
-                        // Handle the notification
-                        subscriptions.forEach { subscription in
-                            subscriptionManager.poll(subscription)
-                        }
-                    }
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
                             Button {
-                                subscriptions.forEach { subscription in
+                                subscriptionsModel.subscriptions.forEach { subscription in
                                     subscriptionManager.poll(subscription)
                                 }
                             } label: {
@@ -56,7 +43,7 @@ struct SubscriptionListView: View {
     
     private var subscriptionList: some View {
         List {
-            ForEach(subscriptions) { subscription in
+            ForEach(subscriptionsModel.subscriptions) { subscription in
                 SubscriptionItemNavView(subscription: subscription)
             }
         }
@@ -72,7 +59,7 @@ struct SubscriptionListView: View {
             }
         }
         .overlay(Group {
-            if subscriptions.isEmpty {
+            if subscriptionsModel.subscriptions.isEmpty {
                 VStack {
                     Text("It looks like you don't have any subscriptions yet")
                         .font(.title2)

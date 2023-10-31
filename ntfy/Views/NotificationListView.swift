@@ -12,6 +12,7 @@ struct NotificationListView: View {
     @EnvironmentObject private var store: Store
     
     @ObservedObject var subscription: Subscription
+    @ObservedObject var notificationsModel: NotificationsObservable
     
     @State private var editMode = EditMode.inactive
     @State private var selection = Set<Notification>()
@@ -22,6 +23,11 @@ struct NotificationListView: View {
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
+    
+    init(subscription: Subscription) {
+        self.subscription = subscription
+        self.notificationsModel = NotificationsObservable(subscriptionID: subscription.objectID)
+    }
 
     var body: some View {
         let shouldPoll = Foundation.Notification.Name("shouldPoll")
@@ -30,21 +36,15 @@ struct NotificationListView: View {
             notificationList
                 .refreshable {
                     subscriptionManager.poll(subscription)
-                }.onReceive(NotificationCenter.default.publisher(for: shouldPoll)) { _ in
-                    // Handle the notification
-                    subscriptionManager.poll(subscription)
                 }
         } else {
-            notificationList.onReceive(NotificationCenter.default.publisher(for: shouldPoll)) { _ in
-                // Handle the notification
-                subscriptionManager.poll(subscription)
-            }
+            notificationList
         }
     }
     
     private var notificationList: some View {
         List(selection: $selection) {
-            ForEach(subscription.notificationsSorted(), id: \.self) { notification in
+            ForEach(notificationsModel.notifications, id: \.self) { notification in
                 NotificationRowView(notification: notification)
             }
         }
@@ -82,13 +82,13 @@ struct NotificationListView: View {
                                 subscriptionManager.poll(subscription)
                             }
                         }
-                        if subscription.notificationCount() > 0 {
+                        if notificationsModel.notifications.count > 0 {
                             editButton
                         }
                         Button("Send test notification") {
                             self.sendTestNotification()
                         }
-                        if subscription.notificationCount() > 0 {
+                        if notificationsModel.notifications.count > 0 {
                             Button("Clear all notifications") {
                                 self.showAlert = true
                                 self.activeAlert = .clear
@@ -148,7 +148,7 @@ struct NotificationListView: View {
             }
         }
         .overlay(Group {
-            if subscription.notificationCount() == 0 {
+            if notificationsModel.notifications.count == 0 {
                 VStack {
                     Text("You haven't received any notifications for this topic yet.")
                         .font(.title2)

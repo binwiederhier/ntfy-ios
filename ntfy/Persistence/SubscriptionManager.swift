@@ -4,7 +4,7 @@ import FirebaseMessaging
 /// Manager to combine persisting a subscription to the data store and subscribing to Firebase.
 /// This is to centralize the logic in one place.
 struct SubscriptionManager {
-    private let tag = "Store"
+    private let tag = "SubscriptionManager"
     var store: Store
     
     func subscribe(baseUrl: String, topic: String) {

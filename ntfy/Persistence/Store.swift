@@ -80,6 +80,7 @@ class Store: ObservableObject {
         subscription.baseUrl = baseUrl
         subscription.topic = topic
         DispatchQueue.main.sync {
+            print("----------> SAVING SUBSCRIPTION \(topic)")
             try? context.save()
         }
         return subscription
