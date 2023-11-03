@@ -30,8 +30,6 @@ struct NotificationListView: View {
     }
 
     var body: some View {
-        let shouldPoll = Foundation.Notification.Name("shouldPoll")
-
         if #available(iOS 15.0, *) {
             notificationList
                 .refreshable {

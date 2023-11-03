@@ -118,8 +118,10 @@ class Store: ObservableObject {
             notification.tags = message.tags?.joined(separator: ",") ?? ""
             notification.actions = Actions.shared.encode(message.actions)
             notification.click = message.click ?? ""
+            notification.subscription = subscription
             subscription.addToNotifications(notification)
             subscription.lastNotificationId = message.id
+            print("--------> STORING NOTIFICATION")
             try context.save()
         } catch let error {
             Log.w(Store.tag, "Cannot store notification (fromMessage)", error)
@@ -269,8 +271,4 @@ extension Store {
         notification.tags = message.tags?.joined(separator: ",") ?? ""
         return notification
     }
-}
-
-extension Foundation.Notification.Name {
-    static let shouldPoll = Foundation.Notification.Name("shouldPoll")
 }

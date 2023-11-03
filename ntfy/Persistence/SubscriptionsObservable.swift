@@ -2,6 +2,14 @@ import CoreData
 import SwiftUI
 
 class SubscriptionsObservable: NSObject, ObservableObject {
+    
+    override init() {
+        super.init()
+        
+        // This will force the initialization of notificationsFetchedResultsController
+        _ = self.notificationsFetchedResultsController
+    }
+    
     private lazy var fetchedResultsController: NSFetchedResultsController<Subscription> = {
         let fetchRequest: NSFetchRequest<Subscription> = Subscription.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "topic", ascending: true)]
@@ -10,9 +18,27 @@ class SubscriptionsObservable: NSObject, ObservableObject {
         controller.delegate = self
         
         do {
+            print("-----------> FETCHING SUBSCRIPTIONS")
             try controller.performFetch()
         } catch {
             print("Failed to fetch items: \(error)")
+        }
+        
+        return controller
+    }()
+    
+    private lazy var notificationsFetchedResultsController: NSFetchedResultsController<Notification> = {
+        let fetchRequest: NSFetchRequest<Notification> = Notification.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "time", ascending: true)]
+        
+        let controller = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: Store.shared.context, sectionNameKeyPath: nil, cacheName: nil)
+        controller.delegate = self
+        
+        do {
+            print("-----------> FETCHING NOTIFICATIONS")
+            try controller.performFetch()
+        } catch {
+            print("Failed to fetch notifications: \(error)")
         }
         
         return controller
@@ -25,6 +51,7 @@ class SubscriptionsObservable: NSObject, ObservableObject {
 
 extension SubscriptionsObservable: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        print("-----------> FETCHING NOTIFICATIONS")
         DispatchQueue.main.async {
             self.objectWillChange.send()
         }
