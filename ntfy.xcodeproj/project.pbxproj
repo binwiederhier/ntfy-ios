@@ -206,6 +206,7 @@
 				94B736D4284AF9B2003D69FB /* SettingsView.swift */,
 				94B736D6284AF9BE003D69FB /* MainView.swift */,
 				9474F20728331F3900CDE4DD /* NotificationListView.swift */,
+				E278CB322AECECCA004B9143 /* QRScannerUIView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -245,7 +246,6 @@
 				94867142283EC9950093C7A4 /* Actions.swift */,
 				948671462841B0B20093C7A4 /* NotificationContent.swift */,
 				948671492841D0CE0093C7A4 /* ActionExecutor.swift */,
-				E278CB322AECECCA004B9143 /* QRScannerUIView.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -550,14 +550,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				APP_BASE_URL = "http://192.168.1.8";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Assets/Preview Content\"";
-				DEVELOPMENT_TEAM = MZWHX5Z44T;
+				DEVELOPMENT_TEAM = YXQ4AMS4B4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfy/Info.plist;
@@ -574,7 +573,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tcaputi.ntfy;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -586,14 +585,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				APP_BASE_URL = "http://192.168.1.8";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Assets/Preview Content\"";
-				DEVELOPMENT_TEAM = MZWHX5Z44T;
+				DEVELOPMENT_TEAM = YXQ4AMS4B4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfy/Info.plist;
@@ -610,7 +608,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tcaputi.ntfy;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -621,11 +619,10 @@
 		9474F1ED282F3FFD00CDE4DD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				APP_BASE_URL = "http://192.168.1.7";
 				CODE_SIGN_ENTITLEMENTS = ntfyNSE/ntfyNSE.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = MZWHX5Z44T;
+				DEVELOPMENT_TEAM = YXQ4AMS4B4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfyNSE/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ntfyNSE;
@@ -637,7 +634,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tcaputi.ntfy.ntfyNSE;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyNSE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -649,11 +646,10 @@
 		9474F1EE282F3FFD00CDE4DD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				APP_BASE_URL = "http://192.168.1.7";
 				CODE_SIGN_ENTITLEMENTS = ntfyNSE/ntfyNSE.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = MZWHX5Z44T;
+				DEVELOPMENT_TEAM = YXQ4AMS4B4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfyNSE/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ntfyNSE;
@@ -665,7 +661,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tcaputi.ntfy.ntfyNSE;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyNSE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;

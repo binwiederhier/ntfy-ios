@@ -2,8 +2,9 @@ import CoreData
 import SwiftUI
 
 class NotificationsObservable: NSObject, ObservableObject {
-
+    private let tag = "NotificationsObservable"
     private var subscriptionID: NSManagedObjectID
+    
     private lazy var fetchedResultsController: NSFetchedResultsController<Notification> = {
         let fetchRequest: NSFetchRequest<Notification> = Notification.fetchRequest()
         
@@ -28,7 +29,7 @@ class NotificationsObservable: NSObject, ObservableObject {
             try self.fetchedResultsController.performFetch()
             self.notifications = self.fetchedResultsController.fetchedObjects ?? []
         } catch {
-            print("Failed to fetch notifications.")
+            Log.w(tag, "Failed to fetch notifications \(error)")
         }
     }
 }

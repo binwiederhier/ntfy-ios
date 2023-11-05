@@ -2,6 +2,7 @@ import CoreData
 import SwiftUI
 
 class SubscriptionsObservable: NSObject, ObservableObject {
+    private let tag = "SubscriptionsObservable"
     
     override init() {
         super.init()
@@ -18,10 +19,10 @@ class SubscriptionsObservable: NSObject, ObservableObject {
         controller.delegate = self
         
         do {
-            print("-----------> FETCHING SUBSCRIPTIONS")
+            Log.d(tag, "Fetching subscriptions")
             try controller.performFetch()
         } catch {
-            print("Failed to fetch items: \(error)")
+            Log.w(tag, "Failed to fetch items: \(error)", error)
         }
         
         return controller
@@ -35,10 +36,10 @@ class SubscriptionsObservable: NSObject, ObservableObject {
         controller.delegate = self
         
         do {
-            print("-----------> FETCHING NOTIFICATIONS")
+            Log.d(tag, "Fetching notifications")
             try controller.performFetch()
         } catch {
-            print("Failed to fetch notifications: \(error)")
+            Log.w(tag, "Failed to fetch notifications: \(error)", error)
         }
         
         return controller
@@ -51,7 +52,7 @@ class SubscriptionsObservable: NSObject, ObservableObject {
 
 extension SubscriptionsObservable: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        print("-----------> FETCHING NOTIFICATIONS")
+        Log.d(tag, "Fetching notifications")
         DispatchQueue.main.async {
             self.objectWillChange.send()
         }

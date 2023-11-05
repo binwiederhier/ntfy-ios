@@ -58,7 +58,7 @@
       launchAutomaticallySubstyle = "2">
       <RemoteRunnable
          runnableDebuggingMode = "0"
-         BundleIdentifier = "com.tcaputi.ntfy"
+         BundleIdentifier = "io.heckel.ntfy"
          RemotePath = "/var/containers/Bundle/Application/508E12DE-12D7-4A45-8D44-B351AFC4BF23/ntfy.app">
       </RemoteRunnable>
       <MacroExpansion>
@@ -77,7 +77,6 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES"
-      askForAppToLaunch = "Yes"
       launchAutomaticallySubstyle = "2">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">

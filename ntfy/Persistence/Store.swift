@@ -7,7 +7,7 @@ import Combine
 class Store: ObservableObject {
     static let shared = Store()
     static let tag = "Store"
-    static let appGroup = "group.com.tcaputi.ntfy" // Must match app group of ntfy = ntfyNSE targets
+    static let appGroup = "group.io.heckel.ntfy" // Must match app group of ntfy = ntfyNSE targets
     static let modelName = "ntfy" // Must match .xdatamodeld folder
     static let prefKeyDefaultBaseUrl = "defaultBaseUrl"
     
@@ -80,7 +80,7 @@ class Store: ObservableObject {
         subscription.baseUrl = baseUrl
         subscription.topic = topic
         DispatchQueue.main.sync {
-            print("----------> SAVING SUBSCRIPTION \(topic)")
+            Log.d(Store.tag, "Storing subscription baseUrl=\(baseUrl), topic=\(topic)")
             try? context.save()
         }
         return subscription
@@ -121,7 +121,7 @@ class Store: ObservableObject {
             notification.subscription = subscription
             subscription.addToNotifications(notification)
             subscription.lastNotificationId = message.id
-            print("--------> STORING NOTIFICATION")
+            Log.d(Store.tag, "Storing notifcation with ID \(notification.id ?? "<unknown>")")
             try context.save()
         } catch let error {
             Log.w(Store.tag, "Cannot store notification (fromMessage)", error)

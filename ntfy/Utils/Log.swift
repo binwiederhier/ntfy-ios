@@ -1,7 +1,7 @@
 import Foundation
 
 struct Log {
-    private static let dateFormat = "yyyy-MM-dd hh:mm:ss.SSSSSSZ"
+    private static let dateFormat = "yy-MM-dd hh:mm:ss.SSS"
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = dateFormat

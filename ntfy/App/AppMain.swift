@@ -5,7 +5,7 @@ import Firebase
 
 @main
 struct AppMain: App {
-    private let tag = "main"
+    private let tag = "AppMain"
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate: AppDelegate
     @StateObject private var store = Store.shared
