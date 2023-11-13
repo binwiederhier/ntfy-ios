@@ -121,7 +121,7 @@ class Store: ObservableObject {
             notification.subscription = subscription
             subscription.addToNotifications(notification)
             subscription.lastNotificationId = message.id
-            Log.d(Store.tag, "Storing notifcation with ID \(notification.id ?? "<unknown>")")
+            Log.d(Store.tag, "Storing notification with ID \(notification.id ?? "<unknown>")")
             try context.save()
         } catch let error {
             Log.w(Store.tag, "Cannot store notification (fromMessage)", error)
