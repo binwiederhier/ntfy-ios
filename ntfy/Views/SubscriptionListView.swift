@@ -7,8 +7,9 @@ struct SubscriptionListView: View {
     let tag = "SubscriptionList"
     
     @EnvironmentObject private var store: Store
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Subscription.topic, ascending: true)]) var subscriptions: FetchedResults<Subscription>
+    @ObservedObject var subscriptionsModel = SubscriptionsObservable()
     @State private var showingAddDialog = false
+    @State private var showingAddQrDialog = false
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -19,7 +20,7 @@ struct SubscriptionListView: View {
             if #available(iOS 15.0, *) {
                 subscriptionList
                     .refreshable {
-                        subscriptions.forEach { subscription in
+                        subscriptionsModel.subscriptions.forEach { subscription in
                             subscriptionManager.poll(subscription)
                         }
                     }
@@ -28,7 +29,7 @@ struct SubscriptionListView: View {
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
                             Button {
-                                subscriptions.forEach { subscription in
+                                subscriptionsModel.subscriptions.forEach { subscription in
                                     subscriptionManager.poll(subscription)
                                 }
                             } label: {
@@ -43,7 +44,7 @@ struct SubscriptionListView: View {
     
     private var subscriptionList: some View {
         List {
-            ForEach(subscriptions) { subscription in
+            ForEach(subscriptionsModel.subscriptions) { subscription in
                 SubscriptionItemNavView(subscription: subscription)
             }
         }
@@ -52,14 +53,23 @@ struct SubscriptionListView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
+                    self.showingAddDialog = false
+                    self.showingAddQrDialog = true
+                } label: {
+                    Image(systemName: "qrcode")
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
                     self.showingAddDialog = true
+                    self.showingAddQrDialog = false
                 } label: {
                     Image(systemName: "plus")
                 }
             }
         }
         .overlay(Group {
-            if subscriptions.isEmpty {
+            if subscriptionsModel.subscriptions.isEmpty {
                 VStack {
                     Text("It looks like you don't have any subscriptions yet")
                         .font(.title2)
@@ -80,6 +90,9 @@ struct SubscriptionListView: View {
         })
         .sheet(isPresented: $showingAddDialog) {
             SubscriptionAddView(isShowing: $showingAddDialog)
+        }
+        .sheet(isPresented: $showingAddQrDialog) {
+            SubscriptionAddQrView(isShowing: $showingAddQrDialog)
         }
     }
 }

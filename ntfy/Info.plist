@@ -18,5 +18,9 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to the camera for QR code scanning.</string>
 </dict>
 </plist>

@@ -50,6 +50,10 @@
 		94CD196A283E666900973B93 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CD1969283E666900973B93 /* EmojiManager.swift */; };
 		94CD196B283E666900973B93 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CD1969283E666900973B93 /* EmojiManager.swift */; };
 		94E9196C28353E0100F30170 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F216283531A200CDE4DD /* Log.swift */; };
+		E27008102AF0F64B006E33BA /* SubscriptionsObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */; };
+		E27008122AF1030A006E33BA /* NotificationsObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27008112AF1030A006E33BA /* NotificationsObservable.swift */; };
+		E278CB332AECECCA004B9143 /* QRScannerUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E278CB322AECECCA004B9143 /* QRScannerUIView.swift */; };
+		E2A4F36C2B033EA80098323F /* SubscriptionAddQrView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2A4F36B2B033EA80098323F /* SubscriptionAddQrView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -111,6 +115,10 @@
 		94B736D6284AF9BE003D69FB /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		94CD1965283E662900973B93 /* emojis.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = emojis.json; sourceTree = "<group>"; };
 		94CD1969283E666900973B93 /* EmojiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiManager.swift; sourceTree = "<group>"; };
+		E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsObservable.swift; sourceTree = "<group>"; };
+		E27008112AF1030A006E33BA /* NotificationsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsObservable.swift; sourceTree = "<group>"; };
+		E278CB322AECECCA004B9143 /* QRScannerUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerUIView.swift; sourceTree = "<group>"; };
+		E2A4F36B2B033EA80098323F /* SubscriptionAddQrView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionAddQrView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -200,6 +208,7 @@
 				94B736D4284AF9B2003D69FB /* SettingsView.swift */,
 				94B736D6284AF9BE003D69FB /* MainView.swift */,
 				9474F20728331F3900CDE4DD /* NotificationListView.swift */,
+				E2A4F36B2B033EA80098323F /* SubscriptionAddQrView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -213,6 +222,8 @@
 				9474F20B283321C300CDE4DD /* Notification.swift */,
 				94A3F7C7283734D900C48E79 /* SubscriptionManager.swift */,
 				9407EDD9284ADE1F00C1C334 /* User.swift */,
+				E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */,
+				E27008112AF1030A006E33BA /* NotificationsObservable.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -237,6 +248,7 @@
 				94867142283EC9950093C7A4 /* Actions.swift */,
 				948671462841B0B20093C7A4 /* NotificationContent.swift */,
 				948671492841D0CE0093C7A4 /* ActionExecutor.swift */,
+				E278CB322AECECCA004B9143 /* QRScannerUIView.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -361,6 +373,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E27008102AF0F64B006E33BA /* SubscriptionsObservable.swift in Sources */,
 				02024E60283D7CBB0064224A /* Extensions.swift in Sources */,
 				948671472841B0B20093C7A4 /* NotificationContent.swift in Sources */,
 				9474F1F92830835400CDE4DD /* Store.swift in Sources */,
@@ -373,9 +386,12 @@
 				9474F1C3282F2AA700CDE4DD /* ContentView.swift in Sources */,
 				9474F20C283321C300CDE4DD /* Notification.swift in Sources */,
 				9474F1F22830825600CDE4DD /* SubscriptionListView.swift in Sources */,
+				E27008122AF1030A006E33BA /* NotificationsObservable.swift in Sources */,
 				9486714A2841D0CE0093C7A4 /* ActionExecutor.swift in Sources */,
 				9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */,
+				E278CB332AECECCA004B9143 /* QRScannerUIView.swift in Sources */,
 				9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */,
+				E2A4F36C2B033EA80098323F /* SubscriptionAddQrView.swift in Sources */,
 				94CD196A283E666900973B93 /* EmojiManager.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */,
 				94867143283EC9960093C7A4 /* Actions.swift in Sources */,
@@ -538,17 +554,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				APP_BASE_URL = "http://192.168.1.8";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Assets/Preview Content\"";
-				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				DEVELOPMENT_TEAM = MZWHX5Z44T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfy/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ntfy;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to scan QR codes.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -560,7 +578,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tcaputi.ntfy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -572,17 +590,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				APP_BASE_URL = "http://192.168.1.8";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Assets/Preview Content\"";
-				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				DEVELOPMENT_TEAM = MZWHX5Z44T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfy/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ntfy;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to scan QR codes.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -594,7 +614,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tcaputi.ntfy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -605,10 +625,11 @@
 		9474F1ED282F3FFD00CDE4DD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APP_BASE_URL = "http://192.168.1.7";
 				CODE_SIGN_ENTITLEMENTS = ntfyNSE/ntfyNSE.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				DEVELOPMENT_TEAM = MZWHX5Z44T;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfyNSE/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ntfyNSE;
@@ -620,7 +641,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyNSE;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tcaputi.ntfy.ntfyNSE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -632,10 +653,11 @@
 		9474F1EE282F3FFD00CDE4DD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APP_BASE_URL = "http://192.168.1.7";
 				CODE_SIGN_ENTITLEMENTS = ntfyNSE/ntfyNSE.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				DEVELOPMENT_TEAM = MZWHX5Z44T;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfyNSE/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ntfyNSE;
@@ -647,7 +669,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyNSE;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tcaputi.ntfy.ntfyNSE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;

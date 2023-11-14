@@ -1,8 +1,8 @@
 import SwiftUI
 import AVFoundation
 
-struct SubscriptionAddView: View {
-    private let tag = "SubscriptionAddView"
+struct SubscriptionAddQrView: View {
+    private let tag = "SubscriptionAddQrView"
     
     @Binding var isShowing: Bool
     
@@ -28,6 +28,13 @@ struct SubscriptionAddView: View {
         NavigationView {
             VStack {
                 addView
+                // TODO: hide this if permission not granted
+                QRScannerUIView { code in
+                    onQRCodeScanned(text: code)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+                .onAppear(perform: checkCameraPermission)
             }
             
             // This is a little weird, but it works. The nagivation link for the login view
@@ -47,31 +54,11 @@ struct SubscriptionAddView: View {
     
     private var addView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Form {
-                Section(
-                    footer: Text("Topics may not be password-protected, so choose a name that's not easy to guess. Once subscribed, you can PUT/POST notifications")
-                ) {
-                    TextField("Topic name, e.g. phil_alerts", text: $topic)
-                        .disableAutocapitalization()
-                        .disableAutocorrection(true)
-                }
-                Section(
-                    footer:
-                        (useAnother) ? Text("To ensure instant delivery from your self-hosted server, be sure to set upstream-base-url in your server's config, otherwise messages may arrive with significant delay.") : Text("")
-                ) {
-                    Toggle("Use another server", isOn: $useAnother)
-                    if useAnother {
-                        TextField("Service URL, e.g. https://ntfy.home.io", text: $baseUrl)
-                            .disableAutocapitalization()
-                            .disableAutocorrection(true)
-                    }
-                }
-            }
             if let error = addError {
                 ErrorView(error: error)
             }
         }
-        .navigationTitle("Add subscription")
+        .navigationTitle("Add with QR Code")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -274,27 +261,12 @@ struct SubscriptionAddView: View {
     }
 }
 
-struct ErrorView: View {
-    var error: String
-    var body: some View {
-        HStack {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.red)
-                .font(.title2)
-            Text(error)
-                .font(.subheadline)
-        }
-        .padding([.leading, .trailing], 20)
-        .padding([.top, .bottom], 10)
-    }
-}
-
-struct SubscriptionAddView_Previews: PreviewProvider {
+struct SubscriptionAddQrView_Previews: PreviewProvider {
     @State static var isShowing = true
     
     static var previews: some View {
         let store = Store.preview
-        SubscriptionAddView(isShowing: $isShowing)
+        SubscriptionAddQrView(isShowing: $isShowing)
             .environmentObject(store)
     }
 }
