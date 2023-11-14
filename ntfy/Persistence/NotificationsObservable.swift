@@ -26,6 +26,7 @@ class NotificationsObservable: NSObject, ObservableObject {
         super.init()
         
         do {
+            Log.d(tag, "Fetching notifications")
             try self.fetchedResultsController.performFetch()
             self.notifications = self.fetchedResultsController.fetchedObjects ?? []
         } catch {

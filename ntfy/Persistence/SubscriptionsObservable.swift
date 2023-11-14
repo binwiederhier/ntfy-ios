@@ -22,7 +22,7 @@ class SubscriptionsObservable: NSObject, ObservableObject {
             Log.d(tag, "Fetching subscriptions")
             try controller.performFetch()
         } catch {
-            Log.w(tag, "Failed to fetch items: \(error)", error)
+            Log.w(tag, "Failed to fetch subscriptions: \(error)", error)
         }
         
         return controller

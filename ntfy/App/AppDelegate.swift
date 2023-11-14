@@ -97,23 +97,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = notification.request.content.userInfo
         Log.d(tag, "Notification received via userNotificationCenter(willPresent)", userInfo)
-        
-        guard let message = Message.from(userInfo: userInfo) else {
-            Log.w(tag, "Cannot convert userInfo to message", userInfo)
-            completionHandler([])
-            return
-        }
-        
-        let store = Store.shared
-        let baseUrl = userInfo["base_url"] as? String ?? Config.appBaseUrl
-        
-        guard let subscription = store.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
-            Log.w(tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
-            completionHandler([])
-            return
-        }
-        Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
-        
         completionHandler([[.banner, .sound]])
     }
     
@@ -131,17 +114,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return
         }
         
-        let store = Store.shared
         let baseUrl = userInfo["base_url"] as? String ?? Config.appBaseUrl
         let action = message.actions?.first { $0.id == response.actionIdentifier }
         
-        guard let subscription = store.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
-            Log.w(tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
-            completionHandler()
-            return
-        }
-        Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
-
         // Show current topic
         if message.topic != "" {
             selectedBaseUrl = topicUrl(baseUrl: baseUrl, topic: message.topic)
