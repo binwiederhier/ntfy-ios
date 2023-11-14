@@ -80,7 +80,6 @@ class Store: ObservableObject {
         subscription.baseUrl = baseUrl
         subscription.topic = topic
         DispatchQueue.main.sync {
-            print("----------> SAVING SUBSCRIPTION \(topic)")
             try? context.save()
         }
         return subscription
@@ -121,7 +120,6 @@ class Store: ObservableObject {
             notification.subscription = subscription
             subscription.addToNotifications(notification)
             subscription.lastNotificationId = message.id
-            print("--------> STORING NOTIFICATION")
             try context.save()
         } catch let error {
             Log.w(Store.tag, "Cannot store notification (fromMessage)", error)

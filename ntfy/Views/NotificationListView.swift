@@ -7,7 +7,7 @@ enum ActiveAlert {
 
 struct NotificationListView: View {
     private let tag = "NotificationListView"
-    
+
     @EnvironmentObject private var delegate: AppDelegate
     @EnvironmentObject private var store: Store
     

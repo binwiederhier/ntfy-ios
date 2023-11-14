@@ -9,6 +9,7 @@ struct SubscriptionListView: View {
     @EnvironmentObject private var store: Store
     @ObservedObject var subscriptionsModel = SubscriptionsObservable()
     @State private var showingAddDialog = false
+    @State private var showingAddQrDialog = false
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -52,7 +53,16 @@ struct SubscriptionListView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
+                    self.showingAddDialog = false
+                    self.showingAddQrDialog = true
+                } label: {
+                    Image(systemName: "qrcode")
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
                     self.showingAddDialog = true
+                    self.showingAddQrDialog = false
                 } label: {
                     Image(systemName: "plus")
                 }
@@ -80,6 +90,9 @@ struct SubscriptionListView: View {
         })
         .sheet(isPresented: $showingAddDialog) {
             SubscriptionAddView(isShowing: $showingAddDialog)
+        }
+        .sheet(isPresented: $showingAddQrDialog) {
+            SubscriptionAddQrView(isShowing: $showingAddQrDialog)
         }
     }
 }

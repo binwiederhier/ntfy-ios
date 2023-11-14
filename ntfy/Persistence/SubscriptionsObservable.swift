@@ -18,7 +18,6 @@ class SubscriptionsObservable: NSObject, ObservableObject {
         controller.delegate = self
         
         do {
-            print("-----------> FETCHING SUBSCRIPTIONS")
             try controller.performFetch()
         } catch {
             print("Failed to fetch items: \(error)")
@@ -35,7 +34,6 @@ class SubscriptionsObservable: NSObject, ObservableObject {
         controller.delegate = self
         
         do {
-            print("-----------> FETCHING NOTIFICATIONS")
             try controller.performFetch()
         } catch {
             print("Failed to fetch notifications: \(error)")
@@ -51,7 +49,6 @@ class SubscriptionsObservable: NSObject, ObservableObject {
 
 extension SubscriptionsObservable: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        print("-----------> FETCHING NOTIFICATIONS")
         DispatchQueue.main.async {
             self.objectWillChange.send()
         }
