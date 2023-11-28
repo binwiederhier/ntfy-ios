@@ -204,6 +204,7 @@ struct SubscriptionAddView: View {
     }
     
     private var selectedBaseUrl: String {
+        var baseUrl = removeTrailingSlash(url: baseUrl)
         return (useAnother) ? baseUrl : store.getDefaultBaseUrl()
     }
     

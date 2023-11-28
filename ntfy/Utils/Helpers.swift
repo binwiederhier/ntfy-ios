@@ -10,7 +10,7 @@ func topicShortUrl(baseUrl: String, topic: String) -> String {
 }
 
 func topicAuthUrl(baseUrl: String, topic: String) -> String {
-    return "\(baseUrl)/\(topic)/auth"
+    return "\(topicUrl(baseUrl: baseUrl, topic: topic))/auth"
 }
 
 func topicHash(baseUrl: String, topic: String) -> String {
@@ -23,6 +23,14 @@ func shortUrl(url: String) -> String {
     return url
         .replacingOccurrences(of: "http://", with: "")
         .replacingOccurrences(of: "https://", with: "")
+}
+
+func removeTrailingSlash(url: String) -> String {
+    var url = url
+    while url.hasSuffix("/") {
+        url = String(url.dropLast())
+    }
+    return url
 }
 
 func parseAllTags(_ tags: String?) -> [String] {

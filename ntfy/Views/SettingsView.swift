@@ -103,6 +103,7 @@ struct DefaultServerView: View {
     }
     
     private func saveAction() {
+        var newDefaultBaseUrl = removeTrailingSlash(url: newDefaultBaseUrl)
         if newDefaultBaseUrl == "" {
             store.saveDefaultBaseUrl(baseUrl: nil)
         } else {
@@ -224,6 +225,7 @@ struct UserTableView: View {
     }
     
     private func saveAction() {
+        var baseUrl = removeTrailingSlash(url: baseUrl)
         var password = password
         if let user = selectedUser, password == "" {
             password = user.password ?? "?" // If password is blank, leave unchanged
