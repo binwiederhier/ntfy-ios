@@ -7,7 +7,7 @@ struct SubscriptionListView: View {
     let tag = "SubscriptionList"
     
     @EnvironmentObject private var store: Store
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Subscription.topic, ascending: true)]) var subscriptions: FetchedResults<Subscription>
+    @ObservedObject var subscriptionsModel = SubscriptionsObservable()
     @State private var showingAddDialog = false
     
     private var subscriptionManager: SubscriptionManager {
@@ -19,7 +19,7 @@ struct SubscriptionListView: View {
             if #available(iOS 15.0, *) {
                 subscriptionList
                     .refreshable {
-                        subscriptions.forEach { subscription in
+                        subscriptionsModel.subscriptions.forEach { subscription in
                             subscriptionManager.poll(subscription)
                         }
                     }
@@ -28,7 +28,7 @@ struct SubscriptionListView: View {
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
                             Button {
-                                subscriptions.forEach { subscription in
+                                subscriptionsModel.subscriptions.forEach { subscription in
                                     subscriptionManager.poll(subscription)
                                 }
                             } label: {
@@ -43,7 +43,7 @@ struct SubscriptionListView: View {
     
     private var subscriptionList: some View {
         List {
-            ForEach(subscriptions) { subscription in
+            ForEach(subscriptionsModel.subscriptions) { subscription in
                 SubscriptionItemNavView(subscription: subscription)
             }
         }
@@ -59,7 +59,7 @@ struct SubscriptionListView: View {
             }
         }
         .overlay(Group {
-            if subscriptions.isEmpty {
+            if subscriptionsModel.subscriptions.isEmpty {
                 VStack {
                     Text("It looks like you don't have any subscriptions yet")
                         .font(.title2)

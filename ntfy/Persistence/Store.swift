@@ -43,7 +43,10 @@ class Store: ObservableObject {
         NotificationCenter.default
           .publisher(for: .NSPersistentStoreRemoteChange)
           .sink { value in
-              Log.d(Store.tag, "Remote change detected, refreshing view", value)
+              // TODO: this could probably broadcast the name of the channel
+              // so that only relevant views can update.
+              Log.d(Store.tag, "Remote change detected, refreshing views", value)
+
               DispatchQueue.main.async {
                   self.hardRefresh()
               }
@@ -77,6 +80,7 @@ class Store: ObservableObject {
         subscription.baseUrl = baseUrl
         subscription.topic = topic
         DispatchQueue.main.sync {
+            Log.d(Store.tag, "Storing subscription baseUrl=\(baseUrl), topic=\(topic)")
             try? context.save()
         }
         return subscription
@@ -114,8 +118,10 @@ class Store: ObservableObject {
             notification.tags = message.tags?.joined(separator: ",") ?? ""
             notification.actions = Actions.shared.encode(message.actions)
             notification.click = message.click ?? ""
+            notification.subscription = subscription
             subscription.addToNotifications(notification)
             subscription.lastNotificationId = message.id
+            Log.d(Store.tag, "Storing notification with ID \(notification.id ?? "<unknown>")")
             try context.save()
         } catch let error {
             Log.w(Store.tag, "Cannot store notification (fromMessage)", error)

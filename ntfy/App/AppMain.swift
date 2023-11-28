@@ -5,7 +5,7 @@ import Firebase
 
 @main
 struct AppMain: App {
-    private let tag = "main"
+    private let tag = "AppMain"
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate: AppDelegate
     @StateObject private var store = Store.shared
@@ -13,11 +13,6 @@ struct AppMain: App {
     init() {
         Log.d(tag, "Launching ntfy 🥳. Welcome!")
         Log.d(tag, "Base URL is \(Config.appBaseUrl), user agent is \(ApiService.userAgent)")
-        
-        // We must configure Firebase here, and not in the AppDelegate. For some reason
-        // configuring it there did not work.
-        FirebaseApp.configure()
-        FirebaseConfiguration.shared.setLoggerLevel(.max)
     }
     
     var body: some Scene {

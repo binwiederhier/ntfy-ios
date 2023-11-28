@@ -50,6 +50,8 @@
 		94CD196A283E666900973B93 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CD1969283E666900973B93 /* EmojiManager.swift */; };
 		94CD196B283E666900973B93 /* EmojiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CD1969283E666900973B93 /* EmojiManager.swift */; };
 		94E9196C28353E0100F30170 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F216283531A200CDE4DD /* Log.swift */; };
+		E27008102AF0F64B006E33BA /* SubscriptionsObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */; };
+		E27008122AF1030A006E33BA /* NotificationsObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27008112AF1030A006E33BA /* NotificationsObservable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -111,6 +113,8 @@
 		94B736D6284AF9BE003D69FB /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		94CD1965283E662900973B93 /* emojis.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = emojis.json; sourceTree = "<group>"; };
 		94CD1969283E666900973B93 /* EmojiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiManager.swift; sourceTree = "<group>"; };
+		E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsObservable.swift; sourceTree = "<group>"; };
+		E27008112AF1030A006E33BA /* NotificationsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsObservable.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,7 +215,9 @@
 				9474F1FE28316ACE00CDE4DD /* Subscription.swift */,
 				9474F1F82830835400CDE4DD /* Store.swift */,
 				9474F20B283321C300CDE4DD /* Notification.swift */,
+				E27008112AF1030A006E33BA /* NotificationsObservable.swift */,
 				94A3F7C7283734D900C48E79 /* SubscriptionManager.swift */,
+				E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */,
 				9407EDD9284ADE1F00C1C334 /* User.swift */,
 			);
 			path = Persistence;
@@ -361,6 +367,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E27008102AF0F64B006E33BA /* SubscriptionsObservable.swift in Sources */,
 				02024E60283D7CBB0064224A /* Extensions.swift in Sources */,
 				948671472841B0B20093C7A4 /* NotificationContent.swift in Sources */,
 				9474F1F92830835400CDE4DD /* Store.swift in Sources */,
@@ -373,6 +380,7 @@
 				9474F1C3282F2AA700CDE4DD /* ContentView.swift in Sources */,
 				9474F20C283321C300CDE4DD /* Notification.swift in Sources */,
 				9474F1F22830825600CDE4DD /* SubscriptionListView.swift in Sources */,
+				E27008122AF1030A006E33BA /* NotificationsObservable.swift in Sources */,
 				9486714A2841D0CE0093C7A4 /* ActionExecutor.swift in Sources */,
 				9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */,
 				9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */,
@@ -542,7 +550,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Assets/Preview Content\"";
 				DEVELOPMENT_TEAM = YXQ4AMS4B4;
 				ENABLE_PREVIEWS = YES;
@@ -559,7 +567,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -576,7 +584,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ntfy/ntfy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"ntfy/Assets/Preview Content\"";
 				DEVELOPMENT_TEAM = YXQ4AMS4B4;
 				ENABLE_PREVIEWS = YES;
@@ -593,7 +601,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
