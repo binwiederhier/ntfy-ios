@@ -1,0 +1,22 @@
+//
+//  projectoverride.xcconfig
+//  ntfy
+//
+//  Created by dacodedbeat on 1/10/24.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+// note: DEVELOPMENT_TEAM is required
+DEVELOPMENT_TEAM = YXQ4AMS4B4
+
+//// uncomment this and edit if you want to use a different PRODUCT_BUNDLE_IDENTIFIER scheme
+////   note: production currently needs this
+//PRODUCT_BUNDLE_IDENTIFIER_CONFIG = OVERRIDE
+//PRODUCT_BUNDLE_IDENTIFIER_OVERRIDE = io.heckel.ntfy
+
+//// uncomment this and edit if you want to use a different APP_GROUP_ID scheme
+////   note: production currently does not need this
+//APP_GROUP_ID_CONFIG = OVERRIDE
+//APP_GROUP_ID_OVERRIDE = group.io.heckel.ntfy
