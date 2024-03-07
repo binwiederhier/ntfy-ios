@@ -53,7 +53,7 @@ recommended.
   1. Enter a project name
   1. Disable Google Analytics (currently iOS app does not support analytics)
 1. On the "Project settings" page, add an iOS app
-  1. Apple bundle ID - "com.copephobia.ntfy-ios" (this can be changed to match yours as shown in XCode's ntfy.sh target > "Bundle Identifier")
+  1. Apple bundle ID - "io.heckel.ntfy" (this can be changed to match yours as shown in XCode's ntfy.sh target > "Bundle Identifier")
   1. Register the app
   1. Download the config file - GoogleInfo.plist (this will need to be included in the ntfy-ios repository / XCode)
 1. Generate a new service account private key for the ntfy server
