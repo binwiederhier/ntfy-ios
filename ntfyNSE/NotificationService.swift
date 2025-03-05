@@ -66,7 +66,7 @@ class NotificationService: UNNotificationServiceExtension {
     }
     
     private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
-        let subscription = store?.getSubscriptions()?.first { $0.urlHash() == pollRequest.topic }
+        let subscription = store?.getSubscriptions()?.first { $0.topic == pollRequest.topic }
         let baseUrl = subscription?.baseUrl
         guard
             let subscription = subscription,
