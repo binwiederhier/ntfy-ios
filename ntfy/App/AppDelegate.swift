@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         UNUserNotificationCenter.current().delegate = self
         Messaging.messaging().delegate = self
         
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound, .timeSensitive, .criticalAlert]) { success, error in
             guard success else {
                 Log.e(self.tag, "Failed to register for local push notifications", error)
                 return

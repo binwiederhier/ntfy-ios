@@ -8,5 +8,9 @@
 	<array>
 		<string>group.io.heckel.ntfy</string>
 	</array>
+	<key>com.apple.developer.usernotifications.time-sensitive</key>
+	<true/>
+	<key>com.apple.developer.usernotifications.critical</key>
+	<true/>
 </dict>
 </plist>
