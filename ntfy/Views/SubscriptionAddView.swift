@@ -13,7 +13,8 @@ struct SubscriptionAddView: View {
     @State private var showLogin: Bool = false
     @State private var username: String = ""
     @State private var password: String = ""
-    
+    @State private var useToken: Bool = false
+
     @State private var loading = false
     @State private var addError: String?
     @State private var loginError: String?
@@ -93,15 +94,25 @@ struct SubscriptionAddView: View {
     }
     
     private var loginView: some View {
+        
         VStack(alignment: .leading, spacing: 0) {
             Form {
+                Section () {
+                    Toggle("Authenticate using a token", isOn: $useToken)
+                }
                 Section(
-                    footer: Text("This topic requires that you log in with username and password. The user will be stored on your device, and will be re-used for other topics.")
+                    footer: Text("This topic requires that you log in with " + (useToken ? "a token" : "username and password") + ". The user will be stored on your device, and will be re-used for other topics.")
                 ) {
-                    TextField("Username", text: $username)
-                        .disableAutocapitalization()
-                        .disableAutocorrection(true)
-                    SecureField("Password", text: $password)
+                    if useToken {
+                        TextField("Token", text: $password)
+                            .disableAutocapitalization()
+                            .disableAutocorrection(true)
+                    } else {
+                        TextField("Username", text: $username)
+                            .disableAutocapitalization()
+                            .disableAutocorrection(true)
+                        SecureField("Password", text: $password)
+                    }
                 }
             }
             if let error = loginError {
@@ -143,7 +154,9 @@ struct SubscriptionAddView: View {
     }
     
     private func isLoginViewValid() -> Bool {
-        if username.isEmpty || password.isEmpty {
+        if useToken && password.isEmpty {
+            return false
+        } else if !useToken && (username.isEmpty || password.isEmpty) {
             return false
         }
         return true

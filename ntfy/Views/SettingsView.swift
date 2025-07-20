@@ -4,7 +4,7 @@ import StoreKit
 
 struct SettingsView: View {
     @EnvironmentObject private var store: Store
-    
+
     var body: some View {
         NavigationView {
             Form {
@@ -133,7 +133,8 @@ struct UserTableView: View {
     
     @State private var selectedUser: User?
     @State private var showDialog = false
-    
+    @State private var useToken: Bool = false
+
     @State private var baseUrl: String = ""
     @State private var username: String = ""
     @State private var password: String = ""
@@ -145,8 +146,15 @@ struct UserTableView: View {
                 Button(action: {
                     selectedUser = user
                     baseUrl = user.baseUrl ?? "?"
-                    username = user.username ?? "?"
                     showDialog = true
+                    
+                    if user.username == "" && user.password != "" {
+                        useToken = true
+                        password = user.password ?? "?"
+                    } else {
+                        username = user.username ?? "?"
+                    }
+                    
                 }) {
                     UserRowView(user: user)
                         .foregroundColor(.primary)
@@ -164,22 +172,36 @@ struct UserTableView: View {
             .padding(.all, 4)
         }
         .sheet(isPresented: $showDialog) {
+            
             NavigationView {
                 Form {
                     Section(
-                        footer: (selectedUser == nil)
-                        ? Text("You can add a user here. All topics for the given server will use this user.")
-                        : Text("Edit the username or password for \(shortUrl(url: baseUrl)) here. This user is used for all topics of this server. Leave the password blank to leave it unchanged.")
                     ) {
                         if selectedUser == nil {
                             TextField("Service URL, e.g. https://ntfy.home.io", text: $baseUrl)
                                 .disableAutocapitalization()
                                 .disableAutocorrection(true)
                         }
-                        TextField("Username", text: $username)
-                            .disableAutocapitalization()
-                            .disableAutocorrection(true)
-                        SecureField("Password", text: $password)
+                    }
+                    Section(
+                    ) {
+                        Toggle("Authenticate using a token", isOn: $useToken)
+                    }
+                    Section(
+                        footer: (selectedUser == nil)
+                        ? Text("You can add a user here. All topics for the given server will use this user.")
+                        : Text("Edit the username or password for \(shortUrl(url: baseUrl)) here. This user is used for all topics of this server. Leave the password blank to leave it unchanged.")
+                    ) {
+                        if useToken {
+                            TextField("Token value", text: $password)
+                                .disableAutocapitalization()
+                                .disableAutocorrection(true)
+                        } else {
+                            TextField("Username", text: $username)
+                                .disableAutocapitalization()
+                                .disableAutocorrection(true)
+                            SecureField("Password", text: $password)
+                        }
                     }
                 }
                 .navigationTitle(selectedUser == nil ? "Add user" : "Edit user")
@@ -228,6 +250,10 @@ struct UserTableView: View {
         if let user = selectedUser, password == "" {
             password = user.password ?? "?" // If password is blank, leave unchanged
         }
+        var username = username
+        if useToken {
+            username = "" // If using a token to log in, ensure username is blank
+        }
         store.saveUser(baseUrl: baseUrl, username: username, password: password)
         resetAndHide()
     }
@@ -245,13 +271,17 @@ struct UserTableView: View {
         if selectedUser == nil { // New user
             if baseUrl.range(of: "^https?://.+", options: .regularExpression, range: nil, locale: nil) == nil {
                 return false
-            } else if username.isEmpty || password.isEmpty {
+            } else if useToken && password.isEmpty {
+                return false
+            } else if !useToken && (username.isEmpty || password.isEmpty) {
                 return false
             } else if store.getUser(baseUrl: baseUrl) != nil {
                 return false
             }
         } else { // Existing user
-            if username.isEmpty {
+            if useToken && password.isEmpty {
+                return false
+            } else if username.isEmpty {
                 return false
             }
         }
@@ -266,6 +296,7 @@ struct UserTableView: View {
             baseUrl = ""
             username = ""
             password = ""
+            useToken = false
         }
     }
 }
