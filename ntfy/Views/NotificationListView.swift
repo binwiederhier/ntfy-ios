@@ -268,61 +268,65 @@ struct NotificationRowView: View {
     }
     
     private var notificationRow: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 2) {
-                Text(notification.shortDateTime())
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                if [1,2,4,5].contains(notification.priority) {
-                    Image("priority-\(notification.priority)")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 16)
-                }
-            }
-            .padding([.bottom], 2)
-            if let title = notification.formatTitle(), title != "" {
-                Text(title)
-                    .font(.headline)
-                    .bold()
-                    .padding([.bottom], 2)
-            }
-            Text(notification.formatMessage())
-                .font(.body)
-            if !notification.nonEmojiTags().isEmpty {
-                Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .padding([.top], 2)
-            }
-            if !notification.actionsList().isEmpty {
-                HStack {
-                    ForEach(notification.actionsList()) { action in
-                        if #available(iOS 15, *) {
-                            Button(action.label) {
-                                ActionExecutor.execute(action)
-                            }
-                            .buttonStyle(.borderedProminent)
-                        } else {
-                            Button(action: {
-                                ActionExecutor.execute(action)
-                            }) {
-                                Text(action.label)
-                                    .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
-                                    .foregroundColor(.white)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                            }
-                            .background(Color.accentColor)
-                            .cornerRadius(10)
-                        }
+        HStack(alignment: .center, spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .center, spacing: 2) {
+                    Text(notification.shortDateTime())
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    if [1,2,4,5].contains(notification.priority) {
+                        Image("priority-\(notification.priority)")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 16, height: 16)
                     }
                 }
-                .padding([.top], 5)
+                .padding([.bottom], 2)
+                if let title = notification.formatTitle(), title != "" {
+                    Text(title)
+                        .font(.headline)
+                        .bold()
+                        .padding([.bottom], 2)
+                }
+                Text(notification.formatMessage())
+                    .font(.body)
+                if !notification.nonEmojiTags().isEmpty {
+                    Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding([.top], 2)
+                }
+                if !notification.actionsList().isEmpty {
+                    HStack {
+                        ForEach(notification.actionsList()) { action in
+                            if #available(iOS 15, *) {
+                                Button(action.label) {
+                                    ActionExecutor.execute(action)
+                                }
+                                .buttonStyle(.borderedProminent)
+                            } else {
+                                Button(action: {
+                                    ActionExecutor.execute(action)
+                                }) {
+                                    Text(action.label)
+                                        .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
+                                        .foregroundColor(.white)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.white, lineWidth: 2)
+                                        )
+                                }
+                                .background(Color.accentColor)
+                                .cornerRadius(10)
+                            }
+                        }
+                    }
+                    .padding([.top], 5)
+                }
             }
+            Spacer()
         }
+        .contentShape(Rectangle())
         .padding(.all, 4)
         .onTapGesture {
             // TODO: This gives no feedback to the user, and it only works if the text is tapped
