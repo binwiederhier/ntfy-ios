@@ -29,6 +29,7 @@ struct SubscriptionManager {
                 }
             }
             store.delete(subscription: subscription)
+            BadgeUpdater.updateBadge()
         }
     }
     
@@ -58,6 +59,7 @@ struct SubscriptionManager {
                     for message in messages {
                         store.save(notificationFromMessage: message, withSubscription: subscription)
                     }
+                    BadgeUpdater.updateBadge()
                 }
             }
             completionHandler(messages)

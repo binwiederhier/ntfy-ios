@@ -62,6 +62,11 @@ class NotificationService: UNNotificationServiceExtension {
             return
         }
         Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
+        if #available(iOS 16.0, *) {
+            UNUserNotificationCenter.current().setBadgeCount(store?.totalUnreadNotificationCount ?? 0)
+        } else {
+            content.badge = (store?.totalUnreadNotificationCount ?? 0) as NSNumber
+        }
         contentHandler(content)
     }
     

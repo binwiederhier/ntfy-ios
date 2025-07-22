@@ -21,6 +21,10 @@ extension Subscription {
         return notifications?.count ?? 0
     }
     
+    func unreadNotificationCount() -> Int {
+        return notifications?.count(where: { ($0 as! Notification).unread }) ?? 0
+    }
+    
     func lastNotification() -> Notification? {
         return notificationsSorted().first
     }

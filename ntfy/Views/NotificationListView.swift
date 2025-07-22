@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 enum ActiveAlert {
-    case clear, unsubscribe, selected
+    case clear, unsubscribe, selected, readAll
 }
 
 struct NotificationListView: View {
@@ -86,6 +86,12 @@ struct NotificationListView: View {
                         Button("Send test notification") {
                             self.sendTestNotification()
                         }
+                        if notificationsModel.notifications.count(where: { $0.unread }) > 0 {
+                            Button("Mark all as read") {
+                                self.showAlert = true
+                                self.activeAlert = .readAll
+                            }
+                        }
                         if notificationsModel.notifications.count > 0 {
                             Button("Clear all notifications") {
                                 self.showAlert = true
@@ -141,6 +147,15 @@ struct NotificationListView: View {
                     primaryButton: .destructive(
                         Text("Delete"),
                         action: deleteSelected
+                    ),
+                    secondaryButton: .cancel())
+            case .readAll:
+                return Alert(
+                    title: Text("Mark as read"),
+                    message: Text("Do you really want to mark all of the notifications in this topic as read?"),
+                    primaryButton: .destructive(
+                        Text("Mark as read"),
+                        action: markAsReadAll
                     ),
                     secondaryButton: .cancel())
             }
@@ -208,6 +223,7 @@ struct NotificationListView: View {
     private func unsubscribe() {
         DispatchQueue.global(qos: .background).async {
             subscriptionManager.unsubscribe(subscription)
+            BadgeUpdater.updateBadge()
         }
         delegate.selectedBaseUrl = nil
     }
@@ -215,6 +231,7 @@ struct NotificationListView: View {
     private func deleteAll() {
         DispatchQueue.global(qos: .background).async {
             store.delete(allNotificationsFor: subscription)
+            BadgeUpdater.updateBadge()
         }
     }
     
@@ -222,8 +239,16 @@ struct NotificationListView: View {
         DispatchQueue.global(qos: .background).async {
             store.delete(notifications: selection)
             selection = Set<Notification>()
+            BadgeUpdater.updateBadge()
         }
         editMode = .inactive
+    }
+
+    private func markAsReadAll() {
+        DispatchQueue.global(qos: .background).async {
+            store.markAsRead(allNotificationsFor: subscription)
+            BadgeUpdater.updateBadge()
+        }
     }
     
     private func cancelSubscriptionNotifications() {
@@ -268,65 +293,72 @@ struct NotificationRowView: View {
     }
     
     private var notificationRow: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 2) {
-                Text(notification.shortDateTime())
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                if [1,2,4,5].contains(notification.priority) {
-                    Image("priority-\(notification.priority)")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 16)
-                }
-            }
-            .padding([.bottom], 2)
-            if let title = notification.formatTitle(), title != "" {
-                Text(title)
-                    .font(.headline)
-                    .bold()
-                    .padding([.bottom], 2)
-            }
-            Text(notification.formatMessage())
-                .font(.body)
-            if !notification.nonEmojiTags().isEmpty {
-                Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .padding([.top], 2)
-            }
-            if !notification.actionsList().isEmpty {
-                HStack {
-                    ForEach(notification.actionsList()) { action in
-                        if #available(iOS 15, *) {
-                            Button(action.label) {
-                                ActionExecutor.execute(action)
-                            }
-                            .buttonStyle(.borderedProminent)
-                        } else {
-                            Button(action: {
-                                ActionExecutor.execute(action)
-                            }) {
-                                Text(action.label)
-                                    .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
-                                    .foregroundColor(.white)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                            }
-                            .background(Color.accentColor)
-                            .cornerRadius(10)
-                        }
+        HStack(alignment: .center, spacing: 0) {
+            Circle()
+                .fill(notification.unread ? .blue : .clear)
+                .frame(width: 8, height: 8)
+                .padding(.trailing, 8) // Add some space between the dot and the text
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .center, spacing: 2) {
+                    Text(notification.shortDateTime())
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    if [1,2,4,5].contains(notification.priority) {
+                        Image("priority-\(notification.priority)")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 16, height: 16)
                     }
                 }
-                .padding([.top], 5)
+                .padding([.bottom], 2)
+                if let title = notification.formatTitle(), title != "" {
+                    Text(title)
+                        .font(.headline)
+                        .bold()
+                        .padding([.bottom], 2)
+                }
+                Text(notification.formatMessage())
+                    .font(.body)
+                if !notification.nonEmojiTags().isEmpty {
+                    Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding([.top], 2)
+                }
+                if !notification.actionsList().isEmpty {
+                    HStack {
+                        ForEach(notification.actionsList()) { action in
+                            if #available(iOS 15, *) {
+                                Button(action.label) {
+                                    ActionExecutor.execute(action)
+                                }
+                                .buttonStyle(.borderedProminent)
+                            } else {
+                                Button(action: {
+                                    ActionExecutor.execute(action)
+                                }) {
+                                    Text(action.label)
+                                        .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
+                                        .foregroundColor(.white)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.white, lineWidth: 2)
+                                        )
+                                }
+                                .background(Color.accentColor)
+                                .cornerRadius(10)
+                            }
+                        }
+                    }.padding([.top], 5)
+                }
             }
         }
         .padding(.all, 4)
         .onTapGesture {
             // TODO: This gives no feedback to the user, and it only works if the text is tapped
             UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
+            store.toggleRead(forNotification: notification)
+            BadgeUpdater.updateBadge()
         }
     }
 }

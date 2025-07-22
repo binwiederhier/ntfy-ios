@@ -145,6 +145,7 @@ struct SubscriptionItemRowView: View {
     
     var body: some View {
         let totalNotificationCount = subscription.notificationCount()
+        let unreadNotificationCount = subscription.unreadNotificationCount()
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text(subscription.displayName())
@@ -160,7 +161,7 @@ struct SubscriptionItemRowView: View {
                     .foregroundColor(.gray)
             }
             Spacer()
-            Text("\(totalNotificationCount) notification\(totalNotificationCount != 1 ? "s" : "")")
+            Text("\(totalNotificationCount) notification\(totalNotificationCount != 1 ? "s" : ""); \(unreadNotificationCount) unread")
                 .font(.subheadline)
                 .foregroundColor(.gray)
         }
