@@ -287,8 +287,13 @@ struct NotificationRowView: View {
                     .bold()
                     .padding([.bottom], 2)
             }
-            Text(notification.formatMessage())
-                .font(.body)
+            if #available(iOS 15.0, *) {
+                Text(makeAttributedText(from: notification.formatMessage()))
+                    .font(.body)
+            } else {
+                Text(notification.formatMessage())
+                    .font(.body)
+            }
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
                     .font(.subheadline)
@@ -328,6 +333,25 @@ struct NotificationRowView: View {
             // TODO: This gives no feedback to the user, and it only works if the text is tapped
             UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
         }
+    }
+
+    @available(iOS 15.0, *)
+    private func makeAttributedText(from text: String) -> AttributedString {
+        var attributedString = AttributedString(text)
+
+        let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        let range = NSRange(location: 0, length: text.utf16.count)
+
+        detector?.enumerateMatches(in: text, options: [], range: range) { match, _, _ in
+            if let match = match,
+               let url = match.url,
+               let stringRange = Range(match.range, in: text),
+               let attributedRange = attributedString.range(of: String(text[stringRange])) {
+                attributedString[attributedRange].link = url
+            }
+        }
+
+        return attributedString
     }
 }
 
