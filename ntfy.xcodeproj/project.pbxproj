@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		02024E60283D7CBB0064224A /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02024E5F283D7CBB0064224A /* Extensions.swift */; };
+		558C6A752E866FB700F0D84A /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 558C6A742E866FB700F0D84A /* MarkdownUI */; };
 		9407EDDA284ADE1F00C1C334 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407EDD9284ADE1F00C1C334 /* User.swift */; };
 		9407EDDB284ADE1F00C1C334 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407EDD9284ADE1F00C1C334 /* User.swift */; };
 		9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1C0282F2AA700CDE4DD /* AppMain.swift */; };
@@ -123,6 +124,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9474F1D0282F2BB600CDE4DD /* FirebaseMessaging in Frameworks */,
+				558C6A752E866FB700F0D84A /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,6 +280,7 @@
 			name = ntfy;
 			packageProductDependencies = (
 				9474F1CF282F2BB600CDE4DD /* FirebaseMessaging */,
+				558C6A742E866FB700F0D84A /* MarkdownUI */,
 			);
 			productName = ntfy;
 			productReference = 9474F1BD282F2AA700CDE4DD /* ntfy.app */;
@@ -329,6 +332,7 @@
 			mainGroup = 9474F1B4282F2AA700CDE4DD;
 			packageReferences = (
 				9474F1CE282F2BB600CDE4DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				558C6A732E866FB700F0D84A /* XCRemoteSwiftPackageReference "MarkdownUI" */,
 			);
 			productRefGroup = 9474F1BE282F2AA700CDE4DD /* Products */;
 			projectDirPath = "";
@@ -697,6 +701,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		558C6A732E866FB700F0D84A /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/MarkdownUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
 		9474F1CE282F2BB600CDE4DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -708,6 +720,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		558C6A742E866FB700F0D84A /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 558C6A732E866FB700F0D84A /* XCRemoteSwiftPackageReference "MarkdownUI" */;
+			productName = MarkdownUI;
+		};
 		9474F1CF282F2BB600CDE4DD /* FirebaseMessaging */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 9474F1CE282F2BB600CDE4DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
