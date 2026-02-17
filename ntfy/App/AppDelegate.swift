@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         Log.d(tag, "Launching AppDelegate")
 
         FirebaseApp.configure()
-        FirebaseConfiguration.shared.setLoggerLevel(.max)
+        FirebaseConfiguration.shared.setLoggerLevel(.warning)
 
         // Register app permissions for push notifications
         UNUserNotificationCenter.current().delegate = self
@@ -50,16 +50,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         }
 
         // Poll and show new messages as notifications
+        // Fix: use DispatchGroup so completionHandler is called AFTER all polls complete
         let store = Store.shared
         let subscriptionManager = SubscriptionManager(store: store)
-        store.getSubscriptions()?.forEach { subscription in
+        let subscriptions = store.getSubscriptions() ?? []
+        let group = DispatchGroup()
+        var hasNewData = false
+        subscriptions.forEach { subscription in
+            group.enter()
             subscriptionManager.poll(subscription) { messages in
-                messages.forEach { message in
-                    self.showNotification(subscription, message)
+                if !messages.isEmpty {
+                    hasNewData = true
+                    messages.forEach { message in
+                        self.showNotification(subscription, message)
+                    }
                 }
+                group.leave()
             }
         }
-        completionHandler(.newData)
+        group.notify(queue: .main) {
+            completionHandler(hasNewData ? .newData : .noData)
+        }
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
@@ -89,7 +100,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
-    /// Executed when the app is in the foreground. Nothing has to be done here, except call the completionHandler.
+    /// Executed when the app is in the foreground.
+    /// Fix: save the notification to CoreData as a fallback (NSE doesn't run on simulator
+    /// or when the app is in the foreground and NSE is skipped).
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
@@ -97,6 +110,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = notification.request.content.userInfo
         Log.d(tag, "Notification received via userNotificationCenter(willPresent)", userInfo)
+        if let message = Message.from(userInfo: userInfo), message.event == "message" {
+            let store = Store.shared
+            let baseUrl = userInfo["base_url"] as? String ?? Config.appBaseUrl
+            if let subscription = store.getSubscription(baseUrl: baseUrl, topic: message.topic) {
+                store.save(notificationFromMessage: message, withSubscription: subscription)
+            }
+        }
         completionHandler([[.banner, .sound]])
     }
     
