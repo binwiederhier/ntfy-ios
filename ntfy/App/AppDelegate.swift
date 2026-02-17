@@ -52,6 +52,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         // Poll and show new messages as notifications
         // Fix: use DispatchGroup so completionHandler is called AFTER all polls complete
         let store = Store.shared
+        // Fix: refresh context so lastNotificationId reflects any recent NSE writes
+        // before we build the poll URL (since=<lastNotificationId>). Without this,
+        // the main app context can be stale and poll for already-delivered messages.
+        store.hardRefresh()
         let subscriptionManager = SubscriptionManager(store: store)
         let subscriptions = store.getSubscriptions() ?? []
         let group = DispatchGroup()
