@@ -66,6 +66,53 @@ struct NotificationDeliveryTests {
                 "Should return nil when the message field is missing")
     }
 
+    // MARK: - Idempotent save (polling deduplication)
+
+    /// Contract test: saving the same message ID multiple times (e.g. NSE then background poll)
+    /// must produce exactly one notification in CoreData.
+    ///
+    /// Implementation note: CoreData's mergeByPropertyStoreTrumpMergePolicyType also prevents
+    /// DB duplicates via the uniquenessConstraint on Notification.id. The explicit idempotency
+    /// check in Store.save() makes the intent clear and avoids an unnecessary insert + merge cycle.
+    @Test func savingDuplicateIdIsIdempotent() {
+        let store = Store(inMemory: true)
+        let subscription = store.saveSubscription(baseUrl: "https://ntfy.sh", topic: "topic-idem")
+
+        let message = Message(
+            id: "idem-001",
+            time: 1739661010,
+            event: "message",
+            topic: "topic-idem",
+            message: "Only one copy should exist"
+        )
+
+        store.save(notificationFromMessage: message, withSubscription: subscription) // NSE path
+        store.save(notificationFromMessage: message, withSubscription: subscription) // background poll path
+        store.save(notificationFromMessage: message, withSubscription: subscription) // willPresent path
+
+        store.context.refreshAllObjects()
+        #expect(subscription.notificationCount() == 1,
+                "Three saves with the same ID must produce exactly one notification")
+    }
+
+    /// Two distinct message IDs must both be saved — idempotency must not over-deduplicate.
+    @Test func savingDistinctIdsPreservesBoth() {
+        let store = Store(inMemory: true)
+        let subscription = store.saveSubscription(baseUrl: "https://ntfy.sh", topic: "topic-distinct")
+
+        let first = Message(id: "distinct-001", time: 1739661011, event: "message",
+                            topic: "topic-distinct", message: "First")
+        let second = Message(id: "distinct-002", time: 1739661012, event: "message",
+                             topic: "topic-distinct", message: "Second")
+
+        store.save(notificationFromMessage: first, withSubscription: subscription)
+        store.save(notificationFromMessage: second, withSubscription: subscription)
+
+        store.context.refreshAllObjects()
+        #expect(subscription.notificationCount() == 2,
+                "Two distinct message IDs must each produce a separate notification")
+    }
+
     // MARK: - willPresent save logic
 
     /// Simulates willPresent receiving a foreground push for a subscribed topic.
