@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "77B014CB-79DC-4AEF-8A0A-1C7CA5979C9B",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "parallelizationEnabled" : false
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:ntfy.xcodeproj",
+        "identifier" : "4DCC2B802F450D9F0069FE8A",
+        "name" : "ntfyTests"
+      }
+    }
+  ],
+  "version" : 1
+}

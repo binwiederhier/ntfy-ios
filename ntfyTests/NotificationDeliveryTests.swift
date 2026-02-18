@@ -2,6 +2,18 @@ import Testing
 import CoreData
 @testable import ntfy
 
+/// Top-level serialization wrapper.
+///
+/// Both inner suites create Store(inMemory: true), which initialises an
+/// NSPersistentContainer. Concurrent initialisation of multiple containers
+/// in the same process causes CoreData to emit "Failed to find a unique match
+/// for NSEntityDescription" warnings that can silently break relationship
+/// queries (e.g. subscription.notificationCount()). Wrapping both suites in a
+/// single .serialized parent prevents them from running concurrently regardless
+/// of how the test plan's parallelizationEnabled is interpreted by the runner.
+@Suite(.serialized)
+struct NtfyTests {
+
 /// Tests for notification delivery fixes.
 ///
 /// Background: when a push arrives while the app is in the foreground, iOS calls
@@ -9,9 +21,6 @@ import CoreData
 /// never saved the message to CoreData, so it never appeared in the topic list (issue #337).
 ///
 /// These tests verify the fix and the Message parsing contract that the fix depends on.
-///
-/// Note: tests are serialized because Store(inMemory: true) uses /dev/null as the SQLite URL
-/// and parallel test processes can interfere with each other.
 @Suite(.serialized)
 struct NotificationDeliveryTests {
 
@@ -305,3 +314,5 @@ struct FirebaseTopicsTests {
                 "Different self-hosted servers with the same topic must produce different hashes")
     }
 }
+
+} // NtfyTests
