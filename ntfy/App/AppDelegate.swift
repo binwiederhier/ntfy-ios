@@ -49,6 +49,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
             return
         }
 
+        // Re-subscribe to Firebase topics in the background to recover from silent
+        // subscription failures without waiting for the user to open the app (#1305).
+        subscribeToFirebaseTopics()
+
         // Poll and show new messages as notifications
         // Fix: use DispatchGroup so completionHandler is called AFTER all polls complete
         let store = Store.shared
