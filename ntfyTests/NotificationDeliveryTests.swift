@@ -232,3 +232,76 @@ struct NotificationDeliveryTests {
                 "Saving the same notification ID twice must not create a duplicate")
     }
 }
+
+// MARK: - Firebase topic subscription
+
+/// Tests for AppDelegate.firebaseTopics(for:) — the logic that maps subscriptions to
+/// Firebase topic names. The ~poll topic must always be included; ntfy.sh subscriptions
+/// use the plain topic name; self-hosted subscriptions use a SHA256 hash of the URL
+/// so the server address is not leaked to Firebase (#1305).
+@Suite(.serialized)
+struct FirebaseTopicsTests {
+    // Hardcoded to avoid depending on Config.appBaseUrl (Bundle.main.infoDictionary) in tests.
+    private let ntfyBaseUrl = "https://ntfy.sh"
+    private let selfHostedBaseUrl = "https://ntfy.example.com"
+    private let poll = "~poll"
+
+    private func topics(_ subscriptions: [Subscription]) -> [String] {
+        firebaseTopics(subscriptions: subscriptions, appBaseUrl: ntfyBaseUrl, pollTopic: poll)
+    }
+
+    /// No subscriptions — only ~poll must be returned.
+    @Test func emptySubscriptionsReturnsPollOnly() {
+        #expect(topics([]) == [poll],
+                "~poll must always be included even with no subscriptions")
+    }
+
+    /// ntfy.sh subscription — topic name is used directly, not hashed.
+    @Test func ntfyShSubscriptionUsesPlainTopicName() {
+        let store = Store(inMemory: true)
+        let sub = store.saveSubscription(baseUrl: ntfyBaseUrl, topic: "alerts")
+        let result = topics([sub])
+        #expect(result.contains(poll))
+        #expect(result.contains("alerts"),
+                "ntfy.sh topics must appear as plain names in Firebase")
+        #expect(result.count == 2)
+    }
+
+    /// Self-hosted subscription — topic must be hashed to avoid leaking the server URL.
+    @Test func selfHostedSubscriptionUsesTopicHash() {
+        let store = Store(inMemory: true)
+        let sub = store.saveSubscription(baseUrl: selfHostedBaseUrl, topic: "alerts")
+        let expectedHash = topicHash(baseUrl: selfHostedBaseUrl, topic: "alerts")
+        let result = topics([sub])
+        #expect(result.contains(poll))
+        #expect(result.contains(expectedHash),
+                "Self-hosted topics must use SHA256(baseUrl/topic) in Firebase")
+        #expect(!result.contains("alerts"),
+                "Self-hosted topic plain name must not appear in Firebase")
+        #expect(result.count == 2)
+    }
+
+    /// Mixed subscriptions — both plain and hashed topics must appear alongside ~poll.
+    @Test func mixedSubscriptionsProducesCorrectTopics() {
+        let store = Store(inMemory: true)
+        let ntfySub = store.saveSubscription(baseUrl: ntfyBaseUrl, topic: "news")
+        let selfSub = store.saveSubscription(baseUrl: selfHostedBaseUrl, topic: "private")
+        let expectedHash = topicHash(baseUrl: selfHostedBaseUrl, topic: "private")
+        let result = topics([ntfySub, selfSub])
+        #expect(result.contains(poll))
+        #expect(result.contains("news"))
+        #expect(result.contains(expectedHash))
+        #expect(result.count == 3)
+    }
+
+    /// Two self-hosted subscriptions on different servers must produce different hashes.
+    @Test func differentServersProduceDifferentHashes() {
+        let store = Store(inMemory: true)
+        let sub1 = store.saveSubscription(baseUrl: "https://ntfy.server1.com", topic: "topic")
+        let sub2 = store.saveSubscription(baseUrl: "https://ntfy.server2.com", topic: "topic")
+        let result = topics([sub1, sub2])
+        let hashes = result.filter { $0 != poll }
+        #expect(Set(hashes).count == 2,
+                "Different self-hosted servers with the same topic must produce different hashes")
+    }
+}

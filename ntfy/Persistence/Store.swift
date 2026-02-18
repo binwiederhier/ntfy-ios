@@ -25,13 +25,19 @@ class Store: ObservableObject {
             // in-memory instances to share the same backing store within a process.
             description = NSPersistentStoreDescription()
             description.type = NSInMemoryStoreType
-        } else {
-            let storeUrl = FileManager.default
-                .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup)!
-                .appendingPathComponent("ntfy.sqlite")
+        } else if let containerUrl = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup) {
+            let storeUrl = containerUrl.appendingPathComponent("ntfy.sqlite")
             description = NSPersistentStoreDescription(url: storeUrl)
             // Required for NSE → main app change propagation (SQLite only)
             description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        } else {
+            // App group unavailable (e.g. unsigned build, unit test host).
+            // Fall back to in-memory so the app starts rather than crashing.
+            // Data will not persist across launches in this state.
+            Log.e(Store.tag, "App group \(Store.appGroup) unavailable, falling back to in-memory store")
+            description = NSPersistentStoreDescription()
+            description.type = NSInMemoryStoreType
         }
 
         // Set up container and observe changes from app extension

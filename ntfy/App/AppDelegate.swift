@@ -174,16 +174,10 @@ extension AppDelegate {
     /// a previous failed subscription. Called on token refresh and on every app foreground
     /// to recover from silent subscription failures (see #1305).
     func subscribeToFirebaseTopics() {
-        subscribeToTopic(pollTopic)
         let store = Store.shared
-        store.getSubscriptions()?.forEach { subscription in
-            guard let baseUrl = subscription.baseUrl, let topic = subscription.topic else { return }
-            if baseUrl == Config.appBaseUrl {
-                subscribeToTopic(topic)
-            } else {
-                subscribeToTopic(topicHash(baseUrl: baseUrl, topic: topic))
-            }
-        }
+        let subscriptions = store.getSubscriptions() ?? []
+        firebaseTopics(subscriptions: subscriptions, appBaseUrl: Config.appBaseUrl, pollTopic: pollTopic)
+            .forEach { subscribeToTopic($0) }
     }
 
     private func subscribeToTopic(_ topic: String) {
@@ -194,4 +188,21 @@ extension AppDelegate {
             }
         }
     }
+}
+
+/// Returns the Firebase topic names for the given subscriptions.
+/// ~poll is always included. ntfy.sh (appBaseUrl) topics use the plain topic name;
+/// self-hosted topics use SHA256(baseUrl/topic) to avoid leaking server addresses.
+/// Package-internal for testability without requiring AppDelegate instantiation.
+func firebaseTopics(subscriptions: [Subscription], appBaseUrl: String, pollTopic: String) -> [String] {
+    var topics = [pollTopic]
+    subscriptions.forEach { subscription in
+        guard let baseUrl = subscription.baseUrl, let topic = subscription.topic else { return }
+        if baseUrl == appBaseUrl {
+            topics.append(topic)
+        } else {
+            topics.append(topicHash(baseUrl: baseUrl, topic: topic))
+        }
+    }
+    return topics
 }
