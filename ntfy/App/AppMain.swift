@@ -24,9 +24,14 @@ struct AppMain: App {
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                     // Use this hook instead of applicationDidBecomeActive, see https://stackoverflow.com/a/68888509/1440785
                     // That post also explains how to start SwiftUI from AppDelegate if that's ever needed.
-                    
+
                     Log.d(tag, "App became active, refreshing objects")
                     store.hardRefresh()
+
+                    // Re-subscribe to Firebase topics on every foreground to recover from
+                    // silent subscription failures (token rotation race, network loss, etc.).
+                    // Firebase no-ops if already subscribed; this only retries failed ones (#1305).
+                    delegate.subscribeToFirebaseTopics()
                 }
         }
     }

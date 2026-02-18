@@ -160,20 +160,33 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         Log.d(tag, "Firebase token received: \(String(describing: fcmToken))")
-        
-        // Subscribe to ~poll topic
-        Messaging.messaging().subscribe(toTopic: pollTopic)
-        
-        // Re-subscribe to Firebase for all topics
+        subscribeToFirebaseTopics()
+    }
+}
+
+extension AppDelegate {
+    /// Subscribes (or re-subscribes) to all Firebase topics for the current subscriptions.
+    /// Safe to call repeatedly — Firebase no-ops if already subscribed, but will retry
+    /// a previous failed subscription. Called on token refresh and on every app foreground
+    /// to recover from silent subscription failures (see #1305).
+    func subscribeToFirebaseTopics() {
+        subscribeToTopic(pollTopic)
         let store = Store.shared
-        store.getSubscriptions()?.forEach{ subscription in
-            if let baseUrl = subscription.baseUrl, let topic = subscription.topic {
-                Log.d(tag, "Re-subscribing to topic \(baseUrl)/\(topic)")
-                if baseUrl == Config.appBaseUrl {
-                    Messaging.messaging().subscribe(toTopic: topic)
-                } else {
-                    Messaging.messaging().subscribe(toTopic: topicHash(baseUrl: baseUrl, topic: topic))
-                }
+        store.getSubscriptions()?.forEach { subscription in
+            guard let baseUrl = subscription.baseUrl, let topic = subscription.topic else { return }
+            if baseUrl == Config.appBaseUrl {
+                subscribeToTopic(topic)
+            } else {
+                subscribeToTopic(topicHash(baseUrl: baseUrl, topic: topic))
+            }
+        }
+    }
+
+    private func subscribeToTopic(_ topic: String) {
+        Log.d(tag, "Subscribing to Firebase topic: \(topic)")
+        Messaging.messaging().subscribe(toTopic: topic) { error in
+            if let error = error {
+                Log.e(self.tag, "Failed to subscribe to Firebase topic \(topic)", error)
             }
         }
     }
