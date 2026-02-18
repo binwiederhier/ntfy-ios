@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -55,6 +55,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		4DCC2B852F450D9F0069FE8A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9474F1B5282F2AA700CDE4DD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9474F1BC282F2AA700CDE4DD;
+			remoteInfo = ntfy;
+		};
 		9474F1E9282F3FFD00CDE4DD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9474F1B5282F2AA700CDE4DD /* Project object */;
@@ -80,6 +87,7 @@
 
 /* Begin PBXFileReference section */
 		02024E5F283D7CBB0064224A /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		4DCC2B812F450D9F0069FE8A /* ntfyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ntfyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9407EDD9284ADE1F00C1C334 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		9474F1BD282F2AA700CDE4DD /* ntfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9474F1C0282F2AA700CDE4DD /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
@@ -117,7 +125,18 @@
 		E27008112AF1030A006E33BA /* NotificationsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsObservable.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		4DCC2B822F450D9F0069FE8A /* ntfyTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ntfyTests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		4DCC2B7E2F450D9F0069FE8A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9474F1BA282F2AA700CDE4DD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -141,6 +160,7 @@
 			children = (
 				9474F1BF282F2AA700CDE4DD /* ntfy */,
 				9474F1E5282F3FFD00CDE4DD /* ntfyNSE */,
+				4DCC2B822F450D9F0069FE8A /* ntfyTests */,
 				9474F1BE282F2AA700CDE4DD /* Products */,
 				9474F1DD282F3A2E00CDE4DD /* Frameworks */,
 			);
@@ -151,6 +171,7 @@
 			children = (
 				9474F1BD282F2AA700CDE4DD /* ntfy.app */,
 				9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */,
+				4DCC2B812F450D9F0069FE8A /* ntfyTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -261,6 +282,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4DCC2B802F450D9F0069FE8A /* ntfyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4DCC2B892F450D9F0069FE8A /* Build configuration list for PBXNativeTarget "ntfyTests" */;
+			buildPhases = (
+				4DCC2B7D2F450D9F0069FE8A /* Sources */,
+				4DCC2B7E2F450D9F0069FE8A /* Frameworks */,
+				4DCC2B7F2F450D9F0069FE8A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4DCC2B862F450D9F0069FE8A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4DCC2B822F450D9F0069FE8A /* ntfyTests */,
+			);
+			name = ntfyTests;
+			packageProductDependencies = (
+			);
+			productName = ntfyTests;
+			productReference = 4DCC2B812F450D9F0069FE8A /* ntfyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		9474F1BC282F2AA700CDE4DD /* ntfy */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9474F1CB282F2AA800CDE4DD /* Build configuration list for PBXNativeTarget "ntfy" */;
@@ -307,9 +351,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1330;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 1330;
 				TargetAttributes = {
+					4DCC2B802F450D9F0069FE8A = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 9474F1BC282F2AA700CDE4DD;
+					};
 					9474F1BC282F2AA700CDE4DD = {
 						CreatedOnToolsVersion = 13.3.1;
 					};
@@ -336,11 +384,19 @@
 			targets = (
 				9474F1BC282F2AA700CDE4DD /* ntfy */,
 				9474F1E3282F3FFD00CDE4DD /* ntfyNSE */,
+				4DCC2B802F450D9F0069FE8A /* ntfyTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4DCC2B7F2F450D9F0069FE8A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9474F1BB282F2AA700CDE4DD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -363,6 +419,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4DCC2B7D2F450D9F0069FE8A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9474F1B9282F2AA700CDE4DD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -418,6 +481,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4DCC2B862F450D9F0069FE8A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9474F1BC282F2AA700CDE4DD /* ntfy */;
+			targetProxy = 4DCC2B852F450D9F0069FE8A /* PBXContainerItemProxy */;
+		};
 		9474F1EA282F3FFD00CDE4DD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 9474F1E3282F3FFD00CDE4DD /* ntfyNSE */;
@@ -426,6 +494,61 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		4DCC2B872F450D9F0069FE8A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D2Z26AS3NJ;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = personal.ntfyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ntfy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ntfy";
+			};
+			name = Debug;
+		};
+		4DCC2B882F450D9F0069FE8A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D2Z26AS3NJ;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = personal.ntfyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ntfy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ntfy";
+			};
+			name = Release;
+		};
 		9474F1C9282F2AA800CDE4DD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -667,6 +790,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4DCC2B892F450D9F0069FE8A /* Build configuration list for PBXNativeTarget "ntfyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DCC2B872F450D9F0069FE8A /* Debug */,
+				4DCC2B882F450D9F0069FE8A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		9474F1B8282F2AA700CDE4DD /* Build configuration list for PBXProject "ntfy" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

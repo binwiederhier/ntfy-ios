@@ -298,6 +298,9 @@ struct UserRowView: View {
 }
 
 struct AboutView: View {
+    @State private var showShareSheet = false
+    @State private var logContent = ""
+
     var body: some View {
         Group {
             Button(action: {
@@ -333,6 +336,21 @@ struct AboutView: View {
                     Image(systemName: "star.fill")
                 }
             }
+            Button(action: {
+                let logs = Log.readAll()
+                let header = "ntfy \(Config.version) (\(Config.build)) — iOS \(Config.osVersion)\n\n"
+                logContent = logs.isEmpty ? header + "(no logs captured yet)" : header + logs
+                showShareSheet = true
+            }) {
+                HStack {
+                    Text("Share logs")
+                    Spacer()
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
+            .sheet(isPresented: $showShareSheet) {
+                ActivityViewController(items: [logContent])
+            }
             HStack {
                 Text("Version")
                 Spacer()
@@ -342,11 +360,22 @@ struct AboutView: View {
         }
         .foregroundColor(.primary)
     }
-    
+
     private func open(url: String) {
         guard let url = URL(string: url) else { return }
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
+}
+
+/// Thin SwiftUI wrapper around UIActivityViewController for sharing arbitrary items.
+struct ActivityViewController: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 struct SettingsView_Previews: PreviewProvider {

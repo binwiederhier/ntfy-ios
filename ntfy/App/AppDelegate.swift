@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         Log.d(tag, "Launching AppDelegate")
 
         FirebaseApp.configure()
-        FirebaseConfiguration.shared.setLoggerLevel(.max)
+        FirebaseConfiguration.shared.setLoggerLevel(.warning)
 
         // Register app permissions for push notifications
         UNUserNotificationCenter.current().delegate = self
@@ -49,17 +49,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
             return
         }
 
+        // Re-subscribe to Firebase topics in the background to recover from silent
+        // subscription failures without waiting for the user to open the app (#1305).
+        subscribeToFirebaseTopics()
+
         // Poll and show new messages as notifications
+        // Fix: use DispatchGroup so completionHandler is called AFTER all polls complete
         let store = Store.shared
+        // Fix: refresh context so lastNotificationId reflects any recent NSE writes
+        // before we build the poll URL (since=<lastNotificationId>). Without this,
+        // the main app context can be stale and poll for already-delivered messages.
+        store.hardRefresh()
         let subscriptionManager = SubscriptionManager(store: store)
-        store.getSubscriptions()?.forEach { subscription in
+        let subscriptions = store.getSubscriptions() ?? []
+        let group = DispatchGroup()
+        var hasNewData = false
+        subscriptions.forEach { subscription in
+            group.enter()
             subscriptionManager.poll(subscription) { messages in
-                messages.forEach { message in
-                    self.showNotification(subscription, message)
+                if !messages.isEmpty {
+                    hasNewData = true
+                    messages.forEach { message in
+                        self.showNotification(subscription, message)
+                    }
                 }
+                group.leave()
             }
         }
-        completionHandler(.newData)
+        group.notify(queue: .main) {
+            completionHandler(hasNewData ? .newData : .noData)
+        }
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
@@ -89,7 +108,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
-    /// Executed when the app is in the foreground. Nothing has to be done here, except call the completionHandler.
+    /// Executed when the app is in the foreground.
+    /// Fix: save the notification to CoreData as a fallback (NSE doesn't run on simulator
+    /// or when the app is in the foreground and NSE is skipped).
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
@@ -97,6 +118,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = notification.request.content.userInfo
         Log.d(tag, "Notification received via userNotificationCenter(willPresent)", userInfo)
+        if let message = Message.from(userInfo: userInfo), message.event == "message" {
+            let store = Store.shared
+            let baseUrl = userInfo["base_url"] as? String ?? Config.appBaseUrl
+            if let subscription = store.getSubscription(baseUrl: baseUrl, topic: message.topic) {
+                store.save(notificationFromMessage: message, withSubscription: subscription)
+            }
+        }
         completionHandler([[.banner, .sound]])
     }
     
@@ -136,21 +164,45 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         Log.d(tag, "Firebase token received: \(String(describing: fcmToken))")
-        
-        // Subscribe to ~poll topic
-        Messaging.messaging().subscribe(toTopic: pollTopic)
-        
-        // Re-subscribe to Firebase for all topics
+        subscribeToFirebaseTopics()
+    }
+}
+
+extension AppDelegate {
+    /// Subscribes (or re-subscribes) to all Firebase topics for the current subscriptions.
+    /// Safe to call repeatedly — Firebase no-ops if already subscribed, but will retry
+    /// a previous failed subscription. Called on token refresh and on every app foreground
+    /// to recover from silent subscription failures (see #1305).
+    func subscribeToFirebaseTopics() {
         let store = Store.shared
-        store.getSubscriptions()?.forEach{ subscription in
-            if let baseUrl = subscription.baseUrl, let topic = subscription.topic {
-                Log.d(tag, "Re-subscribing to topic \(baseUrl)/\(topic)")
-                if baseUrl == Config.appBaseUrl {
-                    Messaging.messaging().subscribe(toTopic: topic)
-                } else {
-                    Messaging.messaging().subscribe(toTopic: topicHash(baseUrl: baseUrl, topic: topic))
-                }
+        let subscriptions = store.getSubscriptions() ?? []
+        firebaseTopics(subscriptions: subscriptions, appBaseUrl: Config.appBaseUrl, pollTopic: pollTopic)
+            .forEach { subscribeToTopic($0) }
+    }
+
+    private func subscribeToTopic(_ topic: String) {
+        Log.d(tag, "Subscribing to Firebase topic: \(topic)")
+        Messaging.messaging().subscribe(toTopic: topic) { error in
+            if let error = error {
+                Log.e(self.tag, "Failed to subscribe to Firebase topic \(topic)", error)
             }
         }
     }
+}
+
+/// Returns the Firebase topic names for the given subscriptions.
+/// ~poll is always included. ntfy.sh (appBaseUrl) topics use the plain topic name;
+/// self-hosted topics use SHA256(baseUrl/topic) to avoid leaking server addresses.
+/// Package-internal for testability without requiring AppDelegate instantiation.
+func firebaseTopics(subscriptions: [Subscription], appBaseUrl: String, pollTopic: String) -> [String] {
+    var topics = [pollTopic]
+    subscriptions.forEach { subscription in
+        guard let baseUrl = subscription.baseUrl, let topic = subscription.topic else { return }
+        if baseUrl == appBaseUrl {
+            topics.append(topic)
+        } else {
+            topics.append(topicHash(baseUrl: baseUrl, topic: topic))
+        }
+    }
+    return topics
 }

@@ -18,11 +18,27 @@ class Store: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
 
     init(inMemory: Bool = false) {
-        let storeUrl = (inMemory) ? URL(fileURLWithPath: "/dev/null") : FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup)!
-            .appendingPathComponent("ntfy.sqlite")
-        let description = NSPersistentStoreDescription(url: storeUrl)
-        description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        let description: NSPersistentStoreDescription
+        if inMemory {
+            // NSInMemoryStoreType gives each Store instance its own isolated database,
+            // which is required for test isolation. Using /dev/null (SQLite) caused all
+            // in-memory instances to share the same backing store within a process.
+            description = NSPersistentStoreDescription()
+            description.type = NSInMemoryStoreType
+        } else if let containerUrl = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup) {
+            let storeUrl = containerUrl.appendingPathComponent("ntfy.sqlite")
+            description = NSPersistentStoreDescription(url: storeUrl)
+            // Required for NSE → main app change propagation (SQLite only)
+            description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        } else {
+            // App group unavailable (e.g. unsigned build, unit test host).
+            // Fall back to in-memory so the app starts rather than crashing.
+            // Data will not persist across launches in this state.
+            Log.e(Store.tag, "App group \(Store.appGroup) unavailable, falling back to in-memory store")
+            description = NSPersistentStoreDescription()
+            description.type = NSInMemoryStoreType
+        }
 
         // Set up container and observe changes from app extension
         container = NSPersistentContainer(name: Store.modelName)
@@ -108,6 +124,19 @@ class Store: ObservableObject {
     // MARK: Notifications
     
     func save(notificationFromMessage message: Message, withSubscription subscription: Subscription) {
+        // Idempotent: skip if a notification with this ID is already stored.
+        // Guards against races between NSE, willPresent, and background poll all
+        // delivering the same message through different paths.
+        // Note: CoreData's mergeByPropertyStoreTrumpMergePolicyType also prevents DB duplicates,
+        // but this explicit check avoids an unnecessary insert + merge cycle and is clearer in intent.
+        let messageId = message.id
+        let existing = Notification.fetchRequest()
+        existing.predicate = NSPredicate(format: "id = %@", messageId)
+        existing.fetchLimit = 1
+        if (try? context.fetch(existing).isEmpty) == false {
+            Log.d(Store.tag, "Notification \(messageId) already stored, skipping duplicate save")
+            return
+        }
         do {
             let notification = Notification(context: context)
             notification.id = message.id
