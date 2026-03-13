@@ -100,6 +100,11 @@ class Store: ObservableObject {
         return try? context.fetch(Subscription.fetchRequest())
     }
     
+    func updateSubscription(subscription: Subscription, displayName: String?) {
+        subscription.customDisplayName = (displayName?.isEmpty == true) ? nil : displayName
+        try? context.save()
+    }
+
     func delete(subscription: Subscription) {
         context.delete(subscription)
         try? context.save()
