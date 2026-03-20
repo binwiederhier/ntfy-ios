@@ -76,11 +76,18 @@ struct Message: Decodable {
     var actions: [Action]?
     var click: String?
     var pollId: String?
-    
+    var contentType: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, time, event, topic, message, title, priority, tags, actions, click
+        case pollId = "poll_id"
+        case contentType = "content_type"
+    }
+
     func toUserInfo() -> [AnyHashable: Any] {
         // This should mimic the way that the ntfy server encodes a message.
         // See server_firebase.go for more details.
-        
+
         return [
             "id": id,
             "time": String(time),
@@ -92,10 +99,11 @@ struct Message: Decodable {
             "tags": tags?.joined(separator: ",") ?? "",
             "actions": Actions.shared.encode(actions),
             "click": click ?? "",
-            "poll_id": pollId ?? ""
+            "poll_id": pollId ?? "",
+            "content_type": contentType ?? ""
         ]
     }
-    
+
     static func from(userInfo: [AnyHashable: Any]) -> Message? {
         guard let id = userInfo["id"] as? String,
               let time = userInfo["time"] as? String,
@@ -112,6 +120,7 @@ struct Message: Decodable {
         let actions = userInfo["actions"] as? String
         let click = userInfo["click"] as? String
         let pollId = userInfo["poll_id"] as? String
+        let contentType = userInfo["content_type"] as? String
         return Message(
             id: id,
             time: timeInt,
@@ -123,7 +132,8 @@ struct Message: Decodable {
             tags: tags,
             actions: Actions.shared.parse(actions),
             click: click,
-            pollId: pollId
+            pollId: pollId,
+            contentType: contentType
         )
     }
 }
