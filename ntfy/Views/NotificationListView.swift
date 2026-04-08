@@ -206,23 +206,17 @@ struct NotificationListView: View {
     }
     
     private func unsubscribe() {
-        DispatchQueue.global(qos: .background).async {
-            subscriptionManager.unsubscribe(subscription)
-        }
+        subscriptionManager.unsubscribe(subscription)
         delegate.selectedBaseUrl = nil
     }
     
     private func deleteAll() {
-        DispatchQueue.global(qos: .background).async {
-            store.delete(allNotificationsFor: subscription)
-        }
+        store.delete(allNotificationsFor: subscription)
     }
     
     private func deleteSelected() {
-        DispatchQueue.global(qos: .background).async {
-            store.delete(notifications: selection)
-            selection = Set<Notification>()
-        }
+        store.delete(notifications: selection)
+        selection = Set<Notification>()
         editMode = .inactive
     }
     
@@ -346,4 +340,3 @@ struct NotificationListView_Previews: PreviewProvider {
         }
     }
 }
-

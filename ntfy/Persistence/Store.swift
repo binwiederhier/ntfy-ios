@@ -101,8 +101,10 @@ class Store: ObservableObject {
     }
     
     func delete(subscription: Subscription) {
-        context.delete(subscription)
-        try? context.save()
+        context.performAndWait {
+            context.delete(subscription)
+            try? context.save()
+        }
     }
     
     // MARK: Notifications
@@ -130,35 +132,41 @@ class Store: ObservableObject {
     }
     
     func delete(notification: Notification) {
-        Log.d(Store.tag, "Deleting notification \(notification.id ?? "")")
-        context.delete(notification)
-        try? context.save()
+        context.performAndWait {
+            Log.d(Store.tag, "Deleting notification \(notification.id ?? "")")
+            context.delete(notification)
+            try? context.save()
+        }
     }
     
     func delete(notifications: Set<Notification>) {
-        Log.d(Store.tag, "Deleting \(notifications.count) notification(s)")
-        do {
-            notifications.forEach { notification in
-                context.delete(notification)
+        context.performAndWait {
+            Log.d(Store.tag, "Deleting \(notifications.count) notification(s)")
+            do {
+                notifications.forEach { notification in
+                    context.delete(notification)
+                }
+                try context.save()
+            } catch let error {
+                Log.w(Store.tag, "Cannot delete notification(s)", error)
+                rollbackAndRefresh()
             }
-            try context.save()
-        } catch let error {
-            Log.w(Store.tag, "Cannot delete notification(s)", error)
-            rollbackAndRefresh()
         }
     }
     
     func delete(allNotificationsFor subscription: Subscription) {
-        guard let notifications = subscription.notifications else { return }
-        Log.d(Store.tag, "Deleting all \(notifications.count) notification(s) for subscription \(subscription.urlString())")
-        do {
-            notifications.forEach { notification in
-                context.delete(notification as! Notification)
+        context.performAndWait {
+            guard let notifications = subscription.notifications else { return }
+            Log.d(Store.tag, "Deleting all \(notifications.count) notification(s) for subscription \(subscription.urlString())")
+            do {
+                notifications.forEach { notification in
+                    context.delete(notification as! Notification)
+                }
+                try context.save()
+            } catch let error {
+                Log.w(Store.tag, "Cannot delete notification(s)", error)
+                rollbackAndRefresh()
             }
-            try context.save()
-        } catch let error {
-            Log.w(Store.tag, "Cannot delete notification(s)", error)
-            rollbackAndRefresh()
         }
     }
     
