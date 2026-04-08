@@ -136,7 +136,7 @@ struct SubscriptionAddView: View {
             return false
         } else if selectedBaseUrl.range(of: "^https?://.+", options: .regularExpression, range: nil, locale: nil) == nil {
             return false
-        } else if store.getSubscription(baseUrl: selectedBaseUrl, topic: topic) != nil {
+        } else if store.getSubscription(baseUrl: selectedBaseUrl, topic: sanitizedTopic) != nil {
             return false
         }
         return true
@@ -153,7 +153,7 @@ struct SubscriptionAddView: View {
         loading = true
         addError = nil
         let user = store.getUser(baseUrl: selectedBaseUrl)?.toBasicUser()
-        ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: topic, user: user) { result in
+        ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: sanitizedTopic, user: user) { result in
             switch result {
             case .Success:
                 DispatchQueue.global(qos: .background).async {
@@ -180,7 +180,7 @@ struct SubscriptionAddView: View {
         loading = true
         loginError = nil
         let user = BasicUser(username: username, password: password)
-        ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: topic, user: user) { result in
+        ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: sanitizedTopic, user: user) { result in
             switch result {
             case .Success:
                 DispatchQueue.global(qos: .background).async {
@@ -204,7 +204,7 @@ struct SubscriptionAddView: View {
     }
     
     private var selectedBaseUrl: String {
-        return (useAnother) ? baseUrl : store.getDefaultBaseUrl()
+        return normalizeBaseUrl((useAnother) ? baseUrl : store.getDefaultBaseUrl())
     }
     
     private func resetAndHide() {

@@ -106,7 +106,7 @@ struct DefaultServerView: View {
         if newDefaultBaseUrl == "" {
             store.saveDefaultBaseUrl(baseUrl: nil)
         } else {
-            store.saveDefaultBaseUrl(baseUrl: newDefaultBaseUrl)
+            store.saveDefaultBaseUrl(baseUrl: normalizeBaseUrl(newDefaultBaseUrl))
         }
         resetAndHide()
     }

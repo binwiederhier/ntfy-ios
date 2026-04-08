@@ -77,10 +77,10 @@ class Store: ObservableObject {
     
     func saveSubscription(baseUrl: String, topic: String) -> Subscription {
         let subscription = Subscription(context: context)
-        subscription.baseUrl = baseUrl
+        subscription.baseUrl = normalizeBaseUrl(baseUrl)
         subscription.topic = topic
         DispatchQueue.main.sync {
-            Log.d(Store.tag, "Storing subscription baseUrl=\(baseUrl), topic=\(topic)")
+            Log.d(Store.tag, "Storing subscription baseUrl=\(subscription.baseUrl ?? "?"), topic=\(topic)")
             try? context.save()
         }
         return subscription
@@ -88,7 +88,7 @@ class Store: ObservableObject {
     
     func getSubscription(baseUrl: String, topic: String) -> Subscription? {
         let fetchRequest = Subscription.fetchRequest()
-        let baseUrlPredicate = NSPredicate(format: "baseUrl = %@", baseUrl)
+        let baseUrlPredicate = NSPredicate(format: "baseUrl = %@", normalizeBaseUrl(baseUrl))
         let topicPredicate = NSPredicate(format: "topic = %@", topic)
         
         fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [baseUrlPredicate, topicPredicate])
@@ -98,6 +98,11 @@ class Store: ObservableObject {
     
     func getSubscriptions() -> [Subscription]? {
         return try? context.fetch(Subscription.fetchRequest())
+    }
+
+    func updateSubscriptionBaseUrl(_ subscription: Subscription, baseUrl: String) {
+        subscription.baseUrl = normalizeBaseUrl(baseUrl)
+        try? context.save()
     }
     
     func delete(subscription: Subscription) {
@@ -167,7 +172,7 @@ class Store: ObservableObject {
     func saveUser(baseUrl: String, username: String, password: String) {
         do {
             let user = getUser(baseUrl: baseUrl) ?? User(context: context)
-            user.baseUrl = baseUrl
+            user.baseUrl = normalizeBaseUrl(baseUrl)
             user.username = username
             user.password = password
             try context.save()
@@ -179,7 +184,7 @@ class Store: ObservableObject {
     
     func getUser(baseUrl: String) -> User? {
         let request = User.fetchRequest()
-        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "baseUrl = %@", baseUrl)])
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "baseUrl = %@", normalizeBaseUrl(baseUrl))])
         return try? context.fetch(request).first
     }
     
@@ -194,7 +199,7 @@ class Store: ObservableObject {
         do {
             let pref = getPreference(key: Store.prefKeyDefaultBaseUrl) ?? Preference(context: context)
             pref.key = Store.prefKeyDefaultBaseUrl
-            pref.value = baseUrl ?? Config.appBaseUrl
+            pref.value = baseUrl.map(normalizeBaseUrl) ?? Config.appBaseUrl
             try context.save()
         } catch let error {
             Log.w(Store.tag, "Cannot store preference", error)
@@ -207,7 +212,7 @@ class Store: ObservableObject {
         if baseUrl == nil || baseUrl?.isEmpty == true {
             return Config.appBaseUrl
         }
-        return baseUrl!
+        return normalizeBaseUrl(baseUrl!)
     }
     
     private func getPreference(key: String) -> Preference? {

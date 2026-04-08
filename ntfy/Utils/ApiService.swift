@@ -43,7 +43,8 @@ class ApiService {
         message: String,
         title: String,
         priority: Int = 3,
-        tags: [String] = []
+        tags: [String] = [],
+        completionHandler: (() -> Void)? = nil
     ) {
         guard let url = URL(string: subscription.urlString()) else { return }
         var request = newRequest(url: url, user: user)
@@ -61,6 +62,7 @@ class ApiService {
                 return
             }
             Log.d(self.tag, "Publishing message succeeded", response)
+            completionHandler?()
         }.resume()
     }
     
