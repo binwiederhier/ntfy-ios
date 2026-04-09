@@ -142,14 +142,11 @@ extension AppDelegate: MessagingDelegate {
         
         // Re-subscribe to Firebase for all topics
         let store = Store.shared
+        let subscriptionManager = SubscriptionManager(store: store)
         store.getSubscriptions()?.forEach{ subscription in
             if let baseUrl = subscription.baseUrl, let topic = subscription.topic {
                 Log.d(tag, "Re-subscribing to topic \(baseUrl)/\(topic)")
-                if baseUrl == Config.appBaseUrl {
-                    Messaging.messaging().subscribe(toTopic: topic)
-                } else {
-                    Messaging.messaging().subscribe(toTopic: topicHash(baseUrl: baseUrl, topic: topic))
-                }
+                Messaging.messaging().subscribe(toTopic: firebaseTopic(baseUrl: baseUrl, topic: topic))
             }
         }
     }

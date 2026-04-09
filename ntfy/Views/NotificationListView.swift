@@ -5,6 +5,7 @@ enum ActiveAlert {
     case clear, unsubscribe, selected
 }
 
+
 struct NotificationListView: View {
     private let tag = "NotificationListView"
     
@@ -201,7 +202,9 @@ struct NotificationListView: View {
                 title: "Test: You can set a title if you like",
                 priority: priority,
                 tags: tags
-            )
+            ) {
+                subscriptionManager.poll(subscription)
+            }
         }
     }
     

@@ -2,7 +2,7 @@ import Foundation
 import CryptoKit
 
 func topicUrl(baseUrl: String, topic: String) -> String {
-    return "\(baseUrl)/\(topic)"
+    return "\(normalizeBaseUrl(baseUrl))/\(topic)"
 }
 
 func topicShortUrl(baseUrl: String, topic: String) -> String {
@@ -10,13 +10,27 @@ func topicShortUrl(baseUrl: String, topic: String) -> String {
 }
 
 func topicAuthUrl(baseUrl: String, topic: String) -> String {
-    return "\(baseUrl)/\(topic)/auth"
+    return "\(normalizeBaseUrl(baseUrl))/\(topic)/auth"
 }
 
 func topicHash(baseUrl: String, topic: String) -> String {
-    let data = Data(topicUrl(baseUrl: baseUrl, topic: topic).utf8)
+    let data = Data(topicUrl(baseUrl: normalizeBaseUrl(baseUrl), topic: topic).utf8)
     let digest = SHA256.hash(data: data)
     return digest.compactMap { String(format: "%02x", $0)}.joined()
+}
+
+func firebaseTopic(baseUrl: String, topic: String) -> String {
+    return normalizeBaseUrl(baseUrl) == normalizeBaseUrl(Config.appBaseUrl)
+        ? topic
+        : topicHash(baseUrl: baseUrl, topic: topic)
+}
+
+func normalizeBaseUrl(_ baseUrl: String) -> String {
+    var normalized = baseUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+    while normalized.hasSuffix("/") {
+        normalized.removeLast()
+    }
+    return normalized
 }
 
 func shortUrl(url: String) -> String {
