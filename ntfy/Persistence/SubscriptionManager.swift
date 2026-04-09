@@ -24,16 +24,6 @@ struct SubscriptionManager {
             store.delete(subscription: subscription)
         }
     }
-
-    func rebase(_ subscription: Subscription, to baseUrl: String) {
-        guard let oldBaseUrl = subscription.baseUrl, let topic = subscription.topic else { return }
-        let normalizedBaseUrl = normalizeBaseUrl(baseUrl)
-        if normalizeBaseUrl(oldBaseUrl) == normalizedBaseUrl { return }
-        Log.d(tag, "Updating subscription \(topic) from \(oldBaseUrl) to \(normalizedBaseUrl)")
-        Messaging.messaging().unsubscribe(fromTopic: firebaseTopic(baseUrl: oldBaseUrl, topic: topic))
-        Messaging.messaging().subscribe(toTopic: firebaseTopic(baseUrl: normalizedBaseUrl, topic: topic))
-        store.updateSubscriptionBaseUrl(subscription, baseUrl: normalizedBaseUrl)
-    }
     
     func poll(_ subscription: Subscription) {
         poll(subscription) { _ in }

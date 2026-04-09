@@ -146,10 +146,6 @@ extension AppDelegate: MessagingDelegate {
         store.getSubscriptions()?.forEach{ subscription in
             if let baseUrl = subscription.baseUrl, let topic = subscription.topic {
                 Log.d(tag, "Re-subscribing to topic \(baseUrl)/\(topic)")
-                if normalizeBaseUrl(baseUrl) == "https://ntfy.sh" && normalizeBaseUrl(Config.appBaseUrl) != "https://ntfy.sh" {
-                    subscriptionManager.rebase(subscription, to: Config.appBaseUrl)
-                    return
-                }
                 Messaging.messaging().subscribe(toTopic: firebaseTopic(baseUrl: baseUrl, topic: topic))
             }
         }
