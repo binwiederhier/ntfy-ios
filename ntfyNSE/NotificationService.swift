@@ -66,35 +66,31 @@ class NotificationService: UNNotificationServiceExtension {
     }
     
     private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
-        let subscription = store?.getSubscriptions()?.first { $0.urlHash() == pollRequest.topic }
+        let subscription = store?.getSubscriptions()?.first { subscription in
+            // Poll requests usually target the hashed topic URL, but tolerate raw topic payloads too
+            subscription.urlHash() == pollRequest.topic || subscription.topic == pollRequest.topic
+        }
         let baseUrl = subscription?.baseUrl
+        let pollId = pollRequest.pollId ?? pollRequest.id
         guard
             let subscription = subscription,
-            let pollId = pollRequest.pollId,
             let baseUrl = baseUrl
         else {
-            Log.w(tag, "Cannot find subscription", pollRequest)
+            Log.w(tag, "Cannot find subscription for poll request topic=\(pollRequest.topic), pollId=\(pollRequest.pollId ?? "<nil>")")
             contentHandler(request.content)
             return
         }
         
         // Poll original server
         let user = store?.getUser(baseUrl: baseUrl)?.toBasicUser()
-        let semaphore = DispatchSemaphore(value: 0)
+        // The extension only needs contentHandler to be called from the async callback
         ApiService.shared.poll(subscription: subscription, messageId: pollId, user: user) { message, error in
             guard let message = message else {
-                Log.w(self.tag, "Error fetching message", error)
+                Log.w(self.tag, "Error fetching poll request message topic=\(pollRequest.topic), pollId=\(pollId), subscription=\(subscription.urlString())", error)
                 contentHandler(request.content)
                 return
             }
             self.handleMessage(request, content, baseUrl, message, contentHandler)
-            semaphore.signal()
         }
-        
-        // Note: If notifications only show up as "New message", it may be because the "return" statement
-        // happens before the contentHandler() is called. We add this semaphore here to synchronize the threads.
-        // I don't know if this is necessary, but it feels like the right thing to do.
-        
-        _ = semaphore.wait(timeout: DispatchTime.now() + 25) // 30 seconds is the max for the entire extension
     }
 }

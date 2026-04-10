@@ -52,20 +52,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         // Poll and show new messages as notifications
         let store = Store.shared
         let subscriptionManager = SubscriptionManager(store: store)
-        store.getSubscriptions()?.forEach { subscription in
+        let subscriptions = store.getSubscriptions() ?? []
+        guard !subscriptions.isEmpty else {
+            completionHandler(.noData)
+            return
+        }
+
+        let group = DispatchGroup()
+        let resultQueue = DispatchQueue(label: "io.heckel.ntfy.background-poll-result")
+        var didReceiveNewData = false
+        subscriptions.forEach { subscription in
+            group.enter()
+            guard let baseUrl = subscription.baseUrl else {
+                Log.w(tag, "Skipping background poll notification for subscription with missing baseUrl")
+                group.leave()
+                return
+            }
             subscriptionManager.poll(subscription) { messages in
-                messages.forEach { message in
-                    self.showNotification(subscription, message)
+                if !messages.isEmpty {
+                    resultQueue.sync {
+                        didReceiveNewData = true
+                    }
                 }
+                messages.forEach { message in
+                    self.showNotification(baseUrl: baseUrl, message)
+                }
+                group.leave()
             }
         }
-        completionHandler(.newData)
+        group.notify(queue: .main) {
+            completionHandler(didReceiveNewData ? .newData : .noData)
+        }
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let token = deviceToken.map { data in String(format: "%02.2hhx", data) }.joined()
         Messaging.messaging().apnsToken = deviceToken
-        Log.d(tag, "Registered for remote notifications. Passing APNs token to Firebase: \(token)")
+        Log.d(tag, "Registered for remote notifications. Passing APNs token \(token.prefix(12))... to Firebase")
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -76,8 +99,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     /// local notification look exactly like the remote one (same userInfo), so that when we tap it, the userNotificationCenter(didReceive) function
     /// has the same information available.
     private func showNotification(_ subscription: Subscription, _ message: Message) {
+        guard let baseUrl = subscription.baseUrl else {
+            Log.w(tag, "Skipping notification for subscription with missing baseUrl")
+            return
+        }
+        showNotification(baseUrl: baseUrl, message)
+    }
+
+    private func showNotification(baseUrl: String, _ message: Message) {
         let content = UNMutableNotificationContent()
-        content.modify(message: message, baseUrl: subscription.baseUrl ?? "?")
+        content.modify(message: message, baseUrl: baseUrl)
     
         let request = UNNotificationRequest(identifier: message.id, content: content, trigger: nil /* now */)
         UNUserNotificationCenter.current().add(request) { (error) in
@@ -135,18 +166,34 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        Log.d(tag, "Firebase token received: \(String(describing: fcmToken))")
+        if let fcmToken = fcmToken, !fcmToken.isEmpty {
+            Log.d(tag, "Firebase token received: \(fcmToken.prefix(12))...")
+        } else {
+            Log.w(tag, "Firebase token missing")
+        }
         
         // Subscribe to ~poll topic
-        Messaging.messaging().subscribe(toTopic: pollTopic)
+        Messaging.messaging().subscribe(toTopic: pollTopic) { error in
+            if let error {
+                Log.e(self.tag, "Firebase subscribe failed for \(self.pollTopic)", error)
+            } else {
+                Log.d(self.tag, "Firebase subscribe succeeded for \(self.pollTopic)")
+            }
+        }
         
         // Re-subscribe to Firebase for all topics
         let store = Store.shared
-        let subscriptionManager = SubscriptionManager(store: store)
         store.getSubscriptions()?.forEach{ subscription in
             if let baseUrl = subscription.baseUrl, let topic = subscription.topic {
+                let firebaseTopicName = firebaseTopic(baseUrl: baseUrl, topic: topic)
                 Log.d(tag, "Re-subscribing to topic \(baseUrl)/\(topic)")
-                Messaging.messaging().subscribe(toTopic: firebaseTopic(baseUrl: baseUrl, topic: topic))
+                Messaging.messaging().subscribe(toTopic: firebaseTopicName) { error in
+                    if let error {
+                        Log.e(self.tag, "Firebase subscribe failed for \(firebaseTopicName)", error)
+                    } else {
+                        Log.d(self.tag, "Firebase subscribe succeeded for \(firebaseTopicName)")
+                    }
+                }
             }
         }
     }

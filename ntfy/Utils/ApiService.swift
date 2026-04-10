@@ -8,7 +8,7 @@ class ApiService {
     
     func poll(subscription: Subscription, user: BasicUser?, completionHandler: @escaping ([Message]?, Error?) -> Void) {
         guard let url = URL(string: subscription.urlString()) else {
-            // FIXME
+            completionHandler(nil, URLError(.badURL))
             return
         }
         let since = subscription.lastNotificationId ?? "all"
@@ -19,7 +19,10 @@ class ApiService {
     }
     
     func poll(subscription: Subscription, messageId: String, user: BasicUser?, completionHandler: @escaping (Message?, Error?) -> Void) {
-        let url = URL(string: "\(subscription.urlString())/json?poll=1&id=\(messageId)")!
+        guard let url = URL(string: "\(subscription.urlString())/json?poll=1&id=\(messageId)") else {
+            completionHandler(nil, URLError(.badURL))
+            return
+        }
         Log.d(tag, "Polling single message from \(url) with user \(user?.username ?? "anonymous")")
         
         let request = newRequest(url: url, user: user)
@@ -28,8 +31,16 @@ class ApiService {
                 completionHandler(nil, error)
                 return
             }
+            guard let httpResponse = response as? HTTPURLResponse, (200..<300).contains(httpResponse.statusCode) else {
+                completionHandler(nil, URLError(.badServerResponse))
+                return
+            }
+            guard let data = data else {
+                completionHandler(nil, URLError(.badServerResponse))
+                return
+            }
             do {
-                let message = try JSONDecoder().decode(Message.self, from: data!)
+                let message = try JSONDecoder().decode(Message.self, from: data)
                 completionHandler(message, nil)
             } catch {
                 completionHandler(nil, error)
@@ -98,19 +109,33 @@ class ApiService {
     }
 
     private func fetchJsonData<T: Decodable>(urlString: String, user: BasicUser?, completionHandler: @escaping ([T]?, Error?) -> ()) {
-        guard let url = URL(string: urlString) else { return }
+        guard let url = URL(string: urlString) else {
+            completionHandler(nil, URLError(.badURL))
+            return
+        }
         let request = newRequest(url: url, user: user)
         newSession(timeout: 30).dataTask(with: request) { (data, response, error) in
-            if let error = error {
+            if let error {
                 Log.e(self.tag, "Error fetching data", error)
                 completionHandler(nil, error)
                 return
             }
+            guard let httpResponse = response as? HTTPURLResponse, (200..<300).contains(httpResponse.statusCode) else {
+                completionHandler(nil, URLError(.badServerResponse))
+                return
+            }
+            guard let data = data else {
+                completionHandler(nil, URLError(.badServerResponse))
+                return
+            }
             do {
-                let lines = String(decoding: data!, as: UTF8.self).split(whereSeparator: \.isNewline)
+                let lines = String(decoding: data, as: UTF8.self).split(whereSeparator: \.isNewline)
                 var notifications: [T] = []
                 for jsonLine in lines {
-                    notifications.append(try JSONDecoder().decode(T.self, from: jsonLine.data(using: .utf8)!))
+                    guard let jsonData = jsonLine.data(using: .utf8) else {
+                        throw URLError(.cannotDecodeContentData)
+                    }
+                    notifications.append(try JSONDecoder().decode(T.self, from: jsonData))
                 }
                 completionHandler(notifications, nil)
             } catch {
