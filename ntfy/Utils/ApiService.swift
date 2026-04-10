@@ -8,7 +8,7 @@ class ApiService {
     
     func poll(subscription: Subscription, user: BasicUser?, completionHandler: @escaping ([Message]?, Error?) -> Void) {
         guard let url = URL(string: subscription.urlString()) else {
-            // FIXME
+            completionHandler(nil, URLError(.badURL))
             return
         }
         let since = subscription.lastNotificationId ?? "all"

@@ -47,10 +47,8 @@ struct SubscriptionManager {
             }
             Log.d(tag, "Polling success, \(messages.count) new message(s)", messages)
             if !messages.isEmpty {
-                DispatchQueue.main.sync {
-                    for message in messages {
-                        store.save(notificationFromMessage: message, withSubscription: subscription)
-                    }
+                for message in messages {
+                    store.save(notificationFromMessage: message, withSubscription: subscription)
                 }
             }
             completionHandler(messages)

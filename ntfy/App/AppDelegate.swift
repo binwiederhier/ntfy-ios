@@ -52,14 +52,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         // Poll and show new messages as notifications
         let store = Store.shared
         let subscriptionManager = SubscriptionManager(store: store)
-        store.getSubscriptions()?.forEach { subscription in
+        let subscriptions = store.getSubscriptions() ?? []
+        guard !subscriptions.isEmpty else {
+            completionHandler(.noData)
+            return
+        }
+
+        let group = DispatchGroup()
+        let resultQueue = DispatchQueue(label: "io.heckel.ntfy.background-poll-result")
+        var didReceiveNewData = false
+        subscriptions.forEach { subscription in
+            group.enter()
+            guard let baseUrl = subscription.baseUrl else {
+                Log.w(tag, "Skipping background poll notification for subscription with missing baseUrl")
+                group.leave()
+                return
+            }
             subscriptionManager.poll(subscription) { messages in
-                messages.forEach { message in
-                    self.showNotification(subscription, message)
+                if !messages.isEmpty {
+                    resultQueue.sync {
+                        didReceiveNewData = true
+                    }
                 }
+                messages.forEach { message in
+                    self.showNotification(baseUrl: baseUrl, message)
+                }
+                group.leave()
             }
         }
-        completionHandler(.newData)
+        group.notify(queue: .main) {
+            completionHandler(didReceiveNewData ? .newData : .noData)
+        }
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
@@ -76,8 +99,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     /// local notification look exactly like the remote one (same userInfo), so that when we tap it, the userNotificationCenter(didReceive) function
     /// has the same information available.
     private func showNotification(_ subscription: Subscription, _ message: Message) {
+        guard let baseUrl = subscription.baseUrl else {
+            Log.w(tag, "Skipping notification for subscription with missing baseUrl")
+            return
+        }
+        showNotification(baseUrl: baseUrl, message)
+    }
+
+    private func showNotification(baseUrl: String, _ message: Message) {
         let content = UNMutableNotificationContent()
-        content.modify(message: message, baseUrl: subscription.baseUrl ?? "?")
+        content.modify(message: message, baseUrl: baseUrl)
     
         let request = UNNotificationRequest(identifier: message.id, content: content, trigger: nil /* now */)
         UNUserNotificationCenter.current().add(request) { (error) in

@@ -80,7 +80,7 @@ class NotificationService: UNNotificationServiceExtension {
         
         // Poll original server
         let user = store?.getUser(baseUrl: baseUrl)?.toBasicUser()
-        let semaphore = DispatchSemaphore(value: 0)
+        // The extension only needs contentHandler to be called from the async callback
         ApiService.shared.poll(subscription: subscription, messageId: pollId, user: user) { message, error in
             guard let message = message else {
                 Log.w(self.tag, "Error fetching message", error)
@@ -88,13 +88,6 @@ class NotificationService: UNNotificationServiceExtension {
                 return
             }
             self.handleMessage(request, content, baseUrl, message, contentHandler)
-            semaphore.signal()
         }
-        
-        // Note: If notifications only show up as "New message", it may be because the "return" statement
-        // happens before the contentHandler() is called. We add this semaphore here to synchronize the threads.
-        // I don't know if this is necessary, but it feels like the right thing to do.
-        
-        _ = semaphore.wait(timeout: DispatchTime.now() + 25) // 30 seconds is the max for the entire extension
     }
 }
