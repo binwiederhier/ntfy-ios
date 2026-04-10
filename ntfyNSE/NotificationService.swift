@@ -68,7 +68,6 @@ class NotificationService: UNNotificationServiceExtension {
     private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
         let subscription = store?.getSubscriptions()?.first { subscription in
             // Poll requests usually target the hashed topic URL, but tolerate raw topic payloads too
-            // Previously polls may have been ignored?
             subscription.urlHash() == pollRequest.topic || subscription.topic == pollRequest.topic
         }
         let baseUrl = subscription?.baseUrl
@@ -77,7 +76,7 @@ class NotificationService: UNNotificationServiceExtension {
             let subscription = subscription,
             let baseUrl = baseUrl
         else {
-            Log.w(tag, "Cannot find subscription", pollRequest)
+            Log.w(tag, "Cannot find subscription for poll request topic=\(pollRequest.topic), pollId=\(pollRequest.pollId ?? "<nil>")")
             contentHandler(request.content)
             return
         }
@@ -87,7 +86,7 @@ class NotificationService: UNNotificationServiceExtension {
         // The extension only needs contentHandler to be called from the async callback
         ApiService.shared.poll(subscription: subscription, messageId: pollId, user: user) { message, error in
             guard let message = message else {
-                Log.w(self.tag, "Error fetching message", error)
+                Log.w(self.tag, "Error fetching poll request message topic=\(pollRequest.topic), pollId=\(pollId), subscription=\(subscription.urlString())", error)
                 contentHandler(request.content)
                 return
             }

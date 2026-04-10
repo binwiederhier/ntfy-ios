@@ -88,7 +88,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let token = deviceToken.map { data in String(format: "%02.2hhx", data) }.joined()
         Messaging.messaging().apnsToken = deviceToken
-        Log.d(tag, "Registered for remote notifications. Passing APNs token to Firebase: \(token)")
+        Log.d(tag, "Registered for remote notifications. Passing APNs token \(token.prefix(12))... to Firebase")
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -166,7 +166,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        Log.d(tag, "Firebase token received: \(String(describing: fcmToken))")
+        if let fcmToken = fcmToken, !fcmToken.isEmpty {
+            Log.d(tag, "Firebase token received: \(fcmToken.prefix(12))...")
+        } else {
+            Log.w(tag, "Firebase token missing")
+        }
         
         // Subscribe to ~poll topic
         Messaging.messaging().subscribe(toTopic: pollTopic) { error in
