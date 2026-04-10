@@ -169,15 +169,27 @@ extension AppDelegate: MessagingDelegate {
         Log.d(tag, "Firebase token received: \(String(describing: fcmToken))")
         
         // Subscribe to ~poll topic
-        Messaging.messaging().subscribe(toTopic: pollTopic)
+        Messaging.messaging().subscribe(toTopic: pollTopic) { error in
+            if let error {
+                Log.e(self.tag, "Firebase subscribe failed for \(self.pollTopic)", error)
+            } else {
+                Log.d(self.tag, "Firebase subscribe succeeded for \(self.pollTopic)")
+            }
+        }
         
         // Re-subscribe to Firebase for all topics
         let store = Store.shared
-        let subscriptionManager = SubscriptionManager(store: store)
         store.getSubscriptions()?.forEach{ subscription in
             if let baseUrl = subscription.baseUrl, let topic = subscription.topic {
+                let firebaseTopicName = firebaseTopic(baseUrl: baseUrl, topic: topic)
                 Log.d(tag, "Re-subscribing to topic \(baseUrl)/\(topic)")
-                Messaging.messaging().subscribe(toTopic: firebaseTopic(baseUrl: baseUrl, topic: topic))
+                Messaging.messaging().subscribe(toTopic: firebaseTopicName) { error in
+                    if let error {
+                        Log.e(self.tag, "Firebase subscribe failed for \(firebaseTopicName)", error)
+                    } else {
+                        Log.d(self.tag, "Firebase subscribe succeeded for \(firebaseTopicName)")
+                    }
+                }
             }
         }
     }
