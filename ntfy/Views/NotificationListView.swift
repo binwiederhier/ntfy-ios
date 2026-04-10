@@ -284,8 +284,15 @@ struct NotificationRowView: View {
                     .bold()
                     .padding([.bottom], 2)
             }
-            Text(notification.formatMessage())
-                .font(.body)
+            if #available(iOS 15.0, *), notification.contentType == "text/markdown",
+               let attributed = try? AttributedString(markdown: notification.formatMessage(),
+                   options: AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlinesOnlyPreservingWhitespace)) {
+                Text(attributed)
+                    .font(.body)
+            } else {
+                Text(notification.formatMessage())
+                    .font(.body)
+            }
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
                     .font(.subheadline)
