@@ -115,24 +115,32 @@ class Store: ObservableObject {
     // MARK: Notifications
     
     func save(notificationFromMessage message: Message, withSubscription subscription: Subscription) {
+        save(notificationsFromMessages: [message], withSubscription: subscription)
+    }
+
+    func save(notificationsFromMessages messages: [Message], withSubscription subscription: Subscription) {
+        guard !messages.isEmpty else { return }
+
         context.performAndWait {
             do {
-                let notification = Notification(context: context)
-                notification.id = message.id
-                notification.time = message.time
-                notification.message = message.message ?? ""
-                notification.title = message.title ?? ""
-                notification.priority = (message.priority != nil && message.priority != 0) ? message.priority! : 3
-                notification.tags = message.tags?.joined(separator: ",") ?? ""
-                notification.actions = Actions.shared.encode(message.actions)
-                notification.click = message.click ?? ""
-                notification.subscription = subscription
-                subscription.addToNotifications(notification)
-                subscription.lastNotificationId = message.id
-                Log.d(Store.tag, "Storing notification with ID \(notification.id ?? "<unknown>")")
+                for message in messages {
+                    let notification = Notification(context: context)
+                    notification.id = message.id
+                    notification.time = message.time
+                    notification.message = message.message ?? ""
+                    notification.title = message.title ?? ""
+                    notification.priority = (message.priority != nil && message.priority != 0) ? message.priority! : 3
+                    notification.tags = message.tags?.joined(separator: ",") ?? ""
+                    notification.actions = Actions.shared.encode(message.actions)
+                    notification.click = message.click ?? ""
+                    notification.subscription = subscription
+                    subscription.addToNotifications(notification)
+                    subscription.lastNotificationId = message.id
+                    Log.d(Store.tag, "Storing notification with ID \(notification.id ?? "<unknown>")")
+                }
                 try context.save()
             } catch let error {
-                Log.w(Store.tag, "Cannot store notification (fromMessage)", error)
+                Log.w(Store.tag, "Cannot store notifications (fromMessages)", error)
                 rollbackAndRefresh()
             }
         }

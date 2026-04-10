@@ -61,9 +61,7 @@ struct SubscriptionManager {
             }
             Log.d(tag, "Polling success, \(messages.count) new message(s)", messages)
             if !messages.isEmpty {
-                for message in messages {
-                    store.save(notificationFromMessage: message, withSubscription: subscription)
-                }
+                store.save(notificationsFromMessages: messages, withSubscription: subscription)
             }
             completionHandler(messages)
         }
