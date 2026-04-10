@@ -101,11 +101,11 @@ struct Message: Decodable {
               let time = userInfo["time"] as? String,
               let event = userInfo["event"] as? String,
               let topic = userInfo["topic"] as? String,
-              let timeInt = Int64(time),
-              let message = userInfo["message"] as? String else {
+              let timeInt = Int64(time) else {
             Log.d(Store.tag, "Unknown or irrelevant message", userInfo)
             return nil
         }
+        let message = userInfo["message"] as? String
         let title = userInfo["title"] as? String
         let priority = Int16(userInfo["priority"] as? String ?? "3") ?? 3
         let tags = (userInfo["tags"] as? String ?? "").components(separatedBy: ",")

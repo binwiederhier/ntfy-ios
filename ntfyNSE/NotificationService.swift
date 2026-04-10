@@ -66,11 +66,15 @@ class NotificationService: UNNotificationServiceExtension {
     }
     
     private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
-        let subscription = store?.getSubscriptions()?.first { $0.urlHash() == pollRequest.topic }
+        let subscription = store?.getSubscriptions()?.first { subscription in
+            // Poll requests usually target the hashed topic URL, but tolerate raw topic payloads too
+            // Previously polls may have been ignored?
+            subscription.urlHash() == pollRequest.topic || subscription.topic == pollRequest.topic
+        }
         let baseUrl = subscription?.baseUrl
+        let pollId = pollRequest.pollId ?? pollRequest.id
         guard
             let subscription = subscription,
-            let pollId = pollRequest.pollId,
             let baseUrl = baseUrl
         else {
             Log.w(tag, "Cannot find subscription", pollRequest)
