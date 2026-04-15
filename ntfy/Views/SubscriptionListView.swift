@@ -19,18 +19,14 @@ struct SubscriptionListView: View {
             if #available(iOS 15.0, *) {
                 subscriptionList
                     .refreshable {
-                        subscriptionsModel.subscriptions.forEach { subscription in
-                            subscriptionManager.poll(subscription)
-                        }
+                        pollSubscriptions()
                     }
             } else {
                 subscriptionList
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
                             Button {
-                                subscriptionsModel.subscriptions.forEach { subscription in
-                                    subscriptionManager.poll(subscription)
-                                }
+                                pollSubscriptions()
                             } label: {
                                 Image(systemName: "arrow.clockwise")
                             }
@@ -80,6 +76,16 @@ struct SubscriptionListView: View {
         })
         .sheet(isPresented: $showingAddDialog) {
             SubscriptionAddView(isShowing: $showingAddDialog)
+        }
+        .onAppear {
+            // Ensures subscription count stays up to date, so a pull to refresh isn't required
+            pollSubscriptions()
+        }
+    }
+
+    private func pollSubscriptions() {
+        subscriptionsModel.subscriptions.forEach { subscription in
+            subscriptionManager.poll(subscription)
         }
     }
 }
