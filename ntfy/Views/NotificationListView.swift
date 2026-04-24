@@ -42,9 +42,15 @@ struct NotificationListView: View {
     }
     
     private var notificationList: some View {
-        List(selection: $selection) {
-            ForEach(notificationsModel.notifications, id: \.self) { notification in
-                NotificationRowView(notification: notification)
+        Group {
+            if editMode == .active {
+                List(selection: $selection) {
+                    notificationRows
+                }
+            } else {
+                List {
+                    notificationRows
+                }
             }
         }
         .listStyle(PlainListStyle())
@@ -171,6 +177,13 @@ struct NotificationListView: View {
         }
     }
     
+    @ViewBuilder
+    private var notificationRows: some View {
+        ForEach(notificationsModel.notifications, id: \.self) { notification in
+            NotificationRowView(notification: notification)
+        }
+    }
+    
     private var editButton: some View {
         if editMode == .inactive {
             return Button(action: {
@@ -247,7 +260,11 @@ struct NotificationListView: View {
 
 struct NotificationRowView: View {
     @EnvironmentObject private var store: Store
+    @Environment(\.openURL) private var openURL
     @ObservedObject var notification: Notification
+    
+    @State private var showCopiedConfirmation = false
+    @State private var copiedConfirmationTask: Task<Void, Never>?
     
     var body: some View {
         if #available(iOS 15.0, *) {
@@ -284,8 +301,7 @@ struct NotificationRowView: View {
                     .bold()
                     .padding([.bottom], 2)
             }
-            Text(notification.formatMessage())
-                .font(.body)
+            messageText
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
                     .font(.subheadline)
@@ -321,10 +337,139 @@ struct NotificationRowView: View {
             }
         }
         .padding(.all, 4)
-        .onTapGesture {
-            // TODO: This gives no feedback to the user, and it only works if the text is tapped
-            UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
+        .overlay(alignment: .topTrailing) {
+            if showCopiedConfirmation {
+                Label("Copied", systemImage: "checkmark.circle.fill")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .foregroundColor(.white)
+                    .background(Color.green.opacity(0.95))
+                    .clipShape(Capsule())
+                    .transition(.opacity.combined(with: .scale))
+            }
         }
+        .animation(.easeInOut(duration: 0.18), value: showCopiedConfirmation)
+        .onDisappear {
+            copiedConfirmationTask?.cancel()
+        }
+        .contextMenu {
+            ForEach(Array(messageLinks.enumerated()), id: \.element) { index, url in
+                Button {
+                    openURL(url)
+                } label: {
+                    Label(linkMenuTitle(for: url, index: index), systemImage: "link")
+                }
+            }
+            
+            if let clickUrl = clickUrl, messageLinks.count <= 1, !messageLinks.contains(clickUrl) {
+                Button {
+                    openURL(clickUrl)
+                } label: {
+                    Label("Open message link", systemImage: "arrow.up.right.square")
+                }
+            }
+            
+            Button {
+                copyMessage()
+            } label: {
+                Label("Copy message", systemImage: "doc.on.doc")
+            }
+        }
+    }
+    
+    private var messageText: some View {
+        Group {
+            if #available(iOS 15.0, *) {
+                Text(notification.formattedMessageAttributedString())
+                    .font(.body)
+                    .tint(.accentColor)
+            } else {
+                Text(notification.formatMessage())
+                    .font(.body)
+            }
+        }
+    }
+    
+    private var clickUrl: URL? {
+        guard let click = notification.click, !click.isEmpty else {
+            return nil
+        }
+        return URL(string: click)
+    }
+    
+    private var messageLinks: [URL] {
+        if #available(iOS 15.0, *) {
+            return notification.messageLinkData().links
+        } else {
+            return []
+        }
+    }
+    
+    private func linkMenuTitle(for url: URL, index: Int) -> String {
+        if messageLinks.count == 1 {
+            return "Open link"
+        }
+        if let host = url.host, !host.isEmpty {
+            return "Open \(host)"
+        }
+        return "Open link \(index + 1)"
+    }
+    
+    private func copyMessage() {
+        UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        copiedConfirmationTask?.cancel()
+        showCopiedConfirmation = true
+        copiedConfirmationTask = Task {
+            try? await Task.sleep(nanoseconds: 1_250_000_000)
+            await MainActor.run {
+                showCopiedConfirmation = false
+            }
+        }
+    }
+}
+
+extension Notification {
+    @available(iOS 15.0, *)
+    func formattedMessageAttributedString() -> AttributedString {
+        messageLinkData().text
+    }
+    
+    @available(iOS 15.0, *)
+    func messageLinkData() -> (text: AttributedString, links: [URL]) {
+        let source = formatMessage()
+        
+        let parsed: AttributedString
+        if let markdown = try? AttributedString(
+            markdown: source,
+            options: AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        ) {
+            parsed = markdown
+        } else {
+            parsed = AttributedString(source)
+        }
+        
+        let mutable = NSMutableAttributedString(attributedString: NSAttributedString(parsed))
+        let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        let range = NSRange(location: 0, length: mutable.string.utf16.count)
+        var links: [URL] = []
+        detector?.enumerateMatches(in: mutable.string, options: [], range: range) { match, _, _ in
+            guard let match, let url = match.url else { return }
+            mutable.addAttribute(.link, value: url, range: match.range)
+            if !links.contains(url) {
+                links.append(url)
+            }
+        }
+        
+        let attributed = AttributedString(mutable)
+        for run in attributed.runs {
+            if let url = run.link, !links.contains(url) {
+                links.append(url)
+            }
+        }
+        
+        return (attributed, links)
     }
 }
 
