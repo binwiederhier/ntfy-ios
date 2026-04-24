@@ -20,6 +20,7 @@ struct NotificationListView: View {
     
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
+    @State private var showCopiedConfirmation = false
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -31,14 +32,10 @@ struct NotificationListView: View {
     }
 
     var body: some View {
-        if #available(iOS 15.0, *) {
-            notificationList
-                .refreshable {
-                    subscriptionManager.poll(subscription)
-                }
-        } else {
-            notificationList
-        }
+        notificationList
+            .refreshable {
+                subscriptionManager.poll(subscription)
+            }
     }
     
     private var notificationList: some View {
@@ -161,17 +158,27 @@ struct NotificationListView: View {
                         .multilineTextAlignment(.center)
                         .padding(.bottom)
                     
-                    if #available(iOS 15.0, *) {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
-                            .foregroundColor(.gray)
-                    } else {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on https://ntfy.sh and https://ntfy.sh/docs.")
-                            .foregroundColor(.gray)
-                    }
+                    Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
+                        .foregroundColor(.gray)
                 }
                 .padding(40)
             }
         })
+        .overlay {
+            if showCopiedConfirmation {
+                Text("Copied to Clipboard")
+                    .font(.body)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.accentColor.cornerRadius(20))
+                    .shadow(radius: 5)
+                    .padding(.bottom, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.snappy(duration: 0.25), value: showCopiedConfirmation)
         .onAppear {
             cancelSubscriptionNotifications()
         }
@@ -180,7 +187,7 @@ struct NotificationListView: View {
     @ViewBuilder
     private var notificationRows: some View {
         ForEach(notificationsModel.notifications, id: \.self) { notification in
-            NotificationRowView(notification: notification)
+            NotificationRowView(notification: notification, onCopyMessage: showCopyConfirmation)
         }
     }
     
@@ -256,43 +263,52 @@ struct NotificationListView: View {
             }
         }
     }
+    
+    private func showCopyConfirmation() {
+        withAnimation(.snappy(duration: 0.25)) {
+            showCopiedConfirmation = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation(.snappy(duration: 0.25)) {
+                showCopiedConfirmation = false
+            }
+        }
+    }
 }
 
 struct NotificationRowView: View {
     @EnvironmentObject private var store: Store
     @Environment(\.openURL) private var openURL
     @ObservedObject var notification: Notification
-    
-    @State private var showCopiedConfirmation = false
-    @State private var copiedConfirmationTask: Task<Void, Never>?
+    let onCopyMessage: () -> Void
     
     var body: some View {
-        if #available(iOS 15.0, *) {
-            notificationRow
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        store.delete(notification: notification)
-                    } label: {
-                        Label("Delete", systemImage: "trash.circle")
-                    }
+        notificationRow
+            .swipeActions(edge: .trailing) {
+                Button(role: .destructive) {
+                    store.delete(notification: notification)
+                } label: {
+                    Label("Delete", systemImage: "trash.circle")
                 }
-        } else {
-            notificationRow
-        }
+            }
     }
     
     private var notificationRow: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 2) {
-                Text(notification.shortDateTime())
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                if [1,2,4,5].contains(notification.priority) {
-                    Image("priority-\(notification.priority)")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 16)
+            HStack(alignment: .top, spacing: 8) {
+                HStack(alignment: .center, spacing: 2) {
+                    Text(notification.shortDateTime())
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    if [1,2,4,5].contains(notification.priority) {
+                        Image("priority-\(notification.priority)")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 16, height: 16)
+                    }
                 }
+                Spacer()
+                messageActionsMenu
             }
             .padding([.bottom], 2)
             if let title = notification.formatTitle(), title != "" {
@@ -337,57 +353,14 @@ struct NotificationRowView: View {
             }
         }
         .padding(.all, 4)
-        .overlay(alignment: .topTrailing) {
-            if showCopiedConfirmation {
-                Label("Copied", systemImage: "checkmark.circle.fill")
-                    .font(.caption.weight(.semibold))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .foregroundColor(.white)
-                    .background(Color.green.opacity(0.95))
-                    .clipShape(Capsule())
-                    .transition(.opacity.combined(with: .scale))
-            }
-        }
-        .animation(.easeInOut(duration: 0.18), value: showCopiedConfirmation)
-        .onDisappear {
-            copiedConfirmationTask?.cancel()
-        }
-        .contextMenu {
-            ForEach(Array(messageLinks.enumerated()), id: \.element) { index, url in
-                Button {
-                    openURL(url)
-                } label: {
-                    Label(linkMenuTitle(for: url, index: index), systemImage: "link")
-                }
-            }
-            
-            if let clickUrl = clickUrl, messageLinks.count <= 1, !messageLinks.contains(clickUrl) {
-                Button {
-                    openURL(clickUrl)
-                } label: {
-                    Label("Open message link", systemImage: "arrow.up.right.square")
-                }
-            }
-            
-            Button {
-                copyMessage()
-            } label: {
-                Label("Copy message", systemImage: "doc.on.doc")
-            }
-        }
+        .contextMenu(menuItems: messageActions)
     }
     
     private var messageText: some View {
         Group {
-            if #available(iOS 15.0, *) {
-                Text(notification.formattedMessageAttributedString())
-                    .font(.body)
-                    .tint(.accentColor)
-            } else {
-                Text(notification.formatMessage())
-                    .font(.body)
-            }
+            Text(notification.formattedMessageAttributedString())
+                .font(.body)
+                .tint(.accentColor)
         }
     }
     
@@ -399,11 +372,7 @@ struct NotificationRowView: View {
     }
     
     private var messageLinks: [URL] {
-        if #available(iOS 15.0, *) {
-            return notification.messageLinkData().links
-        } else {
-            return []
-        }
+        return notification.messageLinkData().links
     }
     
     private func linkMenuTitle(for url: URL, index: Int) -> String {
@@ -416,17 +385,47 @@ struct NotificationRowView: View {
         return "Open link \(index + 1)"
     }
     
+    private var messageActionsMenu: some View {
+        Menu {
+            messageActions()
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .foregroundColor(.gray)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+        }
+        .menuStyle(.borderlessButton)
+    }
+    
+    @ViewBuilder
+    private func messageActions() -> some View {
+        ForEach(Array(messageLinks.enumerated()), id: \.element) { index, url in
+            Button {
+                openURL(url)
+            } label: {
+                Label(linkMenuTitle(for: url, index: index), systemImage: "link")
+            }
+        }
+        
+        if let clickUrl = clickUrl, messageLinks.count <= 1, !messageLinks.contains(clickUrl) {
+            Button {
+                openURL(clickUrl)
+            } label: {
+                Label("Open message link", systemImage: "arrow.up.right.square")
+            }
+        }
+        
+        Button {
+            copyMessage()
+        } label: {
+            Label("Copy message", systemImage: "doc.on.doc")
+        }
+    }
+    
     private func copyMessage() {
         UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        copiedConfirmationTask?.cancel()
-        showCopiedConfirmation = true
-        copiedConfirmationTask = Task {
-            try? await Task.sleep(nanoseconds: 1_250_000_000)
-            await MainActor.run {
-                showCopiedConfirmation = false
-            }
-        }
+        onCopyMessage()
     }
 }
 
