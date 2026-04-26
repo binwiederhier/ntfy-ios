@@ -327,33 +327,20 @@ struct NotificationRowView: View {
             if !notification.actionsList().isEmpty {
                 HStack {
                     ForEach(notification.actionsList()) { action in
-                        if #available(iOS 15, *) {
-                            Button(action.label) {
-                                ActionExecutor.execute(action)
-                            }
-                            .buttonStyle(.borderedProminent)
-                        } else {
-                            Button(action: {
-                                ActionExecutor.execute(action)
-                            }) {
-                                Text(action.label)
-                                    .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
-                                    .foregroundColor(.white)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                            }
-                            .background(Color.accentColor)
-                            .cornerRadius(10)
+                        Button(action.label) {
+                            ActionExecutor.execute(action)
                         }
+                        .buttonStyle(.borderedProminent)
                     }
                 }
                 .padding([.top], 5)
             }
         }
         .padding(.all, 4)
-        .contextMenu(menuItems: messageActions)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            openMessageClickUrl()
+        }
     }
     
     private var messageText: some View {
@@ -427,15 +414,18 @@ struct NotificationRowView: View {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         onCopyMessage()
     }
+    
+    private func openMessageClickUrl() {
+        guard let clickUrl else { return }
+        openURL(clickUrl)
+    }
 }
 
 extension Notification {
-    @available(iOS 15.0, *)
     func formattedMessageAttributedString() -> AttributedString {
         messageLinkData().text
     }
     
-    @available(iOS 15.0, *)
     func messageLinkData() -> (text: AttributedString, links: [URL]) {
         let source = formatMessage()
         
