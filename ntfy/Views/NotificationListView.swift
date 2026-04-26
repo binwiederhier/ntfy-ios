@@ -20,6 +20,7 @@ struct NotificationListView: View {
     
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
+    @State private var showCopiedConfirmation = false
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -31,20 +32,22 @@ struct NotificationListView: View {
     }
 
     var body: some View {
-        if #available(iOS 15.0, *) {
-            notificationList
-                .refreshable {
-                    subscriptionManager.poll(subscription)
-                }
-        } else {
-            notificationList
-        }
+        notificationList
+            .refreshable {
+                subscriptionManager.poll(subscription)
+            }
     }
     
     private var notificationList: some View {
-        List(selection: $selection) {
-            ForEach(notificationsModel.notifications, id: \.self) { notification in
-                NotificationRowView(notification: notification)
+        Group {
+            if editMode == .active {
+                List(selection: $selection) {
+                    notificationRows
+                }
+            } else {
+                List {
+                    notificationRows
+                }
             }
         }
         .listStyle(PlainListStyle())
@@ -155,19 +158,36 @@ struct NotificationListView: View {
                         .multilineTextAlignment(.center)
                         .padding(.bottom)
                     
-                    if #available(iOS 15.0, *) {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
-                            .foregroundColor(.gray)
-                    } else {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on https://ntfy.sh and https://ntfy.sh/docs.")
-                            .foregroundColor(.gray)
-                    }
+                    Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
+                        .foregroundColor(.gray)
                 }
                 .padding(40)
             }
         })
+        .overlay {
+            if showCopiedConfirmation {
+                Text("Copied to Clipboard")
+                    .font(.body)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.accentColor.cornerRadius(20))
+                    .shadow(radius: 5)
+                    .padding(.bottom, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.snappy(duration: 0.25), value: showCopiedConfirmation)
         .onAppear {
             cancelSubscriptionNotifications()
+        }
+    }
+    
+    @ViewBuilder
+    private var notificationRows: some View {
+        ForEach(notificationsModel.notifications, id: \.self) { notification in
+            NotificationRowView(notification: notification, onCopyMessage: showCopyConfirmation)
         }
     }
     
@@ -243,39 +263,52 @@ struct NotificationListView: View {
             }
         }
     }
+    
+    private func showCopyConfirmation() {
+        withAnimation(.snappy(duration: 0.25)) {
+            showCopiedConfirmation = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation(.snappy(duration: 0.25)) {
+                showCopiedConfirmation = false
+            }
+        }
+    }
 }
 
 struct NotificationRowView: View {
     @EnvironmentObject private var store: Store
+    @Environment(\.openURL) private var openURL
     @ObservedObject var notification: Notification
+    let onCopyMessage: () -> Void
     
     var body: some View {
-        if #available(iOS 15.0, *) {
-            notificationRow
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        store.delete(notification: notification)
-                    } label: {
-                        Label("Delete", systemImage: "trash.circle")
-                    }
+        notificationRow
+            .swipeActions(edge: .trailing) {
+                Button(role: .destructive) {
+                    store.delete(notification: notification)
+                } label: {
+                    Label("Delete", systemImage: "trash.circle")
                 }
-        } else {
-            notificationRow
-        }
+            }
     }
     
     private var notificationRow: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 2) {
-                Text(notification.shortDateTime())
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                if [1,2,4,5].contains(notification.priority) {
-                    Image("priority-\(notification.priority)")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 16)
+            HStack(alignment: .top, spacing: 8) {
+                HStack(alignment: .center, spacing: 2) {
+                    Text(notification.shortDateTime())
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    if [1,2,4,5].contains(notification.priority) {
+                        Image("priority-\(notification.priority)")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 16, height: 16)
+                    }
                 }
+                Spacer()
+                messageActionsMenu
             }
             .padding([.bottom], 2)
             if let title = notification.formatTitle(), title != "" {
@@ -284,8 +317,7 @@ struct NotificationRowView: View {
                     .bold()
                     .padding([.bottom], 2)
             }
-            Text(notification.formatMessage())
-                .font(.body)
+            messageText
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
                     .font(.subheadline)
@@ -295,36 +327,138 @@ struct NotificationRowView: View {
             if !notification.actionsList().isEmpty {
                 HStack {
                     ForEach(notification.actionsList()) { action in
-                        if #available(iOS 15, *) {
-                            Button(action.label) {
-                                ActionExecutor.execute(action)
-                            }
-                            .buttonStyle(.borderedProminent)
-                        } else {
-                            Button(action: {
-                                ActionExecutor.execute(action)
-                            }) {
-                                Text(action.label)
-                                    .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
-                                    .foregroundColor(.white)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                            }
-                            .background(Color.accentColor)
-                            .cornerRadius(10)
+                        Button(action.label) {
+                            ActionExecutor.execute(action)
                         }
+                        .buttonStyle(.borderedProminent)
                     }
                 }
                 .padding([.top], 5)
             }
         }
         .padding(.all, 4)
+        .contentShape(Rectangle())
         .onTapGesture {
-            // TODO: This gives no feedback to the user, and it only works if the text is tapped
-            UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
+            openMessageClickUrl()
         }
+    }
+    
+    private var messageText: some View {
+        Group {
+            Text(notification.formattedMessageAttributedString())
+                .font(.body)
+                .tint(.accentColor)
+        }
+    }
+    
+    private var clickUrl: URL? {
+        guard let click = notification.click, !click.isEmpty else {
+            return nil
+        }
+        return URL(string: click)
+    }
+    
+    private var messageLinks: [URL] {
+        return notification.messageLinkData().links
+    }
+    
+    private func linkMenuTitle(for url: URL, index: Int) -> String {
+        if messageLinks.count == 1 {
+            return "Open link"
+        }
+        if let host = url.host, !host.isEmpty {
+            return "Open \(host)"
+        }
+        return "Open link \(index + 1)"
+    }
+    
+    private var messageActionsMenu: some View {
+        Menu {
+            messageActions()
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .foregroundColor(.gray)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+        }
+        .menuStyle(.borderlessButton)
+    }
+    
+    @ViewBuilder
+    private func messageActions() -> some View {
+        ForEach(Array(messageLinks.enumerated()), id: \.element) { index, url in
+            Button {
+                openURL(url)
+            } label: {
+                Label(linkMenuTitle(for: url, index: index), systemImage: "link")
+            }
+        }
+        
+        if let clickUrl = clickUrl, messageLinks.count <= 1, !messageLinks.contains(clickUrl) {
+            Button {
+                openURL(clickUrl)
+            } label: {
+                Label("Open message link", systemImage: "arrow.up.right.square")
+            }
+        }
+        
+        Button {
+            copyMessage()
+        } label: {
+            Label("Copy message", systemImage: "doc.on.doc")
+        }
+    }
+    
+    private func copyMessage() {
+        UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        onCopyMessage()
+    }
+    
+    private func openMessageClickUrl() {
+        guard let clickUrl else { return }
+        openURL(clickUrl)
+    }
+}
+
+extension Notification {
+    func formattedMessageAttributedString() -> AttributedString {
+        messageLinkData().text
+    }
+    
+    func messageLinkData() -> (text: AttributedString, links: [URL]) {
+        let source = formatMessage()
+        
+        let parsed: AttributedString
+        if let markdown = try? AttributedString(
+            markdown: source,
+            options: AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        ) {
+            parsed = markdown
+        } else {
+            parsed = AttributedString(source)
+        }
+        
+        let mutable = NSMutableAttributedString(attributedString: NSAttributedString(parsed))
+        let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        let range = NSRange(location: 0, length: mutable.string.utf16.count)
+        var links: [URL] = []
+        detector?.enumerateMatches(in: mutable.string, options: [], range: range) { match, _, _ in
+            guard let match, let url = match.url else { return }
+            mutable.addAttribute(.link, value: url, range: match.range)
+            if !links.contains(url) {
+                links.append(url)
+            }
+        }
+        
+        let attributed = AttributedString(mutable)
+        for run in attributed.runs {
+            if let url = run.link, !links.contains(url) {
+                links.append(url)
+            }
+        }
+        
+        return (attributed, links)
     }
 }
 
