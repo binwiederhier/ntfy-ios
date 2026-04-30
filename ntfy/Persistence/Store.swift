@@ -292,6 +292,7 @@ extension Store {
         notification.title = message.title
         notification.priority = message.priority ?? 3
         notification.tags = message.tags?.joined(separator: ",") ?? ""
+        notification.contentType = message.contentType
         return notification
     }
 }
