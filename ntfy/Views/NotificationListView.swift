@@ -297,12 +297,12 @@ struct NotificationRowView: View {
                     ForEach(notification.actionsList()) { action in
                         if #available(iOS 15, *) {
                             Button(action.label) {
-                                ActionExecutor.execute(action)
+                                ActionExecutor.execute(action, notificationId: notification.id)
                             }
                             .buttonStyle(.borderedProminent)
                         } else {
                             Button(action: {
-                                ActionExecutor.execute(action)
+                                ActionExecutor.execute(action, notificationId: notification.id)
                             }) {
                                 Text(action.label)
                                     .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))

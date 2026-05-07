@@ -1,10 +1,15 @@
 import Foundation
 import UIKit
+import UserNotifications
 
 struct ActionExecutor {
     private static let tag = "ActionExecutor"
-        
-    static func execute(_ action: Action) {
+
+    /// Execute the given action. When `notificationId` is provided and the action's
+    /// `clear` flag is true, the matching delivered notification is also removed from
+    /// Notification Center so the user gets immediate visual confirmation that the
+    /// tap registered. Documented at https://docs.ntfy.sh/publish/#action-buttons
+    static func execute(_ action: Action, notificationId: String? = nil) {
         Log.d(tag, "Executing user action", action)
         switch action.action {
         case "view":
@@ -17,6 +22,10 @@ struct ActionExecutor {
             http(action)
         default:
             Log.w(tag, "Action \(action.action) not supported", action)
+        }
+
+        if action.clear == true, let id = notificationId {
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [id])
         }
     }
     

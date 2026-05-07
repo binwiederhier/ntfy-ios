@@ -153,9 +153,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             selectedBaseUrl = topicUrl(baseUrl: baseUrl, topic: message.topic)
         }
         
-        // Execute user action or click action (if any)
+        // Execute user action or click action (if any). The notification identifier
+        // is forwarded so ActionExecutor can clear the delivered notification when
+        // the action has `clear: true` set.
         if let action = action {
-            ActionExecutor.execute(action)
+            ActionExecutor.execute(action, notificationId: response.notification.request.identifier)
         } else if let click = message.click, click != "", let url = URL(string: click) {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
