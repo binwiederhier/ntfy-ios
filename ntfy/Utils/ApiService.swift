@@ -6,7 +6,7 @@ class ApiService {
     
     private let tag = "ApiService"
     
-    func poll(subscription: Subscription, user: BasicUser?, completionHandler: @escaping ([Message]?, Error?) -> Void) {
+    func poll(subscription: Subscription, user: BasicUser?, headers: [String: String]? = nil, completionHandler: @escaping ([Message]?, Error?) -> Void) {
         guard let url = URL(string: subscription.urlString()) else {
             completionHandler(nil, URLError(.badURL))
             return
@@ -15,17 +15,17 @@ class ApiService {
         let urlString = "\(url)/json?poll=1&since=\(since)"
         
         Log.d(tag, "Polling from \(urlString) with user \(user?.username ?? "anonymous")")
-        fetchJsonData(urlString: urlString, user: user, completionHandler: completionHandler)
+        fetchJsonData(urlString: urlString, user: user, headers: headers, completionHandler: completionHandler)
     }
     
-    func poll(subscription: Subscription, messageId: String, user: BasicUser?, completionHandler: @escaping (Message?, Error?) -> Void) {
+    func poll(subscription: Subscription, messageId: String, user: BasicUser?, headers: [String: String]? = nil, completionHandler: @escaping (Message?, Error?) -> Void) {
         guard let url = URL(string: "\(subscription.urlString())/json?poll=1&id=\(messageId)") else {
             completionHandler(nil, URLError(.badURL))
             return
         }
         Log.d(tag, "Polling single message from \(url) with user \(user?.username ?? "anonymous")")
         
-        let request = newRequest(url: url, user: user)
+        let request = newRequest(url: url, user: user, headers: headers)
         newSession(timeout: 30).dataTask(with: request) { (data, response, error) in
             if let error = error {
                 completionHandler(nil, error)
@@ -51,6 +51,7 @@ class ApiService {
     func publish(
         subscription: Subscription,
         user: BasicUser?,
+        headers: [String: String]? = nil,
         message: String,
         title: String,
         priority: Int = 3,
@@ -58,7 +59,7 @@ class ApiService {
         completionHandler: (() -> Void)? = nil
     ) {
         guard let url = URL(string: subscription.urlString()) else { return }
-        var request = newRequest(url: url, user: user)
+        var request = newRequest(url: url, user: user, headers: headers)
 
         Log.d(tag, "Publishing to \(url)")
         
@@ -77,9 +78,9 @@ class ApiService {
         }.resume()
     }
     
-    func checkAuth(baseUrl: String, topic: String, user: BasicUser?, completionHandler: @escaping(AuthResult) -> Void) {
+    func checkAuth(baseUrl: String, topic: String, user: BasicUser?, headers: [String: String]? = nil, completionHandler: @escaping(AuthResult) -> Void) {
         guard let url = URL(string: topicAuthUrl(baseUrl: baseUrl, topic: topic)) else { return }
-        let request = newRequest(url: url, user: user)
+        let request = newRequest(url: url, user: user, headers: headers)
         Log.d(tag, "Checking auth for \(url) with user \(user?.username ?? "anonymous")")
         newSession(timeout: 10).dataTask(with: request) { (data, response, error) in
             if let error = error {
@@ -108,12 +109,12 @@ class ApiService {
         }.resume()
     }
 
-    private func fetchJsonData<T: Decodable>(urlString: String, user: BasicUser?, completionHandler: @escaping ([T]?, Error?) -> ()) {
+    private func fetchJsonData<T: Decodable>(urlString: String, user: BasicUser?, headers: [String: String]?, completionHandler: @escaping ([T]?, Error?) -> ()) {
         guard let url = URL(string: urlString) else {
             completionHandler(nil, URLError(.badURL))
             return
         }
-        let request = newRequest(url: url, user: user)
+        let request = newRequest(url: url, user: user, headers: headers)
         newSession(timeout: 30).dataTask(with: request) { (data, response, error) in
             if let error {
                 Log.e(self.tag, "Error fetching data", error)
@@ -145,13 +146,20 @@ class ApiService {
         }.resume()
     }
     
-    private func newRequest(url: URL, user: BasicUser?) -> URLRequest {
+    private func newRequest(url: URL, user: BasicUser?, headers: [String: String]? = nil) -> URLRequest {
         var request = URLRequest(url: url)
         request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
         if let user = user {
             request.setValue(user.toHeader(), forHTTPHeaderField: "Authorization")
         }
+        applyCustomHeaders(headers, to: &request)
         return request
+    }
+
+    private func applyCustomHeaders(_ headers: [String: String]?, to request: inout URLRequest) {
+        headers?.forEach { key, value in
+            request.setValue(value, forHTTPHeaderField: key)
+        }
     }
     
     private func newSession(timeout: TimeInterval) -> URLSession {

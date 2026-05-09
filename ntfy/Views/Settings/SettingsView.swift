@@ -21,6 +21,12 @@ struct SettingsView: View {
                 ) {
                     UserTableView(dialog: $userDialog)
                 }
+                Section(
+                    header: Text("Custom headers"),
+                    footer: Text("Custom headers are sent with all requests to the given server.")
+                ) {
+                    ServerHeadersTableView()
+                }
                 Section(header: Text("About")) {
                     AboutView()
                 }
