@@ -39,6 +39,12 @@ func shortUrl(url: String) -> String {
         .replacingOccurrences(of: "https://", with: "")
 }
 
+func formatBytes(_ bytes: Int64) -> String {
+    let formatter = ByteCountFormatter()
+    formatter.countStyle = .file
+    return formatter.string(fromByteCount: bytes)
+}
+
 func parseAllTags(_ tags: String?) -> [String] {
     return (tags?.components(separatedBy: ",") ?? [])
         .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }

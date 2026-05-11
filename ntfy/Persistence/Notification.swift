@@ -62,21 +62,65 @@ extension Notification {
         return Actions.shared.parse(actions) ?? []
     }
 
-    func attachmentImageUrl() -> URL? {
+    func messageAttachment() -> MessageAttachment? {
         guard let attachmentUrl = attachmentUrl, !attachmentUrl.isEmpty else {
             return nil
         }
-        let attachment = MessageAttachment(
+        return MessageAttachment(
             name: attachmentName ?? "attachment",
             type: attachmentType,
             size: attachmentSize == 0 ? nil : attachmentSize,
             expires: attachmentExpires == 0 ? nil : attachmentExpires,
             url: attachmentUrl
         )
+    }
+
+    func attachmentImageUrl() -> URL? {
+        guard let attachment = messageAttachment(), let attachmentUrl = attachmentRemoteUrl() else {
+            return nil
+        }
         guard attachment.isImageAttachment() else {
             return nil
         }
-        return URL(string: attachmentUrl)
+        return attachmentUrl
+    }
+
+    func attachmentRemoteUrl() -> URL? {
+        guard let attachment = messageAttachment() else {
+            return nil
+        }
+        return URL(string: attachment.url)
+    }
+
+    func attachmentLocalFileUrl() -> URL? {
+        guard let attachmentLocalPath, !attachmentLocalPath.isEmpty else {
+            return nil
+        }
+        let url = URL(fileURLWithPath: attachmentLocalPath)
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            return nil
+        }
+        return url
+    }
+
+    func attachmentDetailText() -> String {
+        guard let attachment = messageAttachment() else {
+            return ""
+        }
+        var parts: [String] = []
+        if let type = attachment.type, !type.isEmpty {
+            parts.append(type)
+        }
+        if let size = attachment.size, size > 0 {
+            parts.append(formatBytes(size))
+        }
+        return parts.joined(separator: " · ")
+    }
+
+    @MainActor
+    func setAttachmentLocalPath(_ localPath: String?) {
+        attachmentLocalPath = localPath
+        try? managedObjectContext?.save()
     }
 }
 
@@ -96,6 +140,40 @@ struct MessageAttachment: Codable {
         }
         let imageExtensions = ["png", "jpg", "jpeg", "gif", "webp", "heic", "heif", "bmp", "tif", "tiff"]
         return imageExtensions.contains(parsedUrl.pathExtension.lowercased())
+    }
+
+    func displayName() -> String {
+        if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return name
+        }
+        if let parsedUrl = URL(string: url) {
+            let filename = parsedUrl.lastPathComponent.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !filename.isEmpty {
+                return filename
+            }
+        }
+        return "attachment"
+    }
+
+    func systemImageName() -> String {
+        guard let type = type?.lowercased() else {
+            return "doc"
+        }
+        if type.hasPrefix("image/") {
+            return "photo"
+        } else if type.hasPrefix("video/") {
+            return "video"
+        } else if type.hasPrefix("audio/") {
+            return "waveform"
+        } else if type == "application/pdf" {
+            return "doc.richtext"
+        } else if type.hasPrefix("text/") {
+            return "doc.text"
+        } else if type.hasPrefix("application/zip") || type.hasSuffix("compressed") {
+            return "archivebox"
+        } else {
+            return "doc"
+        }
     }
 }
 

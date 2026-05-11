@@ -3,6 +3,7 @@
     <entity name="Notification" representedClassName="Notification" syncable="YES" codeGenerationType="class">
         <attribute name="actions" optional="YES" attributeType="String"/>
         <attribute name="attachmentExpires" optional="YES" attributeType="Integer 64" usesScalarValueType="YES"/>
+        <attribute name="attachmentLocalPath" optional="YES" attributeType="String"/>
         <attribute name="attachmentName" optional="YES" attributeType="String"/>
         <attribute name="attachmentSize" optional="YES" attributeType="Integer 64" usesScalarValueType="YES"/>
         <attribute name="attachmentType" optional="YES" attributeType="String"/>
@@ -27,7 +28,6 @@
     </entity>
     <entity name="Subscription" representedClassName="Subscription" syncable="YES" codeGenerationType="class">
         <attribute name="baseUrl" attributeType="String"/>
-        <attribute name="iconPath" optional="YES" attributeType="String"/>
         <attribute name="lastNotificationId" optional="YES" attributeType="String"/>
         <attribute name="topic" attributeType="String" minValueString="1" maxValueString="64" regularExpressionString="^[-_A-Za-z0-9]{1,64}$"/>
         <relationship name="notifications" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Notification" inverseName="subscription" inverseEntity="Notification"/>
@@ -49,8 +49,8 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="Notification" positionX="-54" positionY="9" width="128" height="239"/>
-        <element name="Subscription" positionX="-262.4760131835938" positionY="11.46405029296875" width="128" height="104"/>
+        <element name="Notification" positionX="-54" positionY="9" width="128" height="254"/>
+        <element name="Subscription" positionX="-262.4760131835938" positionY="11.46405029296875" width="128" height="89"/>
         <element name="User" positionX="-162" positionY="81" width="128" height="74"/>
         <element name="Preference" positionX="-162" positionY="81" width="128" height="59"/>
     </elements>
