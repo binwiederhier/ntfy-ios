@@ -20,6 +20,7 @@ struct NotificationListView: View {
     
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
+    @State private var showCopiedConfirmation = false
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -31,20 +32,22 @@ struct NotificationListView: View {
     }
 
     var body: some View {
-        if #available(iOS 15.0, *) {
-            notificationList
-                .refreshable {
-                    subscriptionManager.poll(subscription)
-                }
-        } else {
-            notificationList
-        }
+        notificationList
+            .refreshable {
+                subscriptionManager.poll(subscription)
+            }
     }
     
     private var notificationList: some View {
-        List(selection: $selection) {
-            ForEach(notificationsModel.notifications, id: \.self) { notification in
-                NotificationRowView(notification: notification)
+        Group {
+            if editMode == .active {
+                List(selection: $selection) {
+                    notificationRows
+                }
+            } else {
+                List {
+                    notificationRows
+                }
             }
         }
         .listStyle(PlainListStyle())
@@ -76,11 +79,6 @@ struct NotificationListView: View {
                     editButton
                 } else {
                     Menu {
-                        if #unavailable(iOS 15.0) {
-                            Button("Refresh") {
-                                subscriptionManager.poll(subscription)
-                            }
-                        }
                         if notificationsModel.notifications.count > 0 {
                             editButton
                         }
@@ -155,19 +153,38 @@ struct NotificationListView: View {
                         .multilineTextAlignment(.center)
                         .padding(.bottom)
                     
-                    if #available(iOS 15.0, *) {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
-                            .foregroundColor(.gray)
-                    } else {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on https://ntfy.sh and https://ntfy.sh/docs.")
-                            .foregroundColor(.gray)
-                    }
+                    Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
+                        .foregroundColor(.gray)
                 }
                 .padding(40)
             }
         })
+        .overlay(Group {
+            if showCopiedConfirmation {
+                Text("Copied to Clipboard")
+                    .font(.body)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.accentColor.cornerRadius(20))
+                    .shadow(radius: 5)
+                    .padding(.bottom, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        })
         .onAppear {
             cancelSubscriptionNotifications()
+        }
+    }
+    
+    @ViewBuilder
+    private var notificationRows: some View {
+        ForEach(notificationsModel.notifications, id: \.self) { notification in
+            NotificationRowView(
+                notification: notification,
+                onCopyMessage: showCopyConfirmation
+            )
         }
     }
     
@@ -243,38 +260,54 @@ struct NotificationListView: View {
             }
         }
     }
+    
+    private func showCopyConfirmation() {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            showCopiedConfirmation = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                showCopiedConfirmation = false
+            }
+        }
+    }
+    
 }
 
 struct NotificationRowView: View {
     @EnvironmentObject private var store: Store
+    @Environment(\.openURL) private var openURL
     @ObservedObject var notification: Notification
+    let onCopyMessage: () -> Void
     
     var body: some View {
-        if #available(iOS 15.0, *) {
-            notificationRow
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        store.delete(notification: notification)
-                    } label: {
-                        Label("Delete", systemImage: "trash.circle")
-                    }
+        notificationRow
+            .swipeActions(edge: .trailing) {
+                Button(role: .destructive) {
+                    store.delete(notification: notification)
+                } label: {
+                    Label("Delete", systemImage: "trash.circle")
                 }
-        } else {
-            notificationRow
-        }
+            }
     }
     
     private var notificationRow: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 2) {
-                Text(notification.shortDateTime())
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                if [1,2,4,5].contains(notification.priority) {
-                    Image("priority-\(notification.priority)")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 16)
+            HStack(alignment: .top, spacing: 8) {
+                HStack(alignment: .center, spacing: 2) {
+                    Text(notification.shortDateTime())
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    if [1,2,4,5].contains(notification.priority) {
+                        Image("priority-\(notification.priority)")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 16, height: 16)
+                    }
+                }
+                Spacer()
+                if clickUrl != nil {
+                    messageActionsMenu
                 }
             }
             .padding([.bottom], 2)
@@ -284,8 +317,7 @@ struct NotificationRowView: View {
                     .bold()
                     .padding([.bottom], 2)
             }
-            Text(notification.formatMessage())
-                .font(.body)
+            messageText
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
                     .font(.subheadline)
@@ -295,36 +327,77 @@ struct NotificationRowView: View {
             if !notification.actionsList().isEmpty {
                 HStack {
                     ForEach(notification.actionsList()) { action in
-                        if #available(iOS 15, *) {
-                            Button(action.label) {
-                                ActionExecutor.execute(action)
-                            }
-                            .buttonStyle(.borderedProminent)
-                        } else {
-                            Button(action: {
-                                ActionExecutor.execute(action)
-                            }) {
-                                Text(action.label)
-                                    .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
-                                    .foregroundColor(.white)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                            }
-                            .background(Color.accentColor)
-                            .cornerRadius(10)
+                        Button(action.label) {
+                            ActionExecutor.execute(action)
                         }
+                        .buttonStyle(.borderedProminent)
                     }
                 }
                 .padding([.top], 5)
             }
         }
         .padding(.all, 4)
+        .contentShape(Rectangle())
         .onTapGesture {
-            // TODO: This gives no feedback to the user, and it only works if the text is tapped
-            UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
+            handleRowTap()
         }
+    }
+    
+    private var messageText: some View {
+        Group {
+            Text(notification.linkifiedMessageAttributedString())
+                .font(.body)
+        }
+    }
+    
+    private var clickUrl: URL? {
+        guard let click = notification.click, !click.isEmpty else {
+            return nil
+        }
+        return URL(string: click)
+    }
+    
+    private var messageActionsMenu: some View {
+        Menu {
+            Button("Copy message") {
+                copyMessage()
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .foregroundColor(.gray)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+        }
+        .menuStyle(.borderlessButton)
+    }
+    
+    private func copyMessage() {
+        UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        onCopyMessage()
+    }
+    
+    private func handleRowTap() {
+        if let clickUrl {
+            openURL(clickUrl)
+        } else {
+            copyMessage()
+        }
+    }
+}
+
+extension Notification {
+    func linkifiedMessageAttributedString() -> AttributedString {
+        let source = formatMessage()
+        let mutable = NSMutableAttributedString(string: source)
+        let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        let range = NSRange(location: 0, length: mutable.string.utf16.count)
+        detector?.enumerateMatches(in: mutable.string, options: [], range: range) { match, _, _ in
+            guard let match, let url = match.url else { return }
+            mutable.addAttribute(.link, value: url, range: match.range)
+        }
+        
+        return AttributedString(mutable)
     }
 }
 
