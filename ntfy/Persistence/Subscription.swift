@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 extension Subscription {
     func urlString() -> String {
@@ -30,5 +31,12 @@ extension Subscription {
             return notifications.sortedArray(using: [NSSortDescriptor(keyPath: \Notification.time, ascending: false)]) as! [Notification]
         }
         return []
+    }
+
+    func iconImage() -> UIImage? {
+        guard let iconPath = iconPath, !iconPath.isEmpty else {
+            return nil
+        }
+        return UIImage(contentsOfFile: iconPath)
     }
 }

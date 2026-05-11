@@ -1,6 +1,7 @@
 import Foundation
 import CoreData
 import Combine
+import UIKit
 
 /// Handles all persistence in the app by storing/loading subscriptions and notifications using Core Data.
 /// There are sadly a lot of hacks in here, because I don't quite understand this fully.
@@ -10,7 +11,7 @@ class Store: ObservableObject {
     static let appGroup = "group.io.heckel.ntfy" // Must match app group of ntfy = ntfyNSE targets
     static let modelName = "ntfy" // Must match .xdatamodeld folder
     static let prefKeyDefaultBaseUrl = "defaultBaseUrl"
-    
+    static let subscriptionIconsDir = "subscription-icons"
     private let container: NSPersistentContainer
     var context: NSManagedObjectContext {
         return container.viewContext
@@ -23,6 +24,8 @@ class Store: ObservableObject {
             .appendingPathComponent("ntfy.sqlite")
         let description = NSPersistentStoreDescription(url: storeUrl)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        description.shouldMigrateStoreAutomatically = true
+        description.shouldInferMappingModelAutomatically = true
 
         // Set up container and observe changes from app extension
         container = NSPersistentContainer(name: Store.modelName)
@@ -104,9 +107,40 @@ class Store: ObservableObject {
         subscription.baseUrl = normalizeBaseUrl(baseUrl)
         try? context.save()
     }
-    
+
+    func saveSubscriptionIcon(_ subscription: Subscription, image: UIImage) throws {
+        guard let data = image.jpegData(compressionQuality: 0.9) else {
+            throw NSError(domain: "Store", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not encode icon image"])
+        }
+        let sizeLimit = 4 * 1024 * 1024
+        if data.count > sizeLimit {
+            throw NSError(domain: "Store", code: 2, userInfo: [NSLocalizedDescriptionKey: "Image too large, max supported is 4MB"])
+        }
+        if image.size.width > 2048 || image.size.height > 2048 {
+            throw NSError(domain: "Store", code: 3, userInfo: [NSLocalizedDescriptionKey: "Image exceeds max dimensions of 2048x2048"])
+        }
+
+        let fileUrl = try subscriptionIconFileUrl(for: subscription)
+        try? FileManager.default.removeItem(at: fileUrl)
+        try data.write(to: fileUrl, options: .atomic)
+
+        context.performAndWait {
+            subscription.iconPath = fileUrl.path
+            try? context.save()
+        }
+    }
+
+    func deleteSubscriptionIcon(_ subscription: Subscription) {
+        if let iconPath = subscription.iconPath, !iconPath.isEmpty {
+            try? FileManager.default.removeItem(at: URL(fileURLWithPath: iconPath))
+        }
+        subscription.iconPath = nil
+        try? context.save()
+    }
+
     func delete(subscription: Subscription) {
         context.performAndWait {
+            deleteSubscriptionIcon(subscription)
             context.delete(subscription)
             try? context.save()
         }
@@ -133,6 +167,11 @@ class Store: ObservableObject {
                     notification.tags = message.tags?.joined(separator: ",") ?? ""
                     notification.actions = Actions.shared.encode(message.actions)
                     notification.click = message.click ?? ""
+                    notification.attachmentName = message.attachment?.name
+                    notification.attachmentType = message.attachment?.type
+                    notification.attachmentSize = message.attachment?.size ?? 0
+                    notification.attachmentExpires = message.attachment?.expires ?? 0
+                    notification.attachmentUrl = message.attachment?.url
                     notification.subscription = subscription
                     subscription.addToNotifications(notification)
                     subscription.lastNotificationId = message.id
@@ -238,6 +277,14 @@ class Store: ObservableObject {
         request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "key = %@", key)])
         return try? context.fetch(request).first
     }
+
+    private func subscriptionIconFileUrl(for subscription: Subscription) throws -> URL {
+        let baseDir = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup)!
+            .appendingPathComponent(Store.subscriptionIconsDir, isDirectory: true)
+        try FileManager.default.createDirectory(at: baseDir, withIntermediateDirectories: true)
+        return baseDir.appendingPathComponent(subscription.urlHash() + ".jpg")
+    }
 }
 
 extension Store {
@@ -292,6 +339,11 @@ extension Store {
         notification.title = message.title
         notification.priority = message.priority ?? 3
         notification.tags = message.tags?.joined(separator: ",") ?? ""
+        notification.attachmentName = message.attachment?.name
+        notification.attachmentType = message.attachment?.type
+        notification.attachmentSize = message.attachment?.size ?? 0
+        notification.attachmentExpires = message.attachment?.expires ?? 0
+        notification.attachmentUrl = message.attachment?.url
         return notification
     }
 }

@@ -151,26 +151,52 @@ struct SubscriptionItemRowView: View {
     
     var body: some View {
         let totalNotificationCount = subscription.notificationCount()
-        VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text(subscription.displayName())
-                    .font(.headline)
-                    .bold()
-                    .lineLimit(1)
+        HStack(alignment: .center, spacing: 12) {
+            SubscriptionIconView(subscription: subscription)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text(subscription.displayName())
+                        .font(.headline)
+                        .bold()
+                        .lineLimit(1)
+                    Spacer()
+                    Text(subscription.lastNotification()?.shortDateTime() ?? "")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    Image(systemName: "chevron.forward")
+                        .font(.system(size: 12.0))
+                        .foregroundColor(.gray)
+                }
                 Spacer()
-                Text(subscription.lastNotification()?.shortDateTime() ?? "")
+                Text("\(totalNotificationCount) notification\(totalNotificationCount != 1 ? "s" : "")")
                     .font(.subheadline)
                     .foregroundColor(.gray)
-                Image(systemName: "chevron.forward")
-                    .font(.system(size: 12.0))
-                    .foregroundColor(.gray)
+                    .lineLimit(2)
             }
-            Spacer()
-            Text("\(totalNotificationCount) notification\(totalNotificationCount != 1 ? "s" : "")")
-                .font(.subheadline)
-                .foregroundColor(.gray)
         }
         .padding(.all, 4)
+    }
+}
+
+private struct SubscriptionIconView: View {
+    @ObservedObject var subscription: Subscription
+
+    var body: some View {
+        Group {
+            if let image = subscription.iconImage() {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: "text.bubble")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(.gray)
+                    .padding(4)
+            }
+        }
+            .frame(width: 35, height: 35)
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }
 

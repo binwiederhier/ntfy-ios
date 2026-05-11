@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import UIKit
 
 enum ActiveAlert {
     case clear, unsubscribe, selected
@@ -318,6 +319,13 @@ struct NotificationRowView: View {
                     .padding([.bottom], 2)
             }
             messageText
+            if let imageUrl = notification.attachmentImageUrl() {
+                NotificationAttachmentImageView(
+                    imageUrl: imageUrl,
+                    authorizationHeader: attachmentAuthorizationHeader
+                )
+                .padding([.top], 8)
+            }
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
                     .font(.subheadline)
@@ -356,6 +364,16 @@ struct NotificationRowView: View {
         }
         return URL(string: click)
     }
+
+    private var attachmentAuthorizationHeader: String? {
+        guard
+            let baseUrl = notification.subscription?.baseUrl,
+            let user = store.getUser(baseUrl: baseUrl)?.toBasicUser()
+        else {
+            return nil
+        }
+        return user.toHeader()
+    }
     
     private var messageActionsMenu: some View {
         Menu {
@@ -382,6 +400,74 @@ struct NotificationRowView: View {
             openURL(clickUrl)
         } else {
             copyMessage()
+        }
+    }
+}
+
+private struct NotificationAttachmentImageView: View {
+    @StateObject private var loader = NotificationAttachmentImageLoader()
+
+    let imageUrl: URL
+    let authorizationHeader: String?
+
+    var body: some View {
+        Group {
+            if let image = loader.image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            } else {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.secondarySystemFill))
+                    .frame(height: 120)
+                    .overlay {
+                        ProgressView()
+                    }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .task(id: cacheKey) {
+            await loader.load(from: imageUrl, authorizationHeader: authorizationHeader)
+        }
+    }
+
+    private var cacheKey: String {
+        "\(imageUrl.absoluteString)|\(authorizationHeader ?? "")"
+    }
+}
+
+@MainActor
+private final class NotificationAttachmentImageLoader: ObservableObject {
+    @Published var image: UIImage?
+
+    private static let cache = NSCache<NSURL, UIImage>()
+
+    func load(from url: URL, authorizationHeader: String?) async {
+        if let cachedImage = Self.cache.object(forKey: url as NSURL) {
+            image = cachedImage
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
+        if let authorizationHeader = authorizationHeader {
+            request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
+        }
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard
+                let httpResponse = response as? HTTPURLResponse,
+                (200..<300).contains(httpResponse.statusCode),
+                let uiImage = UIImage(data: data)
+            else {
+                return
+            }
+            Self.cache.setObject(uiImage, forKey: url as NSURL)
+            image = uiImage
+        } catch {
+            Log.w("NotificationAttachmentImageLoader", "Failed to load attachment preview", error)
         }
     }
 }

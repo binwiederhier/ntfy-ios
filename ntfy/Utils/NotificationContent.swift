@@ -1,5 +1,6 @@
 import Foundation
 import UserNotifications
+import UniformTypeIdentifiers
 
 private let actionsCategory = "ntfyActions" // It seems ok to re-use the same category
 
@@ -75,4 +76,69 @@ extension UNMutableNotificationContent {
         self.userInfo = message.toUserInfo()
         self.userInfo["base_url"] = baseUrl
     }
+
+    func attachImageIfNeeded(message: Message, user: BasicUser?, completionHandler: @escaping () -> Void) {
+        guard
+            let attachment = message.attachment,
+            attachment.isImageAttachment(),
+            let url = URL(string: attachment.url)
+        else {
+            completionHandler()
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
+        if let user = user {
+            request.setValue(user.toHeader(), forHTTPHeaderField: "Authorization")
+        }
+
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 20
+        config.timeoutIntervalForResource = 20
+
+        URLSession(configuration: config).downloadTask(with: request) { tempUrl, response, _ in
+            defer { completionHandler() }
+
+            guard
+                let tempUrl,
+                let httpResponse = response as? HTTPURLResponse,
+                (200..<300).contains(httpResponse.statusCode)
+            else {
+                return
+            }
+
+            let mimeType = attachment.type ?? httpResponse.mimeType
+            guard mimeType?.lowercased().hasPrefix("image/") == true || attachment.isImageAttachment() else {
+                return
+            }
+
+            let fileExtension = notificationAttachmentFileExtension(url: url, mimeType: mimeType)
+            let destinationUrl = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension(fileExtension)
+
+            do {
+                try? FileManager.default.removeItem(at: destinationUrl)
+                try FileManager.default.copyItem(at: tempUrl, to: destinationUrl)
+                let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: destinationUrl)
+                self.attachments = self.attachments + [notificationAttachment]
+            } catch {
+                Log.w("NotificationContent", "Failed to create notification attachment", error)
+            }
+        }.resume()
+    }
+}
+
+private func notificationAttachmentFileExtension(url: URL, mimeType: String?) -> String {
+    let pathExtension = url.pathExtension.trimmingCharacters(in: .whitespacesAndNewlines)
+    if !pathExtension.isEmpty {
+        return pathExtension
+    }
+    if let mimeType = mimeType,
+       let type = UTType(mimeType: mimeType),
+       let preferredExtension = type.preferredFilenameExtension {
+        return preferredExtension
+    }
+    return "jpg"
 }

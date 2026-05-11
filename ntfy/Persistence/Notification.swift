@@ -61,6 +61,42 @@ extension Notification {
     func actionsList() -> [Action] {
         return Actions.shared.parse(actions) ?? []
     }
+
+    func attachmentImageUrl() -> URL? {
+        guard let attachmentUrl = attachmentUrl, !attachmentUrl.isEmpty else {
+            return nil
+        }
+        let attachment = MessageAttachment(
+            name: attachmentName ?? "attachment",
+            type: attachmentType,
+            size: attachmentSize == 0 ? nil : attachmentSize,
+            expires: attachmentExpires == 0 ? nil : attachmentExpires,
+            url: attachmentUrl
+        )
+        guard attachment.isImageAttachment() else {
+            return nil
+        }
+        return URL(string: attachmentUrl)
+    }
+}
+
+struct MessageAttachment: Codable {
+    var name: String
+    var type: String?
+    var size: Int64?
+    var expires: Int64?
+    var url: String
+
+    func isImageAttachment() -> Bool {
+        if let type = type, type.lowercased().hasPrefix("image/") {
+            return true
+        }
+        guard let parsedUrl = URL(string: url) else {
+            return false
+        }
+        let imageExtensions = ["png", "jpg", "jpeg", "gif", "webp", "heic", "heif", "bmp", "tif", "tiff"]
+        return imageExtensions.contains(parsedUrl.pathExtension.lowercased())
+    }
 }
 
 /// This is the "on the wire" message as it is received from the ntfy server
@@ -76,12 +112,62 @@ struct Message: Decodable {
     var actions: [Action]?
     var click: String?
     var pollId: String?
+    var attachment: MessageAttachment?
+
+    enum CodingKeys: String, CodingKey {
+        case id, time, event, topic, message, title, priority, tags, actions, click, attachment
+        case pollId = "poll_id"
+    }
+
+    init(
+        id: String,
+        time: Int64,
+        event: String,
+        topic: String,
+        message: String? = nil,
+        title: String? = nil,
+        priority: Int16? = nil,
+        tags: [String]? = nil,
+        actions: [Action]? = nil,
+        click: String? = nil,
+        pollId: String? = nil,
+        attachment: MessageAttachment? = nil
+    ) {
+        self.id = id
+        self.time = time
+        self.event = event
+        self.topic = topic
+        self.message = message
+        self.title = title
+        self.priority = priority
+        self.tags = tags
+        self.actions = actions
+        self.click = click
+        self.pollId = pollId
+        self.attachment = attachment
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        time = try container.decode(Int64.self, forKey: .time)
+        event = try container.decode(String.self, forKey: .event)
+        topic = try container.decode(String.self, forKey: .topic)
+        message = try container.decodeIfPresent(String.self, forKey: .message)
+        title = try container.decodeIfPresent(String.self, forKey: .title)
+        priority = try container.decodeIfPresent(Int16.self, forKey: .priority)
+        tags = try container.decodeIfPresent([String].self, forKey: .tags)
+        actions = try container.decodeIfPresent([Action].self, forKey: .actions)
+        click = try container.decodeIfPresent(String.self, forKey: .click)
+        pollId = try container.decodeIfPresent(String.self, forKey: .pollId)
+        attachment = try container.decodeIfPresent(MessageAttachment.self, forKey: .attachment)
+    }
     
     func toUserInfo() -> [AnyHashable: Any] {
         // This should mimic the way that the ntfy server encodes a message.
         // See server_firebase.go for more details.
         
-        return [
+        var userInfo: [AnyHashable: Any] = [
             "id": id,
             "time": String(time),
             "event": event,
@@ -94,6 +180,14 @@ struct Message: Decodable {
             "click": click ?? "",
             "poll_id": pollId ?? ""
         ]
+        if let attachment {
+            userInfo["attachment_name"] = attachment.name
+            userInfo["attachment_type"] = attachment.type ?? ""
+            userInfo["attachment_size"] = String(attachment.size ?? 0)
+            userInfo["attachment_expires"] = String(attachment.expires ?? 0)
+            userInfo["attachment_url"] = attachment.url
+        }
+        return userInfo
     }
     
     static func from(userInfo: [AnyHashable: Any]) -> Message? {
@@ -112,6 +206,19 @@ struct Message: Decodable {
         let actions = userInfo["actions"] as? String
         let click = userInfo["click"] as? String
         let pollId = userInfo["poll_id"] as? String
+        let attachmentUrl = userInfo["attachment_url"] as? String
+        let attachment: MessageAttachment?
+        if let attachmentUrl = attachmentUrl, !attachmentUrl.isEmpty {
+            attachment = MessageAttachment(
+                name: userInfo["attachment_name"] as? String ?? "attachment",
+                type: userInfo["attachment_type"] as? String,
+                size: Int64(userInfo["attachment_size"] as? String ?? "0").flatMap { $0 == 0 ? nil : $0 },
+                expires: Int64(userInfo["attachment_expires"] as? String ?? "0").flatMap { $0 == 0 ? nil : $0 },
+                url: attachmentUrl
+            )
+        } else {
+            attachment = nil
+        }
         return Message(
             id: id,
             time: timeInt,
@@ -123,7 +230,8 @@ struct Message: Decodable {
             tags: tags,
             actions: Actions.shared.parse(actions),
             click: click,
-            pollId: pollId
+            pollId: pollId,
+            attachment: attachment
         )
     }
 }

@@ -62,7 +62,10 @@ class NotificationService: UNNotificationServiceExtension {
             return
         }
         Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
-        contentHandler(content)
+        let user = store?.getUser(baseUrl: baseUrl)?.toBasicUser()
+        content.attachImageIfNeeded(message: message, user: user) {
+            contentHandler(content)
+        }
     }
     
     private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {

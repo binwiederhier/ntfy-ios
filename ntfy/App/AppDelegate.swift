@@ -109,11 +109,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     private func showNotification(baseUrl: String, _ message: Message) {
         let content = UNMutableNotificationContent()
         content.modify(message: message, baseUrl: baseUrl)
-    
-        let request = UNNotificationRequest(identifier: message.id, content: content, trigger: nil /* now */)
-        UNUserNotificationCenter.current().add(request) { (error) in
-            if let error = error {
-                Log.e(self.tag, "Unable to create notification", error)
+
+        let user = Store.shared.getUser(baseUrl: baseUrl)?.toBasicUser()
+        content.attachImageIfNeeded(message: message, user: user) {
+            let request = UNNotificationRequest(identifier: message.id, content: content, trigger: nil /* now */)
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error = error {
+                    Log.e(self.tag, "Unable to create notification", error)
+                }
             }
         }
     }
