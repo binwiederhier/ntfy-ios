@@ -83,8 +83,9 @@ class NotificationService: UNNotificationServiceExtension {
         
         // Poll original server
         let user = store?.getUser(baseUrl: baseUrl)?.toBasicUser()
+        let headers = store?.getServerHeaders(baseUrl: baseUrl)
         // The extension only needs contentHandler to be called from the async callback
-        ApiService.shared.poll(subscription: subscription, messageId: pollId, user: user) { message, error in
+        ApiService.shared.poll(subscription: subscription, messageId: pollId, user: user, headers: headers) { message, error in
             guard let message = message else {
                 Log.w(self.tag, "Error fetching poll request message topic=\(pollRequest.topic), pollId=\(pollId), subscription=\(subscription.urlString())", error)
                 contentHandler(request.content)

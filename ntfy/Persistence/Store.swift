@@ -23,6 +23,9 @@ class Store: ObservableObject {
             .appendingPathComponent("ntfy.sqlite")
         let description = NSPersistentStoreDescription(url: storeUrl)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        // Lightweight migration — required so existing stores pick up new entities (e.g. ServerConfig) on upgrade.
+        description.shouldMigrateStoreAutomatically = true
+        description.shouldInferMappingModelAutomatically = true
 
         // Set up container and observe changes from app extension
         container = NSPersistentContainer(name: Store.modelName)
@@ -209,6 +212,49 @@ class Store: ObservableObject {
     func delete(user: User) {
         context.delete(user)
         try? context.save()
+    }
+
+    // MARK: Server Config
+
+    func saveServerConfig(baseUrl: String, headers: [String: String]) {
+        let normalizedUrl = normalizeBaseUrl(baseUrl)
+        do {
+            if headers.isEmpty {
+                if let existing = getServerConfig(baseUrl: normalizedUrl) {
+                    context.delete(existing)
+                    try context.save()
+                }
+                return
+            }
+            let config = getServerConfig(baseUrl: normalizedUrl) ?? ServerConfig(context: context)
+            config.baseUrl = normalizedUrl
+            config.headers = CustomHeaders.encode(headers)
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot store server config", error)
+            rollbackAndRefresh()
+        }
+    }
+
+    func getServerConfig(baseUrl: String) -> ServerConfig? {
+        let request = ServerConfig.fetchRequest()
+        request.predicate = NSPredicate(format: "baseUrl = %@", normalizeBaseUrl(baseUrl))
+        return try? context.fetch(request).first
+    }
+
+    func getServerHeaders(baseUrl: String) -> [String: String]? {
+        let headers = CustomHeaders.decode(getServerConfig(baseUrl: baseUrl)?.headers)
+        return headers.isEmpty ? nil : headers
+    }
+
+    func deleteServerConfig(_ config: ServerConfig) {
+        do {
+            context.delete(config)
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot delete server config", error)
+            rollbackAndRefresh()
+        }
     }
     
     // MARK: Preferences

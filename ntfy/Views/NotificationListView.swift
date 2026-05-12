@@ -212,9 +212,11 @@ struct NotificationListView: View {
         let tags = Array(possibleTags.shuffled().prefix(Int.random(in: 0..<4)))
         DispatchQueue.global(qos: .background).async {
             let user = store.getUser(baseUrl: subscription.baseUrl!)?.toBasicUser()
+            let headers = store.getServerHeaders(baseUrl: subscription.baseUrl!)
             ApiService.shared.publish(
                 subscription: subscription,
                 user: user,
+                headers: headers,
                 message: "This is a test notification from the ntfy iOS app. It has a priority of \(priority). If you send another one, it may look different.",
                 title: "Test: You can set a title if you like",
                 priority: priority,

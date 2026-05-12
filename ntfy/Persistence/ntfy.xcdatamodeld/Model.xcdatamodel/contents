@@ -42,10 +42,20 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
+    <entity name="ServerConfig" representedClassName="ServerConfig" syncable="YES" codeGenerationType="class">
+        <attribute name="baseUrl" attributeType="String"/>
+        <attribute name="headers" optional="YES" attributeType="String"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="baseUrl"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
     <elements>
         <element name="Notification" positionX="-54" positionY="9" width="128" height="164"/>
         <element name="Subscription" positionX="-262.4760131835938" positionY="11.46405029296875" width="128" height="89"/>
         <element name="User" positionX="-162" positionY="81" width="128" height="74"/>
         <element name="Preference" positionX="-162" positionY="81" width="128" height="59"/>
+        <element name="ServerConfig" positionX="-20" positionY="170" width="128" height="74"/>
     </elements>
 </model>
