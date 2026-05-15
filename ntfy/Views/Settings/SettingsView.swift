@@ -11,9 +11,20 @@ struct SettingsView: View {
             Form {
                 Section(
                     header: Text("General"),
-                    footer: Text("When subscribing to new topics, this server will be used as a default.")
+                    footer: Text("Choose the default server for new topics and how subscribed topics are sorted.")
                 ) {
                     DefaultServerView()
+                    Picker(
+                        "Subscription sorting",
+                        selection: Binding(
+                            get: { store.subscriptionSortOrder },
+                            set: { store.saveSubscriptionSortOrder($0) }
+                        )
+                    ) {
+                        ForEach(SubscriptionSortOrder.allCases) { sortOrder in
+                            Text(sortOrder.label).tag(sortOrder)
+                        }
+                    }
                 }
                 Section(
                     header: Text("Users"),
