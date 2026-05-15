@@ -2,6 +2,24 @@ import Foundation
 import CoreData
 import Combine
 
+enum SubscriptionSortOrder: String, CaseIterable, Identifiable {
+    case alphabetical
+    case recentActivity
+
+    var id: String {
+        return rawValue
+    }
+
+    var label: String {
+        switch self {
+        case .alphabetical:
+            return "Alphabetical"
+        case .recentActivity:
+            return "Recent activity"
+        }
+    }
+}
+
 /// Handles all persistence in the app by storing/loading subscriptions and notifications using Core Data.
 /// There are sadly a lot of hacks in here, because I don't quite understand this fully.
 class Store: ObservableObject {
@@ -10,7 +28,10 @@ class Store: ObservableObject {
     static let appGroup = "group.io.heckel.ntfy" // Must match app group of ntfy = ntfyNSE targets
     static let modelName = "ntfy" // Must match .xdatamodeld folder
     static let prefKeyDefaultBaseUrl = "defaultBaseUrl"
-    
+    static let prefKeySubscriptionSortOrder = "subscriptionSortOrder"
+
+    @Published private(set) var subscriptionSortOrder: SubscriptionSortOrder = .alphabetical
+
     private let container: NSPersistentContainer
     var context: NSManagedObjectContext {
         return container.viewContext
@@ -22,6 +43,8 @@ class Store: ObservableObject {
             .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup)!
             .appendingPathComponent("ntfy.sqlite")
         let description = NSPersistentStoreDescription(url: storeUrl)
+        description.shouldMigrateStoreAutomatically = true
+        description.shouldInferMappingModelAutomatically = true
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
         // Set up container and observe changes from app extension
@@ -30,6 +53,11 @@ class Store: ObservableObject {
         container.loadPersistentStores { description, error in
             if let error = error {
                 Log.e(Store.tag, "Core Data failed to load: \(error.localizedDescription)", error)
+                return
+            }
+            DispatchQueue.main.async {
+                self.subscriptionSortOrder = self.getSubscriptionSortOrder()
+                self.backfillSubscriptionLastNotificationTimes()
             }
         }
         
@@ -123,6 +151,7 @@ class Store: ObservableObject {
 
         context.performAndWait {
             do {
+                var lastNotificationTime = subscription.lastNotificationTime
                 for message in messages {
                     let notification = Notification(context: context)
                     notification.id = message.id
@@ -136,8 +165,10 @@ class Store: ObservableObject {
                     notification.subscription = subscription
                     subscription.addToNotifications(notification)
                     subscription.lastNotificationId = message.id
+                    lastNotificationTime = max(lastNotificationTime, message.time)
                     Log.d(Store.tag, "Storing notification with ID \(notification.id ?? "<unknown>")")
                 }
+                subscription.lastNotificationTime = lastNotificationTime
                 try context.save()
             } catch let error {
                 Log.w(Store.tag, "Cannot store notifications (fromMessages)", error)
@@ -149,7 +180,11 @@ class Store: ObservableObject {
     func delete(notification: Notification) {
         context.performAndWait {
             Log.d(Store.tag, "Deleting notification \(notification.id ?? "")")
+            let subscription = notification.subscription
             context.delete(notification)
+            if let subscription = subscription {
+                updateLastNotificationTime(for: subscription)
+            }
             try? context.save()
         }
     }
@@ -158,9 +193,11 @@ class Store: ObservableObject {
         context.performAndWait {
             Log.d(Store.tag, "Deleting \(notifications.count) notification(s)")
             do {
+                let subscriptions = Set(notifications.compactMap { $0.subscription })
                 notifications.forEach { notification in
                     context.delete(notification)
                 }
+                subscriptions.forEach(updateLastNotificationTime)
                 try context.save()
             } catch let error {
                 Log.w(Store.tag, "Cannot delete notification(s)", error)
@@ -177,6 +214,7 @@ class Store: ObservableObject {
                 notifications.forEach { notification in
                     context.delete(notification as! Notification)
                 }
+                subscription.lastNotificationTime = 0
                 try context.save()
             } catch let error {
                 Log.w(Store.tag, "Cannot delete notification(s)", error)
@@ -225,6 +263,19 @@ class Store: ObservableObject {
         }
     }
     
+    func saveSubscriptionSortOrder(_ sortOrder: SubscriptionSortOrder) {
+        do {
+            let pref = getPreference(key: Store.prefKeySubscriptionSortOrder) ?? Preference(context: context)
+            pref.key = Store.prefKeySubscriptionSortOrder
+            pref.value = sortOrder.rawValue
+            try context.save()
+            subscriptionSortOrder = sortOrder
+        } catch let error {
+            Log.w(Store.tag, "Cannot store subscription sort order", error)
+            rollbackAndRefresh()
+        }
+    }
+
     func getDefaultBaseUrl() -> String {
         let baseUrl = getPreference(key: Store.prefKeyDefaultBaseUrl)?.value
         if baseUrl == nil || baseUrl?.isEmpty == true {
@@ -233,10 +284,53 @@ class Store: ObservableObject {
         return normalizeBaseUrl(baseUrl!)
     }
     
+    private func getSubscriptionSortOrder() -> SubscriptionSortOrder {
+        guard
+            let value = getPreference(key: Store.prefKeySubscriptionSortOrder)?.value,
+            let sortOrder = SubscriptionSortOrder(rawValue: value)
+        else {
+            return .alphabetical
+        }
+        return sortOrder
+    }
+
     private func getPreference(key: String) -> Preference? {
         let request = Preference.fetchRequest()
         request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "key = %@", key)])
         return try? context.fetch(request).first
+    }
+
+    private func backfillSubscriptionLastNotificationTimes() {
+        context.perform {
+            do {
+                let subscriptions = try self.context.fetch(Subscription.fetchRequest())
+                var hasChanges = false
+                for subscription in subscriptions {
+                    let lastNotificationTime = self.latestNotificationTime(for: subscription)
+                    if subscription.lastNotificationTime != lastNotificationTime {
+                        subscription.lastNotificationTime = lastNotificationTime
+                        hasChanges = true
+                    }
+                }
+                if hasChanges {
+                    try self.context.save()
+                }
+            } catch let error {
+                Log.w(Store.tag, "Cannot backfill subscription activity times", error)
+            }
+        }
+    }
+
+    private func updateLastNotificationTime(for subscription: Subscription) {
+        subscription.lastNotificationTime = latestNotificationTime(for: subscription)
+    }
+
+    private func latestNotificationTime(for subscription: Subscription) -> Int64 {
+        let request = Notification.fetchRequest()
+        request.predicate = NSPredicate(format: "subscription == %@", subscription)
+        request.sortDescriptors = [NSSortDescriptor(key: "time", ascending: false)]
+        request.fetchLimit = 1
+        return (try? context.fetch(request).first?.time) ?? 0
     }
 }
 
@@ -280,6 +374,7 @@ extension Store {
         subscription.baseUrl = Config.appBaseUrl
         subscription.topic = topic
         subscription.notifications = NSSet(array: notifications)
+        subscription.lastNotificationTime = messages.map(\.time).max() ?? 0
         return subscription
     }
     

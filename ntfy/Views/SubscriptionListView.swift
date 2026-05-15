@@ -38,8 +38,9 @@ struct SubscriptionListView: View {
     }
     
     private var subscriptionList: some View {
-        List {
-            ForEach(subscriptionsModel.subscriptions) { subscription in
+        let subscriptions = subscriptionsModel.subscriptions(sortOrder: store.subscriptionSortOrder)
+        return List {
+            ForEach(subscriptions) { subscription in
                 SubscriptionItemNavView(subscription: subscription)
             }
         }
@@ -55,7 +56,7 @@ struct SubscriptionListView: View {
             }
         }
         .overlay(Group {
-            if subscriptionsModel.subscriptions.isEmpty {
+            if subscriptions.isEmpty {
                 VStack {
                     Text("It looks like you don't have any subscriptions yet")
                         .font(.title2)
@@ -84,7 +85,7 @@ struct SubscriptionListView: View {
     }
 
     private func pollSubscriptions() {
-        subscriptionsModel.subscriptions.forEach { subscription in
+        subscriptionsModel.subscriptions(sortOrder: store.subscriptionSortOrder).forEach { subscription in
             subscriptionManager.poll(subscription)
         }
     }

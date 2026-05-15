@@ -45,8 +45,32 @@ class SubscriptionsObservable: NSObject, ObservableObject {
         return controller
     }()
     
-    var subscriptions: [Subscription] {
-        fetchedResultsController.fetchedObjects ?? []
+    func subscriptions(sortOrder: SubscriptionSortOrder) -> [Subscription] {
+        let subscriptions = fetchedResultsController.fetchedObjects ?? []
+        switch sortOrder {
+        case .alphabetical:
+            return subscriptions
+        case .recentActivity:
+            return subscriptions.sorted { first, second in
+                if first.lastNotificationTime != second.lastNotificationTime {
+                    return first.lastNotificationTime > second.lastNotificationTime
+                }
+                return alphabeticallyPrecedes(first, second)
+            }
+        }
+    }
+
+    private func alphabeticallyPrecedes(_ first: Subscription, _ second: Subscription) -> Bool {
+        let firstTopic = first.topic ?? ""
+        let secondTopic = second.topic ?? ""
+        let topicComparison = firstTopic.localizedCaseInsensitiveCompare(secondTopic)
+        if topicComparison != .orderedSame {
+            return topicComparison == .orderedAscending
+        }
+
+        let firstBaseUrl = first.baseUrl ?? ""
+        let secondBaseUrl = second.baseUrl ?? ""
+        return firstBaseUrl.localizedCaseInsensitiveCompare(secondBaseUrl) == .orderedAscending
     }
 }
 
