@@ -10,6 +10,10 @@ class Store: ObservableObject {
     static let appGroup = "group.io.heckel.ntfy" // Must match app group of ntfy = ntfyNSE targets
     static let modelName = "ntfy" // Must match .xdatamodeld folder
     static let prefKeyDefaultBaseUrl = "defaultBaseUrl"
+    static let prefKeyAttachmentAutoDownloadMaxSize = "attachmentAutoDownloadMaxSize"
+    static let autoDownloadNever: Int64 = 0
+    static let autoDownloadAlways: Int64 = 1
+    static let autoDownloadDefault: Int64 = 1024 * 1024
     private let container: NSPersistentContainer
     var context: NSManagedObjectContext {
         return container.viewContext
@@ -63,7 +67,7 @@ class Store: ObservableObject {
         context.rollback()
         hardRefresh()
     }
-    
+
     func hardRefresh() {
         // `refreshAllObjects` only refreshes objects from which the cache is invalid. With a staleness intervall of -1 the cache never invalidates.
         // We set the `stalenessInterval` to 0 to make sure that changes in the app extension get processed correctly.
@@ -73,7 +77,7 @@ class Store: ObservableObject {
         context.refreshAllObjects()
         context.stalenessInterval = -1
     }
-    
+
     // MARK: Subscriptions
     
     func saveSubscription(baseUrl: String, topic: String) -> Subscription {
@@ -99,6 +103,12 @@ class Store: ObservableObject {
     
     func getSubscriptions() -> [Subscription]? {
         return try? context.fetch(Subscription.fetchRequest())
+    }
+
+    func getNotification(id: String) -> Notification? {
+        let request = Notification.fetchRequest()
+        request.predicate = NSPredicate(format: "id = %@", id)
+        return try? context.fetch(request).first
     }
 
     func updateSubscriptionBaseUrl(_ subscription: Subscription, baseUrl: String) {
@@ -130,7 +140,22 @@ class Store: ObservableObject {
 
         context.performAndWait {
             do {
-                for message in messages {
+                let ids = messages.map(\.id)
+                let existingRequest = Notification.fetchRequest()
+                existingRequest.predicate = NSPredicate(format: "id IN %@", ids)
+                let existingNotifications = try context.fetch(existingRequest)
+                let existingIDs = Set(existingNotifications.compactMap(\.id))
+                let newMessages = messages.filter { !existingIDs.contains($0.id) }
+
+                guard !newMessages.isEmpty else {
+                    if let lastMessage = messages.last {
+                        subscription.lastNotificationId = lastMessage.id
+                        try context.save()
+                    }
+                    return
+                }
+
+                for message in newMessages {
                     let notification = Notification(context: context)
                     notification.id = message.id
                     notification.time = message.time
@@ -145,11 +170,12 @@ class Store: ObservableObject {
                     notification.attachmentSize = message.attachment?.size ?? 0
                     notification.attachmentExpires = message.attachment?.expires ?? 0
                     notification.attachmentUrl = message.attachment?.url
+                    notification.attachmentProgress = message.attachment == nil ? 0 : ATTACHMENT_PROGRESS_NONE
                     notification.subscription = subscription
                     subscription.addToNotifications(notification)
-                    subscription.lastNotificationId = message.id
                     Log.d(Store.tag, "Storing notification with ID \(notification.id ?? "<unknown>")")
                 }
+                subscription.lastNotificationId = messages.last?.id
                 try context.save()
             } catch let error {
                 Log.w(Store.tag, "Cannot store notifications (fromMessages)", error)
@@ -248,6 +274,28 @@ class Store: ObservableObject {
         }
         return normalizeBaseUrl(baseUrl!)
     }
+
+    func saveAttachmentAutoDownloadMaxSize(_ maxSize: Int64) {
+        do {
+            let pref = getPreference(key: Store.prefKeyAttachmentAutoDownloadMaxSize) ?? Preference(context: context)
+            pref.key = Store.prefKeyAttachmentAutoDownloadMaxSize
+            pref.value = String(maxSize)
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot store attachment auto-download preference", error)
+            rollbackAndRefresh()
+        }
+    }
+
+    func getAttachmentAutoDownloadMaxSize() -> Int64 {
+        guard
+            let rawValue = getPreference(key: Store.prefKeyAttachmentAutoDownloadMaxSize)?.value,
+            let maxSize = Int64(rawValue)
+        else {
+            return Store.autoDownloadDefault
+        }
+        return maxSize
+    }
     
     private func getPreference(key: String) -> Preference? {
         let request = Preference.fetchRequest()
@@ -320,6 +368,7 @@ extension Store {
         notification.attachmentSize = message.attachment?.size ?? 0
         notification.attachmentExpires = message.attachment?.expires ?? 0
         notification.attachmentUrl = message.attachment?.url
+        notification.attachmentProgress = message.attachment == nil ? 0 : ATTACHMENT_PROGRESS_NONE
         return notification
     }
 }

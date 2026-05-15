@@ -2,10 +2,8 @@ import Foundation
 import UserNotifications
 import UniformTypeIdentifiers
 
-private let actionsCategory = "ntfyActions" // It seems ok to re-use the same category
-
 extension UNMutableNotificationContent {
-    func modify(message: Message, baseUrl: String) {
+    func modify(message: Message, baseUrl: String, notification: Notification? = nil) {
         // Body and title
         if let body = message.message {
             self.body = body
@@ -37,14 +35,8 @@ extension UNMutableNotificationContent {
         //
         // We also must set the .foreground flag, which brings the notification to the foreground and avoids an error about
         // permissions. This is described in https://stackoverflow.com/a/44580916/1440785
-        if let actions = message.actions, !actions.isEmpty {
-            self.categoryIdentifier = actionsCategory
-            
-            let center = UNUserNotificationCenter.current()
-            let notificationActions = actions.map { UNNotificationAction(identifier: $0.id, title: $0.label, options: [.foreground]) }
-            let category = UNNotificationCategory(identifier: actionsCategory, actions: notificationActions, intentIdentifiers: [])
-            center.setNotificationCategories([category])
-        }
+        appendAttachmentSummaryIfNeeded(message: message, notification: notification)
+        configureNotificationActions(message: message)
         
         // Play a sound, and group by topic
         self.sound = .default
@@ -77,7 +69,20 @@ extension UNMutableNotificationContent {
         self.userInfo["base_url"] = baseUrl
     }
 
-    func attachImageIfNeeded(message: Message, user: BasicUser?, completionHandler: @escaping () -> Void) {
+    func attachImageIfNeeded(notification: Notification?, message: Message, user: BasicUser?, completionHandler: @escaping () -> Void) {
+        if let localFileUrl = notification?.attachmentLocalFileUrl(),
+           let attachment = message.attachment,
+           attachment.isImageAttachment() {
+            do {
+                let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: localFileUrl)
+                self.attachments = self.attachments + [notificationAttachment]
+            } catch {
+                Log.w("NotificationContent", "Failed to attach local image", error)
+            }
+            completionHandler()
+            return
+        }
+
         guard
             let attachment = message.attachment,
             attachment.isImageAttachment(),
@@ -128,6 +133,47 @@ extension UNMutableNotificationContent {
             }
         }.resume()
     }
+
+    private func configureNotificationActions(message: Message) {
+        let userActions = message.actions ?? []
+        let actions = userActions.prefix(4).map {
+            UNNotificationAction(identifier: $0.id, title: $0.label, options: [.foreground])
+        }
+
+        guard !actions.isEmpty else {
+            categoryIdentifier = ""
+            return
+        }
+
+        let categoryIdentifier = "ntfyActions." + actions.map(\.identifier).joined(separator: ".")
+        self.categoryIdentifier = categoryIdentifier
+
+        let center = UNUserNotificationCenter.current()
+        let category = UNNotificationCategory(identifier: categoryIdentifier, actions: actions, intentIdentifiers: [])
+        center.getNotificationCategories { existingCategories in
+            center.setNotificationCategories(existingCategories.union([category]))
+        }
+    }
+
+    private func appendAttachmentSummaryIfNeeded(message: Message, notification: Notification?) {
+        guard let attachment = message.attachment else {
+            return
+        }
+        if attachment.isImageAttachment(), notification?.attachmentLocalFileUrl() != nil {
+            return
+        }
+
+        let summary = notification?.notificationAttachmentSummary() ?? fallbackAttachmentSummary(attachment: attachment)
+        guard !summary.isEmpty else {
+            return
+        }
+
+        if body.isEmpty {
+            body = summary
+        } else {
+            body = body + "\n\n" + summary
+        }
+    }
 }
 
 private func notificationAttachmentFileExtension(url: URL, mimeType: String?) -> String {
@@ -141,4 +187,15 @@ private func notificationAttachmentFileExtension(url: URL, mimeType: String?) ->
         return preferredExtension
     }
     return "jpg"
+}
+
+private func fallbackAttachmentSummary(attachment: MessageAttachment) -> String {
+    var parts = [attachment.displayName()]
+    if let size = attachment.size, size > 0 {
+        parts.append(formatBytes(size))
+    }
+    if attachment.isExpired() {
+        parts.append("expired")
+    }
+    return "Attachment: " + parts.joined(separator: ", ")
 }

@@ -5,6 +5,7 @@
         <attribute name="attachmentExpires" optional="YES" attributeType="Integer 64" usesScalarValueType="YES"/>
         <attribute name="attachmentLocalPath" optional="YES" attributeType="String"/>
         <attribute name="attachmentName" optional="YES" attributeType="String"/>
+        <attribute name="attachmentProgress" optional="YES" attributeType="Integer 16" defaultValueString="-1" usesScalarValueType="YES"/>
         <attribute name="attachmentSize" optional="YES" attributeType="Integer 64" usesScalarValueType="YES"/>
         <attribute name="attachmentType" optional="YES" attributeType="String"/>
         <attribute name="attachmentUrl" optional="YES" attributeType="String"/>
@@ -49,7 +50,7 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="Notification" positionX="-54" positionY="9" width="128" height="254"/>
+        <element name="Notification" positionX="-54" positionY="9" width="128" height="269"/>
         <element name="Subscription" positionX="-262.4760131835938" positionY="11.46405029296875" width="128" height="89"/>
         <element name="User" positionX="-162" positionY="81" width="128" height="74"/>
         <element name="Preference" positionX="-162" positionY="81" width="128" height="59"/>

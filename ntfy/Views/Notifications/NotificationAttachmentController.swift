@@ -5,46 +5,54 @@
 //  Created by Alek Michelson on 5/11/26.
 //
 
-// TODO: This will be converted to the @Observable macro at some point :)
-
 import SwiftUI
 
 @MainActor
 final class NotificationAttachmentController: ObservableObject {
-    @Published var isDownloading = false
-    @Published var errorMessage: String?
-
     private var downloadTask: Task<Void, Never>?
 
     func startDownload(notification: Notification, attachment: MessageAttachment, authorizationHeader: String?) {
         guard downloadTask == nil else {
             return
         }
-        errorMessage = nil
-        isDownloading = true
+        guard let notificationID = notification.id, let remoteUrl = notification.attachmentRemoteUrl() else {
+            return
+        }
 
+        notification.beginAttachmentDownload()
         downloadTask = Task {
             defer {
                 Task { @MainActor in
-                    self.isDownloading = false
                     self.downloadTask = nil
                 }
             }
 
             do {
-                let localFileUrl = try await AttachmentFileStore.download(
-                    notification: notification,
+                let downloaded = try await AttachmentFileStore.download(
+                    notificationID: notificationID,
+                    remoteUrl: remoteUrl,
                     attachment: attachment,
-                    authorizationHeader: authorizationHeader
+                    authorizationHeader: authorizationHeader,
+                    onProgress: { progress in
+                        Task { @MainActor in
+                            notification.setAttachmentDownloadProgress(progress)
+                        }
+                    }
                 )
                 await MainActor.run {
-                    notification.setAttachmentLocalPath(localFileUrl.path)
+                    notification.completeAttachmentDownload(
+                        localPath: downloaded.localFileUrl.path,
+                        resolvedType: downloaded.mimeType,
+                        resolvedSize: downloaded.size
+                    )
                 }
             } catch is CancellationError {
-                return
+                await MainActor.run {
+                    notification.resetAttachmentDownload()
+                }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = error.localizedDescription
+                    notification.failAttachmentDownload()
                 }
             }
         }
@@ -53,7 +61,6 @@ final class NotificationAttachmentController: ObservableObject {
     func cancelDownload() {
         downloadTask?.cancel()
         downloadTask = nil
-        isDownloading = false
     }
 
     func deleteDownloadedFile(notification: Notification) {
@@ -61,8 +68,10 @@ final class NotificationAttachmentController: ObservableObject {
             return
         }
         try? FileManager.default.removeItem(at: localFileUrl)
-        notification.setAttachmentLocalPath(nil)
+        notification.markAttachmentDeleted()
+    }
+
+    deinit {
+        downloadTask?.cancel()
     }
 }
-
-

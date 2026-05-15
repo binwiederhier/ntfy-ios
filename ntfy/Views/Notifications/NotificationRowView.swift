@@ -5,6 +5,7 @@
 //  Created by Alek Michelson on 5/11/26.
 //
 
+import QuickLook
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -27,56 +28,68 @@ struct NotificationRowView: View {
             }
             .sheet(item: $attachmentPresentation) { attachmentPresentation in
                 switch attachmentPresentation.mode {
+                case .preview:
+                    AttachmentPreviewView(url: attachmentPresentation.url)
                 case .share:
                     ActivityView(activityItems: [attachmentPresentation.url])
-                case .save:
-                    AttachmentExportView(url: attachmentPresentation.url)
                 }
             }
     }
     
     private var notificationRow: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top, spacing: 8) {
-                HStack(alignment: .center, spacing: 2) {
-                    Text(notification.shortDateTime())
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    if [1,2,4,5].contains(notification.priority) {
-                        Image("priority-\(notification.priority)")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 16, height: 16)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .top, spacing: 8) {
+                    HStack(alignment: .center, spacing: 2) {
+                        Text(notification.shortDateTime())
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                        if [1,2,4,5].contains(notification.priority) {
+                            Image("priority-\(notification.priority)")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 16, height: 16)
+                        }
+                    }
+                    Spacer()
+                    if clickUrl != nil {
+                        messageActionsMenu
                     }
                 }
-                Spacer()
-                if clickUrl != nil {
-                    messageActionsMenu
+                .padding([.bottom], 2)
+                if let title = notification.formatTitle(), title != "" {
+                    Text(title)
+                        .font(.headline)
+                        .bold()
+                        .padding([.bottom], 2)
+                }
+                messageText
+                if !notification.nonEmojiTags().isEmpty {
+                    Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding([.top], 2)
                 }
             }
-            .padding([.bottom], 2)
-            if let title = notification.formatTitle(), title != "" {
-                Text(title)
-                    .font(.headline)
-                    .bold()
-                    .padding([.bottom], 2)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                handleRowTap()
             }
-            messageText
+
             if let attachment = notification.messageAttachment() {
                 NotificationAttachmentSectionView(
                     notification: notification,
                     attachment: attachment,
                     authorizationHeader: attachmentAuthorizationHeader,
                     controller: attachmentController,
+                    onOpen: { attachmentPresentation = AttachmentPresentation(url: $0, mode: .preview) },
                     onShare: { attachmentPresentation = AttachmentPresentation(url: $0, mode: .share) },
-                    onSave: { attachmentPresentation = AttachmentPresentation(url: $0, mode: .save) }
+                    onSave: { url in
+                        Task { @MainActor in
+                            AttachmentExportPresenter.shared.present(url: url)
+                        }
+                    }
                 )
-            }
-            if !notification.nonEmojiTags().isEmpty {
-                Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .padding([.top], 2)
             }
             if !notification.actionsList().isEmpty {
                 HStack {
@@ -92,9 +105,6 @@ struct NotificationRowView: View {
         }
         .padding(.all, 4)
         .contentShape(Rectangle())
-        .onTapGesture {
-            handleRowTap()
-        }
     }
     
     private var messageText: some View {
@@ -165,7 +175,8 @@ extension NotificationRowView {
 
     private struct AttachmentPresentation: Identifiable {
         enum Mode {
-            case share, save
+            case preview
+            case share
         }
 
         let id = UUID()
@@ -173,16 +184,170 @@ extension NotificationRowView {
         let mode: Mode
     }
 
-    private struct AttachmentExportView: UIViewControllerRepresentable {
+    private struct AttachmentPreviewView: UIViewControllerRepresentable {
         let url: URL
 
-        func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-            UIDocumentPickerViewController(forExporting: [url], asCopy: true)
+        func makeUIViewController(context: Context) -> UINavigationController {
+            let controller = AttachmentPreviewController(onClose: {
+                context.coordinator.dismiss?()
+            })
+            controller.configure(url: url)
+            let navigationController = UINavigationController(rootViewController: controller)
+            navigationController.modalPresentationStyle = .pageSheet
+            context.coordinator.dismiss = { [weak navigationController] in
+                navigationController?.dismiss(animated: true)
+            }
+            return navigationController
         }
 
-        func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {
+        func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {
+            guard let controller = uiViewController.viewControllers.first as? AttachmentPreviewController else {
+                return
+            }
+            controller.configure(url: url)
+        }
+
+        func makeCoordinator() -> Coordinator {
+            Coordinator()
+        }
+
+        final class Coordinator {
+            var dismiss: (() -> Void)?
+        }
+    }
+
+    private final class AttachmentPreviewController: QLPreviewController, QLPreviewControllerDataSource {
+        private let loadingView = UIActivityIndicatorView(style: .large)
+        private let onClose: () -> Void
+        private var previewItem: PreviewItem?
+        private var configuredURL: URL?
+        private var hasLoadedCurrentItem = false
+
+        init(onClose: @escaping () -> Void) {
+            self.onClose = onClose
+            super.init(nibName: nil, bundle: nil)
+        }
+
+        @available(*, unavailable)
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        override func viewDidLoad() {
+            super.viewDidLoad()
+
+            view.backgroundColor = .systemBackground
+            dataSource = self
+            navigationItem.leftBarButtonItem = UIBarButtonItem(
+                barButtonSystemItem: .close,
+                target: self,
+                action: #selector(closePreview)
+            )
+
+            loadingView.translatesAutoresizingMaskIntoConstraints = false
+            loadingView.hidesWhenStopped = true
+            loadingView.startAnimating()
+            view.addSubview(loadingView)
+
+            NSLayoutConstraint.activate([
+                loadingView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                loadingView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            ])
+        }
+
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            guard !hasLoadedCurrentItem else {
+                return
+            }
+            hasLoadedCurrentItem = true
+            reloadPreview()
+        }
+
+        func configure(url: URL) {
+            guard configuredURL != url else {
+                return
+            }
+            configuredURL = url
+            previewItem = PreviewItem(url: url)
+            navigationItem.title = url.lastPathComponent
+            hasLoadedCurrentItem = false
+            if isViewLoaded {
+                loadingView.startAnimating()
+                if view.window != nil {
+                    hasLoadedCurrentItem = true
+                    reloadPreview()
+                }
+            }
+        }
+
+        func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
+            previewItem == nil ? 0 : 1
+        }
+
+        func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+            previewItem ?? PreviewItem(url: URL(fileURLWithPath: ""))
+        }
+
+        private func reloadPreview() {
+            reloadData()
+            currentPreviewItemIndex = 0
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                self?.loadingView.stopAnimating()
+            }
+        }
+
+        @objc
+        private func closePreview() {
+            onClose()
+        }
+    }
+
+    private final class PreviewItem: NSObject, QLPreviewItem {
+        let previewItemURL: URL?
+        let previewItemTitle: String?
+
+        init(url: URL) {
+            self.previewItemURL = url
+            self.previewItemTitle = url.lastPathComponent
+        }
+    }
+
+    @MainActor
+    private final class AttachmentExportPresenter: NSObject, UIDocumentPickerDelegate {
+        static let shared = AttachmentExportPresenter()
+
+        func present(url: URL) {
+            guard let presenter = topViewController(from: rootViewController()) else {
+                return
+            }
+
+            let picker = UIDocumentPickerViewController(forExporting: [url], asCopy: true)
+            picker.delegate = self
+            presenter.present(picker, animated: true)
+        }
+
+        private func rootViewController() -> UIViewController? {
+            UIApplication.shared
+                .connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first { $0.isKeyWindow }?
+                .rootViewController
+        }
+
+        private func topViewController(from controller: UIViewController?) -> UIViewController? {
+            if let navigationController = controller as? UINavigationController {
+                return topViewController(from: navigationController.visibleViewController)
+            }
+            if let tabBarController = controller as? UITabBarController {
+                return topViewController(from: tabBarController.selectedViewController)
+            }
+            if let presentedViewController = controller?.presentedViewController {
+                return topViewController(from: presentedViewController)
+            }
+            return controller
         }
     }
 
 }
-

@@ -9,74 +9,82 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct NotificationAttachmentSectionView: View {
-    @Environment(\.openURL) private var openURL
     @ObservedObject var notification: Notification
     let attachment: MessageAttachment
     let authorizationHeader: String?
     @ObservedObject var controller: NotificationAttachmentController
+    let onOpen: (URL) -> Void
     let onShare: (URL) -> Void
     let onSave: (URL) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if shouldShowImagePreview, let imageUrl = notification.attachmentImageUrl() {
-                NotificationAttachmentImageView(
-                    imageUrl: imageUrl,
-                    localFileUrl: notification.attachmentLocalFileUrl(),
-                    authorizationHeader: authorizationHeader
-                )
-            }
+            if shouldShowImagePreview {
+                ZStack(alignment: .topTrailing) {
+                    NotificationAttachmentImageView(
+                        localFileUrl: notification.attachmentLocalFileUrl(),
+                        isLoading: notification.isAttachmentDownloading()
+                    )
 
-            HStack(alignment: .center, spacing: 10) {
-                Image(systemName: attachment.systemImageName())
-                    .font(.title3)
-                    .foregroundColor(.gray)
-                    .frame(width: 24, height: 24)
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(attachment.displayName())
-                        .font(.subheadline)
-                        .bold()
-                        .lineLimit(2)
-                    if !statusText.isEmpty {
-                        Text(statusText)
-                            .font(.caption)
-                            .foregroundColor(statusColor)
-                            .lineLimit(2)
+                    if showsImageOnly, showsMenu {
+                        previewMenuButton
+                            .padding(8)
                     }
                 }
-
-                Spacer()
-
-                if controller.isDownloading {
-                    ProgressView()
-                        .scaleEffect(0.85)
-                }
-
-                Menu {
-                    attachmentMenuItems
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                        .foregroundColor(.gray)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 4)
-                }
-                .menuStyle(.borderlessButton)
-            }
-            .padding(10)
-            .background(Color(.secondarySystemFill))
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .onTapGesture {
-                handlePrimaryTap()
             }
 
-            if let errorMessage = controller.errorMessage, !errorMessage.isEmpty {
-                Text(errorMessage)
+            if !showsImageOnly {
+                HStack(alignment: .center, spacing: 10) {
+                    Button(action: handlePrimaryTap) {
+                        HStack(alignment: .center, spacing: 10) {
+                            Image(systemName: attachment.systemImageName())
+                                .font(.title3)
+                                .foregroundColor(.gray)
+                                .frame(width: 24, height: 24)
+
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(attachment.displayName())
+                                    .font(.subheadline)
+                                    .bold()
+                                    .lineLimit(2)
+                                if !statusText.isEmpty {
+                                    Text(statusText)
+                                        .font(.caption)
+                                        .foregroundColor(statusColor)
+                                        .lineLimit(2)
+                                }
+                            }
+
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+
+                    if notification.isAttachmentDownloading() {
+                        ProgressView()
+                            .scaleEffect(0.85)
+                    }
+
+                    if showsMenu {
+                        previewMenuButton
+                    }
+                }
+                .padding(10)
+                .background(Color(.secondarySystemFill))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
+
+            if notification.attachmentDownloadFailed() {
+                Text("The last download attempt failed.")
                     .font(.caption)
                     .foregroundColor(.red)
             }
         }
         .padding(.top, 8)
+        .task(id: imageAutoDownloadKey) {
+            autoDownloadInlineImageIfNeeded()
+        }
     }
 
     @ViewBuilder
@@ -94,7 +102,7 @@ struct NotificationAttachmentSectionView: View {
             Button("Delete download", role: .destructive) {
                 controller.deleteDownloadedFile(notification: notification)
             }
-        } else if controller.isDownloading {
+        } else if notification.isAttachmentDownloading() {
             Button("Cancel") {
                 controller.cancelDownload()
             }
@@ -108,7 +116,7 @@ struct NotificationAttachmentSectionView: View {
             }
         }
 
-        if let remoteUrl = notification.attachmentRemoteUrl() {
+        if !attachmentExpired, let remoteUrl = notification.attachmentRemoteUrl() {
             Button("Copy URL") {
                 UIPasteboard.general.setValue(remoteUrl.absoluteString, forPasteboardType: UTType.plainText.identifier)
             }
@@ -116,37 +124,22 @@ struct NotificationAttachmentSectionView: View {
     }
 
     private var attachmentExpired: Bool {
-        guard let expires = attachment.expires else {
-            return false
-        }
-        return expires < Int64(Date().timeIntervalSince1970)
+        notification.attachmentIsExpired()
     }
 
     private var shouldShowImagePreview: Bool {
         guard attachment.isImageAttachment() else {
             return false
         }
-        return notification.attachmentLocalFileUrl() != nil || !attachmentExpired
+        return notification.attachmentLocalFileUrl() != nil || notification.isAttachmentDownloading()
     }
 
     private var statusText: String {
-        var parts: [String] = []
-        let detailText = notification.attachmentDetailText()
-        if !detailText.isEmpty {
-            parts.append(detailText)
-        }
-        if controller.isDownloading {
-            parts.append("Downloading")
-        } else if notification.attachmentLocalFileUrl() != nil {
-            parts.append("Downloaded")
-        } else if attachmentExpired {
-            parts.append("Expired")
-        }
-        return parts.joined(separator: " · ")
+        notification.attachmentStatusDescription()
     }
 
     private var statusColor: Color {
-        if controller.errorMessage != nil {
+        if notification.attachmentDownloadFailed() {
             return .red
         } else if attachmentExpired {
             return .red
@@ -158,7 +151,7 @@ struct NotificationAttachmentSectionView: View {
     private func handlePrimaryTap() {
         if let localFileUrl = notification.attachmentLocalFileUrl() {
             openLocalFile(localFileUrl)
-        } else if !attachmentExpired && !controller.isDownloading {
+        } else if !attachmentExpired && !notification.isAttachmentDownloading() {
             controller.startDownload(
                 notification: notification,
                 attachment: attachment,
@@ -168,7 +161,71 @@ struct NotificationAttachmentSectionView: View {
     }
 
     private func openLocalFile(_ localFileUrl: URL) {
-        openURL(localFileUrl)
+        onOpen(localFileUrl)
+    }
+
+    private var previewMenuButton: some View {
+        Menu {
+            attachmentMenuItems
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .foregroundColor(.gray)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+                .background(.ultraThinMaterial, in: Circle())
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+    }
+
+    private var showsImageOnly: Bool {
+        attachment.isImageAttachment() && notification.attachmentLocalFileUrl() != nil
+    }
+
+    private var showsMenu: Bool {
+        if notification.attachmentLocalFileUrl() != nil {
+            return true
+        }
+        if notification.isAttachmentDownloading() {
+            return true
+        }
+        if !attachmentExpired {
+            return true
+        }
+        return false
+    }
+
+    private var imageAutoDownloadKey: String {
+        [
+            notification.id ?? "",
+            notification.attachmentLocalPath ?? "",
+            String(notification.attachmentProgressValue())
+        ].joined(separator: "|")
+    }
+
+    private func autoDownloadInlineImageIfNeeded() {
+        guard attachment.isImageAttachment() else {
+            return
+        }
+        guard notification.attachmentLocalFileUrl() == nil else {
+            return
+        }
+        guard !notification.isAttachmentDownloading() else {
+            return
+        }
+        guard !notification.attachmentDownloadFailed() else {
+            return
+        }
+        guard !notification.attachmentWasDeleted() else {
+            return
+        }
+        guard !attachmentExpired else {
+            return
+        }
+        controller.startDownload(
+            notification: notification,
+            attachment: attachment,
+            authorizationHeader: authorizationHeader
+        )
     }
 }
-

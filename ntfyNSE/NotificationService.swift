@@ -52,10 +52,7 @@ class NotificationService: UNNotificationServiceExtension {
     }
     
     private func handleMessage(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ baseUrl: String, _ message: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
-        // Modify notification based on message
-        content.modify(message: message, baseUrl: baseUrl)
-        
-        // Save notification to store, and display it
+        // Save notification first so attachment downloads can update persistent state.
         guard let subscription = store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
             Log.w(tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
             contentHandler(request.content)
@@ -63,7 +60,8 @@ class NotificationService: UNNotificationServiceExtension {
         }
         Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
         let user = store?.getUser(baseUrl: baseUrl)?.toBasicUser()
-        content.attachImageIfNeeded(message: message, user: user) {
+        content.modify(message: message, baseUrl: baseUrl)
+        content.attachImageIfNeeded(notification: nil, message: message, user: user) {
             contentHandler(content)
         }
     }

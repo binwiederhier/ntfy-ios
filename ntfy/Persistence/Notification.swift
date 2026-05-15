@@ -1,5 +1,11 @@
 import Foundation
 
+let ATTACHMENT_PROGRESS_NONE: Int16 = -1
+let ATTACHMENT_PROGRESS_INDETERMINATE: Int16 = -2
+let ATTACHMENT_PROGRESS_FAILED: Int16 = -3
+let ATTACHMENT_PROGRESS_DELETED: Int16 = -4
+let ATTACHMENT_PROGRESS_DONE: Int16 = 100
+
 /// Extensions to make the notification easier to display
 extension Notification {
     func shortDateTime() -> String {
@@ -117,9 +123,164 @@ extension Notification {
         return parts.joined(separator: " · ")
     }
 
+    func attachmentProgressValue() -> Int16 {
+        if attachmentLocalFileUrl() != nil {
+            return ATTACHMENT_PROGRESS_DONE
+        }
+        if attachmentProgress == 0, messageAttachment() != nil {
+            return ATTACHMENT_PROGRESS_NONE
+        }
+        return attachmentProgress
+    }
+
+    func isAttachmentDownloading() -> Bool {
+        let progress = attachmentProgressValue()
+        return progress == ATTACHMENT_PROGRESS_INDETERMINATE || (0..<ATTACHMENT_PROGRESS_DONE).contains(progress)
+    }
+
+    func attachmentDownloadFailed() -> Bool {
+        attachmentProgressValue() == ATTACHMENT_PROGRESS_FAILED
+    }
+
+    func attachmentWasDeleted() -> Bool {
+        attachmentProgressValue() == ATTACHMENT_PROGRESS_DELETED
+    }
+
+    func attachmentIsExpired(referenceDate: Date = Date()) -> Bool {
+        guard let expires = messageAttachment()?.expires else {
+            return false
+        }
+        return expires < Int64(referenceDate.timeIntervalSince1970)
+    }
+
+    func attachmentStatusDescription() -> String {
+        guard let attachment = messageAttachment() else {
+            return ""
+        }
+        var parts: [String] = []
+        if let size = attachment.size, size > 0 {
+            parts.append(formatBytes(size))
+        }
+
+        let progress = attachmentProgressValue()
+        let exists = attachmentLocalFileUrl() != nil
+        let deleted = !exists && (progress == ATTACHMENT_PROGRESS_DONE || progress == ATTACHMENT_PROGRESS_DELETED)
+        if progress == ATTACHMENT_PROGRESS_NONE {
+            if attachmentIsExpired() {
+                parts.append("Not downloaded, expired")
+            } else if let expiry = attachmentExpiryShortDateString() {
+                parts.append("Not downloaded, expires \(expiry)")
+            } else {
+                parts.append("Not downloaded")
+            }
+        } else if progress == ATTACHMENT_PROGRESS_INDETERMINATE {
+            parts.append("Downloading")
+        } else if (0..<ATTACHMENT_PROGRESS_DONE).contains(progress) {
+            parts.append("Downloading \(progress)%")
+        } else if progress == ATTACHMENT_PROGRESS_FAILED {
+            if attachmentIsExpired() {
+                parts.append("Download failed, expired")
+            } else if let expiry = attachmentExpiryShortDateString() {
+                parts.append("Download failed, expires \(expiry)")
+            } else {
+                parts.append("Download failed")
+            }
+        } else if deleted {
+            if attachmentIsExpired() {
+                parts.append("Deleted, expired")
+            } else if let expiry = attachmentExpiryShortDateString() {
+                parts.append("Deleted, expires \(expiry)")
+            } else {
+                parts.append("Deleted")
+            }
+        }
+        return parts.joined(separator: " · ")
+    }
+
+    func notificationAttachmentSummary() -> String? {
+        guard let attachment = messageAttachment() else {
+            return nil
+        }
+        var parts = [attachment.displayName()]
+        if let size = attachment.size, size > 0 {
+            parts.append(formatBytes(size))
+        }
+
+        let progress = attachmentProgressValue()
+        if progress == ATTACHMENT_PROGRESS_DONE {
+            parts.append("downloaded")
+        } else if progress == ATTACHMENT_PROGRESS_INDETERMINATE || (0..<ATTACHMENT_PROGRESS_DONE).contains(progress) {
+            parts.append("downloading")
+        } else if progress == ATTACHMENT_PROGRESS_FAILED {
+            parts.append("download failed")
+        } else if attachmentIsExpired() {
+            parts.append("expired")
+        }
+
+        return "Attachment: " + parts.joined(separator: ", ")
+    }
+
+    private func attachmentExpiryShortDateString() -> String? {
+        guard let expires = messageAttachment()?.expires else {
+            return nil
+        }
+        let expiresDate = Date(timeIntervalSince1970: TimeInterval(expires))
+        guard expiresDate > Date() else {
+            return nil
+        }
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .none
+        return formatter.string(from: expiresDate)
+    }
+
     @MainActor
     func setAttachmentLocalPath(_ localPath: String?) {
         attachmentLocalPath = localPath
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func beginAttachmentDownload() {
+        attachmentProgress = ATTACHMENT_PROGRESS_INDETERMINATE
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func setAttachmentDownloadProgress(_ progress: Int16) {
+        attachmentProgress = progress
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func resetAttachmentDownload() {
+        attachmentProgress = ATTACHMENT_PROGRESS_NONE
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func failAttachmentDownload() {
+        attachmentProgress = ATTACHMENT_PROGRESS_FAILED
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func completeAttachmentDownload(localPath: String, resolvedType: String?, resolvedSize: Int64) {
+        attachmentLocalPath = localPath
+        attachmentProgress = ATTACHMENT_PROGRESS_DONE
+        if resolvedSize > 0 {
+            attachmentSize = resolvedSize
+        }
+        if let resolvedType, !resolvedType.isEmpty {
+            attachmentType = resolvedType
+        }
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func markAttachmentDeleted() {
+        attachmentLocalPath = nil
+        attachmentProgress = ATTACHMENT_PROGRESS_DELETED
         try? managedObjectContext?.save()
     }
 }
@@ -140,6 +301,13 @@ struct MessageAttachment: Codable {
         }
         let imageExtensions = ["png", "jpg", "jpeg", "gif", "webp", "heic", "heif", "bmp", "tif", "tiff"]
         return imageExtensions.contains(parsedUrl.pathExtension.lowercased())
+    }
+
+    func isExpired(referenceDate: Date = Date()) -> Bool {
+        guard let expires else {
+            return false
+        }
+        return expires < Int64(referenceDate.timeIntervalSince1970)
     }
 
     func displayName() -> String {
