@@ -104,7 +104,7 @@ struct NotificationAttachmentSectionView: View {
             }
         } else if notification.isAttachmentDownloading() {
             Button("Cancel") {
-                controller.cancelDownload()
+                controller.cancelDownload(notification: notification)
             }
         } else if !attachmentExpired {
             Button("Download") {
@@ -216,16 +216,27 @@ struct NotificationAttachmentSectionView: View {
         guard !notification.attachmentDownloadFailed() else {
             return
         }
+        guard !notification.attachmentDownloadWasCanceled() else {
+            return
+        }
+        guard !notification.attachmentAutoDownloadWasSkipped() else {
+            return
+        }
         guard !notification.attachmentWasDeleted() else {
             return
         }
         guard !attachmentExpired else {
             return
         }
+        guard Store.shared.shouldAutoDownloadAttachment(attachment) else {
+            notification.skipAttachmentAutoDownload()
+            return
+        }
         controller.startDownload(
             notification: notification,
             attachment: attachment,
-            authorizationHeader: authorizationHeader
+            authorizationHeader: authorizationHeader,
+            isAutomatic: true
         )
     }
 }

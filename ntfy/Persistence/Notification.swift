@@ -1,11 +1,5 @@
 import Foundation
 
-let ATTACHMENT_PROGRESS_NONE: Int16 = -1
-let ATTACHMENT_PROGRESS_INDETERMINATE: Int16 = -2
-let ATTACHMENT_PROGRESS_FAILED: Int16 = -3
-let ATTACHMENT_PROGRESS_DELETED: Int16 = -4
-let ATTACHMENT_PROGRESS_DONE: Int16 = 100
-
 /// Extensions to make the notification easier to display
 extension Notification {
     func shortDateTime() -> String {
@@ -123,27 +117,36 @@ extension Notification {
         return parts.joined(separator: " · ")
     }
 
+    func attachmentProgressState() -> AttachmentProgressState {
+        AttachmentProgressState(
+            storedValue: attachmentProgress,
+            hasAttachment: messageAttachment() != nil,
+            hasLocalFile: attachmentLocalFileUrl() != nil
+        )
+    }
+
     func attachmentProgressValue() -> Int16 {
-        if attachmentLocalFileUrl() != nil {
-            return ATTACHMENT_PROGRESS_DONE
-        }
-        if attachmentProgress == 0, messageAttachment() != nil {
-            return ATTACHMENT_PROGRESS_NONE
-        }
-        return attachmentProgress
+        attachmentProgressState().persistedValue
     }
 
     func isAttachmentDownloading() -> Bool {
-        let progress = attachmentProgressValue()
-        return progress == ATTACHMENT_PROGRESS_INDETERMINATE || (0..<ATTACHMENT_PROGRESS_DONE).contains(progress)
+        attachmentProgressState().isDownloading
     }
 
     func attachmentDownloadFailed() -> Bool {
-        attachmentProgressValue() == ATTACHMENT_PROGRESS_FAILED
+        attachmentProgressState() == .failed
     }
 
     func attachmentWasDeleted() -> Bool {
-        attachmentProgressValue() == ATTACHMENT_PROGRESS_DELETED
+        attachmentProgressState() == .deleted
+    }
+
+    func attachmentDownloadWasCanceled() -> Bool {
+        attachmentProgressState() == .canceled
+    }
+
+    func attachmentAutoDownloadWasSkipped() -> Bool {
+        attachmentProgressState() == .skipped
     }
 
     func attachmentIsExpired(referenceDate: Date = Date()) -> Bool {
@@ -162,10 +165,10 @@ extension Notification {
             parts.append(formatBytes(size))
         }
 
-        let progress = attachmentProgressValue()
+        let progress = attachmentProgressState()
         let exists = attachmentLocalFileUrl() != nil
-        let deleted = !exists && (progress == ATTACHMENT_PROGRESS_DONE || progress == ATTACHMENT_PROGRESS_DELETED)
-        if progress == ATTACHMENT_PROGRESS_NONE {
+        let deleted = !exists && (progress == .done || progress == .deleted)
+        if progress == .none {
             if attachmentIsExpired() {
                 parts.append("Not downloaded, expired")
             } else if let expiry = attachmentExpiryShortDateString() {
@@ -173,17 +176,33 @@ extension Notification {
             } else {
                 parts.append("Not downloaded")
             }
-        } else if progress == ATTACHMENT_PROGRESS_INDETERMINATE {
+        } else if progress == .indeterminate {
             parts.append("Downloading")
-        } else if (0..<ATTACHMENT_PROGRESS_DONE).contains(progress) {
-            parts.append("Downloading \(progress)%")
-        } else if progress == ATTACHMENT_PROGRESS_FAILED {
+        } else if case .progress(let percent) = progress {
+            parts.append("Downloading \(percent)%")
+        } else if progress == .failed {
             if attachmentIsExpired() {
                 parts.append("Download failed, expired")
             } else if let expiry = attachmentExpiryShortDateString() {
                 parts.append("Download failed, expires \(expiry)")
             } else {
                 parts.append("Download failed")
+            }
+        } else if progress == .canceled {
+            if attachmentIsExpired() {
+                parts.append("Download canceled, expired")
+            } else if let expiry = attachmentExpiryShortDateString() {
+                parts.append("Download canceled, expires \(expiry)")
+            } else {
+                parts.append("Download canceled")
+            }
+        } else if progress == .skipped {
+            if attachmentIsExpired() {
+                parts.append("Not downloaded, expired")
+            } else if let expiry = attachmentExpiryShortDateString() {
+                parts.append("Not auto-downloaded, expires \(expiry)")
+            } else {
+                parts.append("Not auto-downloaded")
             }
         } else if deleted {
             if attachmentIsExpired() {
@@ -206,13 +225,17 @@ extension Notification {
             parts.append(formatBytes(size))
         }
 
-        let progress = attachmentProgressValue()
-        if progress == ATTACHMENT_PROGRESS_DONE {
+        let progress = attachmentProgressState()
+        if progress == .done {
             parts.append("downloaded")
-        } else if progress == ATTACHMENT_PROGRESS_INDETERMINATE || (0..<ATTACHMENT_PROGRESS_DONE).contains(progress) {
+        } else if progress.isDownloading {
             parts.append("downloading")
-        } else if progress == ATTACHMENT_PROGRESS_FAILED {
+        } else if progress == .failed {
             parts.append("download failed")
+        } else if progress == .canceled {
+            parts.append("download canceled")
+        } else if progress == .skipped {
+            parts.append("not auto-downloaded")
         } else if attachmentIsExpired() {
             parts.append("expired")
         }
@@ -242,32 +265,44 @@ extension Notification {
 
     @MainActor
     func beginAttachmentDownload() {
-        attachmentProgress = ATTACHMENT_PROGRESS_INDETERMINATE
+        attachmentProgress = AttachmentProgressState.indeterminate.persistedValue
         try? managedObjectContext?.save()
     }
 
     @MainActor
     func setAttachmentDownloadProgress(_ progress: Int16) {
-        attachmentProgress = progress
+        attachmentProgress = AttachmentProgressState.progress(progress).persistedValue
         try? managedObjectContext?.save()
     }
 
     @MainActor
     func resetAttachmentDownload() {
-        attachmentProgress = ATTACHMENT_PROGRESS_NONE
+        attachmentProgress = AttachmentProgressState.none.persistedValue
         try? managedObjectContext?.save()
     }
 
     @MainActor
     func failAttachmentDownload() {
-        attachmentProgress = ATTACHMENT_PROGRESS_FAILED
+        attachmentProgress = AttachmentProgressState.failed.persistedValue
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func cancelAttachmentDownload() {
+        attachmentProgress = AttachmentProgressState.canceled.persistedValue
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func skipAttachmentAutoDownload() {
+        attachmentProgress = AttachmentProgressState.skipped.persistedValue
         try? managedObjectContext?.save()
     }
 
     @MainActor
     func completeAttachmentDownload(localPath: String, resolvedType: String?, resolvedSize: Int64) {
         attachmentLocalPath = localPath
-        attachmentProgress = ATTACHMENT_PROGRESS_DONE
+        attachmentProgress = AttachmentProgressState.done.persistedValue
         if resolvedSize > 0 {
             attachmentSize = resolvedSize
         }
@@ -280,7 +315,7 @@ extension Notification {
     @MainActor
     func markAttachmentDeleted() {
         attachmentLocalPath = nil
-        attachmentProgress = ATTACHMENT_PROGRESS_DELETED
+        attachmentProgress = AttachmentProgressState.deleted.persistedValue
         try? managedObjectContext?.save()
     }
 }

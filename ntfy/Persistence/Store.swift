@@ -170,7 +170,7 @@ class Store: ObservableObject {
                     notification.attachmentSize = message.attachment?.size ?? 0
                     notification.attachmentExpires = message.attachment?.expires ?? 0
                     notification.attachmentUrl = message.attachment?.url
-                    notification.attachmentProgress = message.attachment == nil ? 0 : ATTACHMENT_PROGRESS_NONE
+                    notification.attachmentProgress = message.attachment == nil ? 0 : AttachmentProgressState.none.persistedValue
                     notification.subscription = subscription
                     subscription.addToNotifications(notification)
                     Log.d(Store.tag, "Storing notification with ID \(notification.id ?? "<unknown>")")
@@ -296,6 +296,32 @@ class Store: ObservableObject {
         }
         return maxSize
     }
+
+    func shouldAutoDownloadAttachment(_ attachment: MessageAttachment) -> Bool {
+        if attachment.isExpired() {
+            return false
+        }
+
+        let maxSize = getAttachmentAutoDownloadMaxSize()
+        if maxSize == Store.autoDownloadNever {
+            return false
+        }
+        if maxSize == Store.autoDownloadAlways {
+            return true
+        }
+        guard let size = attachment.size else {
+            return true
+        }
+        return size <= maxSize
+    }
+
+    func resolvedAttachmentAutoDownloadMaxSize() -> Int64? {
+        let maxSize = getAttachmentAutoDownloadMaxSize()
+        if maxSize == Store.autoDownloadAlways {
+            return nil
+        }
+        return maxSize
+    }
     
     private func getPreference(key: String) -> Preference? {
         let request = Preference.fetchRequest()
@@ -368,7 +394,7 @@ extension Store {
         notification.attachmentSize = message.attachment?.size ?? 0
         notification.attachmentExpires = message.attachment?.expires ?? 0
         notification.attachmentUrl = message.attachment?.url
-        notification.attachmentProgress = message.attachment == nil ? 0 : ATTACHMENT_PROGRESS_NONE
+        notification.attachmentProgress = message.attachment == nil ? 0 : AttachmentProgressState.none.persistedValue
         return notification
     }
 }

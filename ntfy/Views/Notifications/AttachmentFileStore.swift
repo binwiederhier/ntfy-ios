@@ -55,7 +55,7 @@ enum AttachmentFileStore {
         let handle = try FileHandle(forWritingTo: destinationUrl)
         var totalBytes: Int64 = 0
         var buffer = Data()
-        var lastProgress: Int16 = ATTACHMENT_PROGRESS_NONE
+        var lastProgress = AttachmentProgressState.none.persistedValue
 
         do {
             for try await byte in bytes {

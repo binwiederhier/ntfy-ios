@@ -11,12 +11,27 @@ import SwiftUI
 final class NotificationAttachmentController: ObservableObject {
     private var downloadTask: Task<Void, Never>?
 
-    func startDownload(notification: Notification, attachment: MessageAttachment, authorizationHeader: String?) {
+    func startDownload(
+        notification: Notification,
+        attachment: MessageAttachment,
+        authorizationHeader: String?,
+        isAutomatic: Bool = false
+    ) {
         guard downloadTask == nil else {
             return
         }
         guard let notificationID = notification.id, let remoteUrl = notification.attachmentRemoteUrl() else {
             return
+        }
+        let maxSize: Int64?
+        if isAutomatic {
+            guard Store.shared.shouldAutoDownloadAttachment(attachment) else {
+                notification.skipAttachmentAutoDownload()
+                return
+            }
+            maxSize = Store.shared.resolvedAttachmentAutoDownloadMaxSize()
+        } else {
+            maxSize = nil
         }
 
         notification.beginAttachmentDownload()
@@ -33,6 +48,7 @@ final class NotificationAttachmentController: ObservableObject {
                     remoteUrl: remoteUrl,
                     attachment: attachment,
                     authorizationHeader: authorizationHeader,
+                    maxSize: maxSize,
                     onProgress: { progress in
                         Task { @MainActor in
                             notification.setAttachmentDownloadProgress(progress)
@@ -48,7 +64,17 @@ final class NotificationAttachmentController: ObservableObject {
                 }
             } catch is CancellationError {
                 await MainActor.run {
-                    notification.resetAttachmentDownload()
+                    if !notification.attachmentDownloadWasCanceled() {
+                        notification.resetAttachmentDownload()
+                    }
+                }
+            } catch AttachmentDownloadError.tooLarge {
+                await MainActor.run {
+                    if isAutomatic {
+                        notification.skipAttachmentAutoDownload()
+                    } else {
+                        notification.failAttachmentDownload()
+                    }
                 }
             } catch {
                 await MainActor.run {
@@ -58,7 +84,8 @@ final class NotificationAttachmentController: ObservableObject {
         }
     }
 
-    func cancelDownload() {
+    func cancelDownload(notification: Notification) {
+        notification.cancelAttachmentDownload()
         downloadTask?.cancel()
         downloadTask = nil
     }
