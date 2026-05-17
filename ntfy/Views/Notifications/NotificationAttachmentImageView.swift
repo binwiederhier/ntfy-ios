@@ -70,7 +70,7 @@ private struct PresentedImage: Identifiable {
     let image: UIImage
 }
 
-private struct AttachmentFullscreenImageView: View {
+struct AttachmentFullscreenImageView: View {
     @Environment(\.dismiss) private var dismiss
 
     let image: UIImage
@@ -86,11 +86,18 @@ private struct AttachmentFullscreenImageView: View {
             Button {
                 dismiss()
             } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 28))
-                    .foregroundColor(.white.opacity(0.9))
-                    .padding()
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .frame(width: 36, height: 36)
+                    .background(.regularMaterial, in: Circle())
+                    .overlay {
+                        Circle()
+                            .strokeBorder(Color.white.opacity(0.18), lineWidth: 0.5)
+                    }
             }
+            .padding(.top, 14)
+            .padding(.trailing, 14)
         }
     }
 }

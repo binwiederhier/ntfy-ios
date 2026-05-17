@@ -5,11 +5,21 @@
 //  Created by Alek Michelson on 5/11/26.
 //
 
+import CoreData
 import SwiftUI
 
 @MainActor
 final class NotificationAttachmentController: ObservableObject {
     private var downloadTask: Task<Void, Never>?
+    @Published private var activeNotificationObjectID: NSManagedObjectID?
+    @Published private var transientProgressState: AttachmentProgressState?
+
+    func progressState(for notification: Notification) -> AttachmentProgressState {
+        if activeNotificationObjectID == notification.objectID, let transientProgressState {
+            return transientProgressState
+        }
+        return notification.attachmentStoredProgressState()
+    }
 
     func startDownload(
         notification: Notification,
@@ -34,7 +44,7 @@ final class NotificationAttachmentController: ObservableObject {
             maxSize = nil
         }
 
-        notification.beginAttachmentDownload()
+        setTransientProgressState(.indeterminate, for: notification)
         downloadTask = Task {
             defer {
                 Task { @MainActor in
@@ -51,7 +61,7 @@ final class NotificationAttachmentController: ObservableObject {
                     maxSize: maxSize,
                     onProgress: { progress in
                         Task { @MainActor in
-                            notification.setAttachmentDownloadProgress(progress)
+                            self.setTransientProgressState(.progress(progress), for: notification)
                         }
                     }
                 )
@@ -61,12 +71,14 @@ final class NotificationAttachmentController: ObservableObject {
                         resolvedType: downloaded.mimeType,
                         resolvedSize: downloaded.size
                     )
+                    self.clearTransientProgressState(for: notification)
                 }
             } catch is CancellationError {
                 await MainActor.run {
                     if !notification.attachmentDownloadWasCanceled() {
                         notification.resetAttachmentDownload()
                     }
+                    self.clearTransientProgressState(for: notification)
                 }
             } catch AttachmentDownloadError.tooLarge {
                 await MainActor.run {
@@ -75,10 +87,12 @@ final class NotificationAttachmentController: ObservableObject {
                     } else {
                         notification.failAttachmentDownload()
                     }
+                    self.clearTransientProgressState(for: notification)
                 }
             } catch {
                 await MainActor.run {
                     notification.failAttachmentDownload()
+                    self.clearTransientProgressState(for: notification)
                 }
             }
         }
@@ -86,6 +100,7 @@ final class NotificationAttachmentController: ObservableObject {
 
     func cancelDownload(notification: Notification) {
         notification.cancelAttachmentDownload()
+        clearTransientProgressState(for: notification)
         downloadTask?.cancel()
         downloadTask = nil
     }
@@ -96,9 +111,23 @@ final class NotificationAttachmentController: ObservableObject {
         }
         try? FileManager.default.removeItem(at: localFileUrl)
         notification.markAttachmentDeleted()
+        clearTransientProgressState(for: notification)
     }
 
     deinit {
         downloadTask?.cancel()
+    }
+
+    private func setTransientProgressState(_ state: AttachmentProgressState, for notification: Notification) {
+        activeNotificationObjectID = notification.objectID
+        transientProgressState = state
+    }
+
+    private func clearTransientProgressState(for notification: Notification) {
+        guard activeNotificationObjectID == notification.objectID else {
+            return
+        }
+        activeNotificationObjectID = nil
+        transientProgressState = nil
     }
 }

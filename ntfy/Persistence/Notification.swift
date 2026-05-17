@@ -117,7 +117,7 @@ extension Notification {
         return parts.joined(separator: " · ")
     }
 
-    func attachmentProgressState() -> AttachmentProgressState {
+    func attachmentStoredProgressState() -> AttachmentProgressState {
         AttachmentProgressState(
             storedValue: attachmentProgress,
             hasAttachment: messageAttachment() != nil,
@@ -125,28 +125,32 @@ extension Notification {
         )
     }
 
-    func attachmentProgressValue() -> Int16 {
-        attachmentProgressState().persistedValue
+    func attachmentProgressState(overrideState: AttachmentProgressState? = nil) -> AttachmentProgressState {
+        overrideState ?? attachmentStoredProgressState()
     }
 
-    func isAttachmentDownloading() -> Bool {
-        attachmentProgressState().isDownloading
+    func attachmentProgressValue(overrideState: AttachmentProgressState? = nil) -> Int16 {
+        attachmentProgressState(overrideState: overrideState).persistedValue
     }
 
-    func attachmentDownloadFailed() -> Bool {
-        attachmentProgressState() == .failed
+    func isAttachmentDownloading(overrideState: AttachmentProgressState? = nil) -> Bool {
+        attachmentProgressState(overrideState: overrideState).isDownloading
     }
 
-    func attachmentWasDeleted() -> Bool {
-        attachmentProgressState() == .deleted
+    func attachmentDownloadFailed(overrideState: AttachmentProgressState? = nil) -> Bool {
+        attachmentProgressState(overrideState: overrideState) == .failed
     }
 
-    func attachmentDownloadWasCanceled() -> Bool {
-        attachmentProgressState() == .canceled
+    func attachmentWasDeleted(overrideState: AttachmentProgressState? = nil) -> Bool {
+        attachmentProgressState(overrideState: overrideState) == .deleted
     }
 
-    func attachmentAutoDownloadWasSkipped() -> Bool {
-        attachmentProgressState() == .skipped
+    func attachmentDownloadWasCanceled(overrideState: AttachmentProgressState? = nil) -> Bool {
+        attachmentProgressState(overrideState: overrideState) == .canceled
+    }
+
+    func attachmentAutoDownloadWasSkipped(overrideState: AttachmentProgressState? = nil) -> Bool {
+        attachmentProgressState(overrideState: overrideState) == .skipped
     }
 
     func attachmentIsExpired(referenceDate: Date = Date()) -> Bool {
@@ -156,7 +160,7 @@ extension Notification {
         return expires < Int64(referenceDate.timeIntervalSince1970)
     }
 
-    func attachmentStatusDescription() -> String {
+    func attachmentStatusDescription(overrideState: AttachmentProgressState? = nil) -> String {
         guard let attachment = messageAttachment() else {
             return ""
         }
@@ -165,7 +169,7 @@ extension Notification {
             parts.append(formatBytes(size))
         }
 
-        let progress = attachmentProgressState()
+        let progress = attachmentProgressState(overrideState: overrideState)
         let exists = attachmentLocalFileUrl() != nil
         let deleted = !exists && (progress == .done || progress == .deleted)
         if progress == .none {
@@ -216,7 +220,7 @@ extension Notification {
         return parts.joined(separator: " · ")
     }
 
-    func notificationAttachmentSummary() -> String? {
+    func notificationAttachmentSummary(overrideState: AttachmentProgressState? = nil) -> String? {
         guard let attachment = messageAttachment() else {
             return nil
         }
@@ -225,7 +229,7 @@ extension Notification {
             parts.append(formatBytes(size))
         }
 
-        let progress = attachmentProgressState()
+        let progress = attachmentProgressState(overrideState: overrideState)
         if progress == .done {
             parts.append("downloaded")
         } else if progress.isDownloading {
@@ -260,18 +264,6 @@ extension Notification {
     @MainActor
     func setAttachmentLocalPath(_ localPath: String?) {
         attachmentLocalPath = localPath
-        try? managedObjectContext?.save()
-    }
-
-    @MainActor
-    func beginAttachmentDownload() {
-        attachmentProgress = AttachmentProgressState.indeterminate.persistedValue
-        try? managedObjectContext?.save()
-    }
-
-    @MainActor
-    func setAttachmentDownloadProgress(_ progress: Int16) {
-        attachmentProgress = AttachmentProgressState.progress(progress).persistedValue
         try? managedObjectContext?.save()
     }
 

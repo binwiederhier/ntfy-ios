@@ -16,6 +16,10 @@ struct NotificationAttachmentSectionView: View {
     let onOpen: (URL) -> Void
     let onShare: (URL) -> Void
     let onSave: (URL) -> Void
+    
+    private var currentProgressState: AttachmentProgressState {
+        controller.progressState(for: notification)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -23,7 +27,7 @@ struct NotificationAttachmentSectionView: View {
                 ZStack(alignment: .topTrailing) {
                     NotificationAttachmentImageView(
                         localFileUrl: notification.attachmentLocalFileUrl(),
-                        isLoading: notification.isAttachmentDownloading()
+                        isLoading: notification.isAttachmentDownloading(overrideState: currentProgressState)
                     )
 
                     if showsImageOnly, showsMenu {
@@ -61,7 +65,7 @@ struct NotificationAttachmentSectionView: View {
                     }
                     .buttonStyle(.plain)
 
-                    if notification.isAttachmentDownloading() {
+                    if notification.isAttachmentDownloading(overrideState: currentProgressState) {
                         ProgressView()
                             .scaleEffect(0.85)
                     }
@@ -75,7 +79,7 @@ struct NotificationAttachmentSectionView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
 
-            if notification.attachmentDownloadFailed() {
+            if notification.attachmentDownloadFailed(overrideState: currentProgressState) {
                 Text("The last download attempt failed.")
                     .font(.caption)
                     .foregroundColor(.red)
@@ -102,7 +106,7 @@ struct NotificationAttachmentSectionView: View {
             Button("Delete download", role: .destructive) {
                 controller.deleteDownloadedFile(notification: notification)
             }
-        } else if notification.isAttachmentDownloading() {
+        } else if notification.isAttachmentDownloading(overrideState: currentProgressState) {
             Button("Cancel") {
                 controller.cancelDownload(notification: notification)
             }
@@ -131,15 +135,15 @@ struct NotificationAttachmentSectionView: View {
         guard attachment.isImageAttachment() else {
             return false
         }
-        return notification.attachmentLocalFileUrl() != nil || notification.isAttachmentDownloading()
+        return notification.attachmentLocalFileUrl() != nil || notification.isAttachmentDownloading(overrideState: currentProgressState)
     }
 
     private var statusText: String {
-        notification.attachmentStatusDescription()
+        notification.attachmentStatusDescription(overrideState: currentProgressState)
     }
 
     private var statusColor: Color {
-        if notification.attachmentDownloadFailed() {
+        if notification.attachmentDownloadFailed(overrideState: currentProgressState) {
             return .red
         } else if attachmentExpired {
             return .red
@@ -151,7 +155,7 @@ struct NotificationAttachmentSectionView: View {
     private func handlePrimaryTap() {
         if let localFileUrl = notification.attachmentLocalFileUrl() {
             openLocalFile(localFileUrl)
-        } else if !attachmentExpired && !notification.isAttachmentDownloading() {
+        } else if !attachmentExpired && !notification.isAttachmentDownloading(overrideState: currentProgressState) {
             controller.startDownload(
                 notification: notification,
                 attachment: attachment,
@@ -186,7 +190,7 @@ struct NotificationAttachmentSectionView: View {
         if notification.attachmentLocalFileUrl() != nil {
             return true
         }
-        if notification.isAttachmentDownloading() {
+        if notification.isAttachmentDownloading(overrideState: currentProgressState) {
             return true
         }
         if !attachmentExpired {
@@ -199,7 +203,7 @@ struct NotificationAttachmentSectionView: View {
         [
             notification.id ?? "",
             notification.attachmentLocalPath ?? "",
-            String(notification.attachmentProgressValue())
+            String(notification.attachmentProgressValue(overrideState: currentProgressState))
         ].joined(separator: "|")
     }
 
@@ -210,19 +214,19 @@ struct NotificationAttachmentSectionView: View {
         guard notification.attachmentLocalFileUrl() == nil else {
             return
         }
-        guard !notification.isAttachmentDownloading() else {
+        guard !notification.isAttachmentDownloading(overrideState: currentProgressState) else {
             return
         }
-        guard !notification.attachmentDownloadFailed() else {
+        guard !notification.attachmentDownloadFailed(overrideState: currentProgressState) else {
             return
         }
-        guard !notification.attachmentDownloadWasCanceled() else {
+        guard !notification.attachmentDownloadWasCanceled(overrideState: currentProgressState) else {
             return
         }
-        guard !notification.attachmentAutoDownloadWasSkipped() else {
+        guard !notification.attachmentAutoDownloadWasSkipped(overrideState: currentProgressState) else {
             return
         }
-        guard !notification.attachmentWasDeleted() else {
+        guard !notification.attachmentWasDeleted(overrideState: currentProgressState) else {
             return
         }
         guard !attachmentExpired else {
