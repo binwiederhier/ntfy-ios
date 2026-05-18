@@ -44,7 +44,7 @@ final class NotificationAttachmentController: ObservableObject {
             maxSize = nil
         }
 
-        setTransientProgressState(.indeterminate, for: notification)
+        setTransientProgressState(.progress(0), for: notification)
         downloadTask = Task {
             defer {
                 Task { @MainActor in

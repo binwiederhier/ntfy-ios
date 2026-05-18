@@ -180,8 +180,6 @@ extension Notification {
             } else {
                 parts.append("Not downloaded")
             }
-        } else if progress == .indeterminate {
-            parts.append("Downloading")
         } else if case .progress(let percent) = progress {
             parts.append("Downloading \(percent)%")
         } else if progress == .failed {

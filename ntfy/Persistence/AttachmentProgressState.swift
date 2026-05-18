@@ -9,7 +9,6 @@ import Foundation
 
 enum AttachmentProgressState: Equatable {
     case none
-    case indeterminate
     case failed
     case deleted
     case canceled
@@ -30,8 +29,6 @@ enum AttachmentProgressState: Equatable {
         switch storedValue {
         case -1:
             self = .none
-        case -2:
-            self = .indeterminate
         case -3:
             self = .failed
         case -4:
@@ -53,8 +50,6 @@ enum AttachmentProgressState: Equatable {
         switch self {
         case .none:
             return -1
-        case .indeterminate:
-            return -2
         case .failed:
             return -3
         case .deleted:
@@ -72,7 +67,7 @@ enum AttachmentProgressState: Equatable {
     
     var isDownloading: Bool {
         switch self {
-        case .indeterminate, .progress:
+        case .progress:
             return true
         default:
             return false
