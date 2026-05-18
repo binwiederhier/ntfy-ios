@@ -14,6 +14,18 @@
 		2939B2192F8F293C00A52946 /* DefaultServerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2102F8F293C00A52946 /* DefaultServerView.swift */; };
 		2939B21A2F8F293C00A52946 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2112F8F293C00A52946 /* SettingsView.swift */; };
 		2939B21B2F8F293C00A52946 /* UserTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2142F8F293C00A52946 /* UserTableView.swift */; };
+		2968F2AD2FBA530200480665 /* AttachmentProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */; };
+		2968F2AE2FBA530200480665 /* AttachmentProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */; };
+		29E8419B2FB417E400F927E4 /* SubscriptionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E841992FB417E400F927E4 /* SubscriptionListView.swift */; };
+		29E8419C2FB417E400F927E4 /* SubscriptionAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E841982FB417E400F927E4 /* SubscriptionAddView.swift */; };
+		29E841A52FB417EA00F927E4 /* NotificationAttachmentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E8419E2FB417EA00F927E4 /* NotificationAttachmentController.swift */; };
+		29E841A62FB417EA00F927E4 /* NotificationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E841A32FB417EA00F927E4 /* NotificationRowView.swift */; };
+		29E841A72FB417EA00F927E4 /* NotificationAttachmentImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E8419F2FB417EA00F927E4 /* NotificationAttachmentImageLoader.swift */; };
+		29E841A82FB417EA00F927E4 /* NotificationAttachmentImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E841A02FB417EA00F927E4 /* NotificationAttachmentImageView.swift */; };
+		29E841A92FB417EA00F927E4 /* AttachmentFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E8419D2FB417EA00F927E4 /* AttachmentFileStore.swift */; };
+		29E841AA2FB417EA00F927E4 /* NotificationAttachmentSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E841A12FB417EA00F927E4 /* NotificationAttachmentSectionView.swift */; };
+		29E841AB2FB417EA00F927E4 /* NotificationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E841A22FB417EA00F927E4 /* NotificationListView.swift */; };
+		29F001032FB560E300F927E4 /* AttachmentFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E8419D2FB417EA00F927E4 /* AttachmentFileStore.swift */; };
 		9407EDDA284ADE1F00C1C334 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407EDD9284ADE1F00C1C334 /* User.swift */; };
 		9407EDDB284ADE1F00C1C334 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407EDD9284ADE1F00C1C334 /* User.swift */; };
 		9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1C0282F2AA700CDE4DD /* AppMain.swift */; };
@@ -25,14 +37,11 @@
 		9474F1DC282F30B500CDE4DD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */; };
 		9474F1E7282F3FFD00CDE4DD /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1E6282F3FFD00CDE4DD /* NotificationService.swift */; };
 		9474F1EB282F3FFD00CDE4DD /* ntfyNSE.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		9474F1F22830825600CDE4DD /* SubscriptionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F12830825600CDE4DD /* SubscriptionListView.swift */; };
 		9474F1F72830830700CDE4DD /* ntfy.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F52830830700CDE4DD /* ntfy.xcdatamodeld */; };
 		9474F1F92830835400CDE4DD /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F82830835400CDE4DD /* Store.swift */; };
-		9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FC2831311A00CDE4DD /* SubscriptionAddView.swift */; };
 		9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1FE28316ACE00CDE4DD /* Subscription.swift */; };
 		9474F2052831D51500CDE4DD /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F82830835400CDE4DD /* Store.swift */; };
 		9474F2062831D73C00CDE4DD /* ntfy.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1F52830830700CDE4DD /* ntfy.xcdatamodeld */; };
-		9474F20928331F3A00CDE4DD /* NotificationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F20728331F3900CDE4DD /* NotificationListView.swift */; };
 		9474F20C283321C300CDE4DD /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F20B283321C300CDE4DD /* Notification.swift */; };
 		9474F20F283326C500CDE4DD /* ApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F20E283326C500CDE4DD /* ApiService.swift */; };
 		9474F212283327C200CDE4DD /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F211283327C200CDE4DD /* Helpers.swift */; };
@@ -91,6 +100,16 @@
 		2939B2122F8F293C00A52946 /* UserEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserEditorView.swift; sourceTree = "<group>"; };
 		2939B2132F8F293C00A52946 /* UserRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRowView.swift; sourceTree = "<group>"; };
 		2939B2142F8F293C00A52946 /* UserTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTableView.swift; sourceTree = "<group>"; };
+		2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentProgressState.swift; sourceTree = "<group>"; };
+		29E841982FB417E400F927E4 /* SubscriptionAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionAddView.swift; sourceTree = "<group>"; };
+		29E841992FB417E400F927E4 /* SubscriptionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionListView.swift; sourceTree = "<group>"; };
+		29E8419D2FB417EA00F927E4 /* AttachmentFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentFileStore.swift; sourceTree = "<group>"; };
+		29E8419E2FB417EA00F927E4 /* NotificationAttachmentController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationAttachmentController.swift; sourceTree = "<group>"; };
+		29E8419F2FB417EA00F927E4 /* NotificationAttachmentImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationAttachmentImageLoader.swift; sourceTree = "<group>"; };
+		29E841A02FB417EA00F927E4 /* NotificationAttachmentImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationAttachmentImageView.swift; sourceTree = "<group>"; };
+		29E841A12FB417EA00F927E4 /* NotificationAttachmentSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationAttachmentSectionView.swift; sourceTree = "<group>"; };
+		29E841A22FB417EA00F927E4 /* NotificationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationListView.swift; sourceTree = "<group>"; };
+		29E841A32FB417EA00F927E4 /* NotificationRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRowView.swift; sourceTree = "<group>"; };
 		9407EDD9284ADE1F00C1C334 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		9474F1BD282F2AA700CDE4DD /* ntfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9474F1C0282F2AA700CDE4DD /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
@@ -104,13 +123,10 @@
 		9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ntfyNSE.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9474F1E6282F3FFD00CDE4DD /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		9474F1E8282F3FFD00CDE4DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9474F1F12830825600CDE4DD /* SubscriptionListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionListView.swift; sourceTree = "<group>"; };
 		9474F1F62830830700CDE4DD /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		9474F1F82830835400CDE4DD /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
-		9474F1FC2831311A00CDE4DD /* SubscriptionAddView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionAddView.swift; sourceTree = "<group>"; };
 		9474F1FE28316ACE00CDE4DD /* Subscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subscription.swift; sourceTree = "<group>"; };
 		9474F2042831CDBF00CDE4DD /* ntfyNSE.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfyNSE.entitlements; sourceTree = "<group>"; };
-		9474F20728331F3900CDE4DD /* NotificationListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationListView.swift; sourceTree = "<group>"; };
 		9474F20B283321C300CDE4DD /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
 		9474F20E283326C500CDE4DD /* ApiService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
 		9474F211283327C200CDE4DD /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
@@ -157,6 +173,29 @@
 				2939B2142F8F293C00A52946 /* UserTableView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		29E8419A2FB417E400F927E4 /* Subscriptions */ = {
+			isa = PBXGroup;
+			children = (
+				29E841982FB417E400F927E4 /* SubscriptionAddView.swift */,
+				29E841992FB417E400F927E4 /* SubscriptionListView.swift */,
+			);
+			path = Subscriptions;
+			sourceTree = "<group>";
+		};
+		29E841A42FB417EA00F927E4 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				29E8419D2FB417EA00F927E4 /* AttachmentFileStore.swift */,
+				29E8419E2FB417EA00F927E4 /* NotificationAttachmentController.swift */,
+				29E8419F2FB417EA00F927E4 /* NotificationAttachmentImageLoader.swift */,
+				29E841A02FB417EA00F927E4 /* NotificationAttachmentImageView.swift */,
+				29E841A12FB417EA00F927E4 /* NotificationAttachmentSectionView.swift */,
+				29E841A22FB417EA00F927E4 /* NotificationListView.swift */,
+				29E841A32FB417EA00F927E4 /* NotificationRowView.swift */,
+			);
+			path = Notifications;
 			sourceTree = "<group>";
 		};
 		9474F1B4282F2AA700CDE4DD = {
@@ -221,12 +260,11 @@
 			isa = PBXGroup;
 			children = (
 				02024E5F283D7CBB0064224A /* Extensions.swift */,
+				29E8419A2FB417E400F927E4 /* Subscriptions */,
 				9474F1C2282F2AA700CDE4DD /* ContentView.swift */,
-				9474F1FC2831311A00CDE4DD /* SubscriptionAddView.swift */,
-				9474F1F12830825600CDE4DD /* SubscriptionListView.swift */,
 				2939B2152F8F293C00A52946 /* Settings */,
 				94B736D6284AF9BE003D69FB /* MainView.swift */,
-				9474F20728331F3900CDE4DD /* NotificationListView.swift */,
+				29E841A42FB417EA00F927E4 /* Notifications */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -238,6 +276,7 @@
 				9474F1FE28316ACE00CDE4DD /* Subscription.swift */,
 				9474F1F82830835400CDE4DD /* Store.swift */,
 				9474F20B283321C300CDE4DD /* Notification.swift */,
+				2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */,
 				E27008112AF1030A006E33BA /* NotificationsObservable.swift */,
 				94A3F7C7283734D900C48E79 /* SubscriptionManager.swift */,
 				E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */,
@@ -393,6 +432,7 @@
 				2939B2162F8F293C00A52946 /* UserRowView.swift in Sources */,
 				2939B2172F8F293C00A52946 /* UserEditorView.swift in Sources */,
 				2939B2182F8F293C00A52946 /* AboutView.swift in Sources */,
+				2968F2AD2FBA530200480665 /* AttachmentProgressState.swift in Sources */,
 				2939B2192F8F293C00A52946 /* DefaultServerView.swift in Sources */,
 				2939B21A2F8F293C00A52946 /* SettingsView.swift in Sources */,
 				2939B21B2F8F293C00A52946 /* UserTableView.swift in Sources */,
@@ -402,16 +442,15 @@
 				9474F1F92830835400CDE4DD /* Store.swift in Sources */,
 				9474F212283327C200CDE4DD /* Helpers.swift in Sources */,
 				9474F217283531A300CDE4DD /* Log.swift in Sources */,
-				9474F20928331F3A00CDE4DD /* NotificationListView.swift in Sources */,
 				94A3F7C8283734D900C48E79 /* SubscriptionManager.swift in Sources */,
 				9474F1D2282F2D2C00CDE4DD /* AppDelegate.swift in Sources */,
+				29E8419B2FB417E400F927E4 /* SubscriptionListView.swift in Sources */,
+				29E8419C2FB417E400F927E4 /* SubscriptionAddView.swift in Sources */,
 				94A3F7CA28386B2100C48E79 /* Config.swift in Sources */,
 				9474F1C3282F2AA700CDE4DD /* ContentView.swift in Sources */,
 				9474F20C283321C300CDE4DD /* Notification.swift in Sources */,
-				9474F1F22830825600CDE4DD /* SubscriptionListView.swift in Sources */,
 				E27008122AF1030A006E33BA /* NotificationsObservable.swift in Sources */,
 				9486714A2841D0CE0093C7A4 /* ActionExecutor.swift in Sources */,
-				9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */,
 				9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */,
 				94CD196A283E666900973B93 /* EmojiManager.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */,
@@ -419,6 +458,13 @@
 				9474F20F283326C500CDE4DD /* ApiService.swift in Sources */,
 				94B736D7284AF9BE003D69FB /* MainView.swift in Sources */,
 				9474F1F72830830700CDE4DD /* ntfy.xcdatamodeld in Sources */,
+				29E841A52FB417EA00F927E4 /* NotificationAttachmentController.swift in Sources */,
+				29E841A62FB417EA00F927E4 /* NotificationRowView.swift in Sources */,
+				29E841A72FB417EA00F927E4 /* NotificationAttachmentImageLoader.swift in Sources */,
+				29E841A82FB417EA00F927E4 /* NotificationAttachmentImageView.swift in Sources */,
+				29E841A92FB417EA00F927E4 /* AttachmentFileStore.swift in Sources */,
+				29E841AA2FB417EA00F927E4 /* NotificationAttachmentSectionView.swift in Sources */,
+				29E841AB2FB417EA00F927E4 /* NotificationListView.swift in Sources */,
 				9407EDDA284ADE1F00C1C334 /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -435,7 +481,9 @@
 				94CD196B283E666900973B93 /* EmojiManager.swift in Sources */,
 				94867144283ECD370093C7A4 /* Actions.swift in Sources */,
 				94867145284058C60093C7A4 /* ApiService.swift in Sources */,
+				2968F2AE2FBA530200480665 /* AttachmentProgressState.swift in Sources */,
 				9474F2052831D51500CDE4DD /* Store.swift in Sources */,
+				29F001032FB560E300F927E4 /* AttachmentFileStore.swift in Sources */,
 				9474F2062831D73C00CDE4DD /* ntfy.xcdatamodeld in Sources */,
 				94A3F7CB28386B2100C48E79 /* Config.swift in Sources */,
 				948671482841B1430093C7A4 /* NotificationContent.swift in Sources */,

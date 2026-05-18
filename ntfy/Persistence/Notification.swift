@@ -61,6 +61,313 @@ extension Notification {
     func actionsList() -> [Action] {
         return Actions.shared.parse(actions) ?? []
     }
+
+    func messageAttachment() -> MessageAttachment? {
+        guard let attachmentUrl = attachmentUrl, !attachmentUrl.isEmpty else {
+            return nil
+        }
+        return MessageAttachment(
+            name: attachmentName ?? "attachment",
+            type: attachmentType,
+            size: attachmentSize == 0 ? nil : attachmentSize,
+            expires: attachmentExpires == 0 ? nil : attachmentExpires,
+            url: attachmentUrl
+        )
+    }
+
+    func attachmentImageUrl() -> URL? {
+        guard let attachment = messageAttachment(), let attachmentUrl = attachmentRemoteUrl() else {
+            return nil
+        }
+        guard attachment.isImageAttachment() else {
+            return nil
+        }
+        return attachmentUrl
+    }
+
+    func attachmentRemoteUrl() -> URL? {
+        guard let attachment = messageAttachment() else {
+            return nil
+        }
+        return URL(string: attachment.url)
+    }
+
+    func attachmentLocalFileUrl() -> URL? {
+        guard let attachmentLocalPath, !attachmentLocalPath.isEmpty else {
+            return nil
+        }
+        let url = URL(fileURLWithPath: attachmentLocalPath)
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            return nil
+        }
+        return url
+    }
+
+    func attachmentDetailText() -> String {
+        guard let attachment = messageAttachment() else {
+            return ""
+        }
+        var parts: [String] = []
+        if let type = attachment.type, !type.isEmpty {
+            parts.append(type)
+        }
+        if let size = attachment.size, size > 0 {
+            parts.append(formatBytes(size))
+        }
+        return parts.joined(separator: " · ")
+    }
+
+    func attachmentStoredProgressState() -> AttachmentProgressState {
+        AttachmentProgressState(
+            storedValue: attachmentProgress,
+            hasAttachment: messageAttachment() != nil,
+            hasLocalFile: attachmentLocalFileUrl() != nil
+        )
+    }
+
+    func attachmentProgressState(overrideState: AttachmentProgressState? = nil) -> AttachmentProgressState {
+        overrideState ?? attachmentStoredProgressState()
+    }
+
+    func attachmentProgressValue(overrideState: AttachmentProgressState? = nil) -> Int16 {
+        attachmentProgressState(overrideState: overrideState).persistedValue
+    }
+
+    func isAttachmentDownloading(overrideState: AttachmentProgressState? = nil) -> Bool {
+        attachmentProgressState(overrideState: overrideState).isDownloading
+    }
+
+    func attachmentDownloadFailed(overrideState: AttachmentProgressState? = nil) -> Bool {
+        attachmentProgressState(overrideState: overrideState) == .failed
+    }
+
+    func attachmentWasDeleted(overrideState: AttachmentProgressState? = nil) -> Bool {
+        attachmentProgressState(overrideState: overrideState) == .deleted
+    }
+
+    func attachmentDownloadWasCanceled(overrideState: AttachmentProgressState? = nil) -> Bool {
+        attachmentProgressState(overrideState: overrideState) == .canceled
+    }
+
+    func attachmentAutoDownloadWasSkipped(overrideState: AttachmentProgressState? = nil) -> Bool {
+        attachmentProgressState(overrideState: overrideState) == .skipped
+    }
+
+    func attachmentIsExpired(referenceDate: Date = Date()) -> Bool {
+        guard let expires = messageAttachment()?.expires else {
+            return false
+        }
+        return expires < Int64(referenceDate.timeIntervalSince1970)
+    }
+
+    func attachmentStatusDescription(overrideState: AttachmentProgressState? = nil) -> String {
+        guard let attachment = messageAttachment() else {
+            return ""
+        }
+        var parts: [String] = []
+        if let size = attachment.size, size > 0 {
+            parts.append(formatBytes(size))
+        }
+
+        let progress = attachmentProgressState(overrideState: overrideState)
+        let exists = attachmentLocalFileUrl() != nil
+        let deleted = !exists && (progress == .done || progress == .deleted)
+        if progress == .none {
+            if attachmentIsExpired() {
+                parts.append("Not downloaded, expired")
+            } else if let expiry = attachmentExpiryShortDateString() {
+                parts.append("Not downloaded, expires \(expiry)")
+            } else {
+                parts.append("Not downloaded")
+            }
+        } else if case .progress(let percent) = progress {
+            parts.append("Downloading \(percent)%")
+        } else if progress == .failed {
+            if attachmentIsExpired() {
+                parts.append("Download failed, expired")
+            } else if let expiry = attachmentExpiryShortDateString() {
+                parts.append("Download failed, expires \(expiry)")
+            } else {
+                parts.append("Download failed")
+            }
+        } else if progress == .canceled {
+            if attachmentIsExpired() {
+                parts.append("Download canceled, expired")
+            } else if let expiry = attachmentExpiryShortDateString() {
+                parts.append("Download canceled, expires \(expiry)")
+            } else {
+                parts.append("Download canceled")
+            }
+        } else if progress == .skipped {
+            if attachmentIsExpired() {
+                parts.append("Not downloaded, expired")
+            } else if let expiry = attachmentExpiryShortDateString() {
+                parts.append("Not auto-downloaded, expires \(expiry)")
+            } else {
+                parts.append("Not auto-downloaded")
+            }
+        } else if deleted {
+            if attachmentIsExpired() {
+                parts.append("Deleted, expired")
+            } else if let expiry = attachmentExpiryShortDateString() {
+                parts.append("Deleted, expires \(expiry)")
+            } else {
+                parts.append("Deleted")
+            }
+        }
+        return parts.joined(separator: " · ")
+    }
+
+    func notificationAttachmentSummary(overrideState: AttachmentProgressState? = nil) -> String? {
+        guard let attachment = messageAttachment() else {
+            return nil
+        }
+        var parts = [attachment.displayName()]
+        if let size = attachment.size, size > 0 {
+            parts.append(formatBytes(size))
+        }
+
+        let progress = attachmentProgressState(overrideState: overrideState)
+        if progress == .done {
+            parts.append("downloaded")
+        } else if progress.isDownloading {
+            parts.append("downloading")
+        } else if progress == .failed {
+            parts.append("download failed")
+        } else if progress == .canceled {
+            parts.append("download canceled")
+        } else if progress == .skipped {
+            parts.append("not auto-downloaded")
+        } else if attachmentIsExpired() {
+            parts.append("expired")
+        }
+
+        return "Attachment: " + parts.joined(separator: ", ")
+    }
+
+    private func attachmentExpiryShortDateString() -> String? {
+        guard let expires = messageAttachment()?.expires else {
+            return nil
+        }
+        let expiresDate = Date(timeIntervalSince1970: TimeInterval(expires))
+        guard expiresDate > Date() else {
+            return nil
+        }
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .none
+        return formatter.string(from: expiresDate)
+    }
+
+    @MainActor
+    func setAttachmentLocalPath(_ localPath: String?) {
+        attachmentLocalPath = localPath
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func resetAttachmentDownload() {
+        attachmentProgress = AttachmentProgressState.none.persistedValue
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func failAttachmentDownload() {
+        attachmentProgress = AttachmentProgressState.failed.persistedValue
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func cancelAttachmentDownload() {
+        attachmentProgress = AttachmentProgressState.canceled.persistedValue
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func skipAttachmentAutoDownload() {
+        attachmentProgress = AttachmentProgressState.skipped.persistedValue
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func completeAttachmentDownload(localPath: String, resolvedType: String?, resolvedSize: Int64) {
+        attachmentLocalPath = localPath
+        attachmentProgress = AttachmentProgressState.done.persistedValue
+        if resolvedSize > 0 {
+            attachmentSize = resolvedSize
+        }
+        if let resolvedType, !resolvedType.isEmpty {
+            attachmentType = resolvedType
+        }
+        try? managedObjectContext?.save()
+    }
+
+    @MainActor
+    func markAttachmentDeleted() {
+        attachmentLocalPath = nil
+        attachmentProgress = AttachmentProgressState.deleted.persistedValue
+        try? managedObjectContext?.save()
+    }
+}
+
+struct MessageAttachment: Codable {
+    var name: String
+    var type: String?
+    var size: Int64?
+    var expires: Int64?
+    var url: String
+
+    func isImageAttachment() -> Bool {
+        if let type = type, type.lowercased().hasPrefix("image/") {
+            return true
+        }
+        guard let parsedUrl = URL(string: url) else {
+            return false
+        }
+        let imageExtensions = ["png", "jpg", "jpeg", "gif", "webp", "heic", "heif", "bmp", "tif", "tiff"]
+        return imageExtensions.contains(parsedUrl.pathExtension.lowercased())
+    }
+
+    func isExpired(referenceDate: Date = Date()) -> Bool {
+        guard let expires else {
+            return false
+        }
+        return expires < Int64(referenceDate.timeIntervalSince1970)
+    }
+
+    func displayName() -> String {
+        if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return name
+        }
+        if let parsedUrl = URL(string: url) {
+            let filename = parsedUrl.lastPathComponent.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !filename.isEmpty {
+                return filename
+            }
+        }
+        return "attachment"
+    }
+
+    func systemImageName() -> String {
+        guard let type = type?.lowercased() else {
+            return "doc"
+        }
+        if type.hasPrefix("image/") {
+            return "photo"
+        } else if type.hasPrefix("video/") {
+            return "video"
+        } else if type.hasPrefix("audio/") {
+            return "waveform"
+        } else if type == "application/pdf" {
+            return "doc.richtext"
+        } else if type.hasPrefix("text/") {
+            return "doc.text"
+        } else if type.hasPrefix("application/zip") || type.hasSuffix("compressed") {
+            return "archivebox"
+        } else {
+            return "doc"
+        }
+    }
 }
 
 /// This is the "on the wire" message as it is received from the ntfy server
@@ -76,12 +383,62 @@ struct Message: Decodable {
     var actions: [Action]?
     var click: String?
     var pollId: String?
+    var attachment: MessageAttachment?
+
+    enum CodingKeys: String, CodingKey {
+        case id, time, event, topic, message, title, priority, tags, actions, click, attachment
+        case pollId = "poll_id"
+    }
+
+    init(
+        id: String,
+        time: Int64,
+        event: String,
+        topic: String,
+        message: String? = nil,
+        title: String? = nil,
+        priority: Int16? = nil,
+        tags: [String]? = nil,
+        actions: [Action]? = nil,
+        click: String? = nil,
+        pollId: String? = nil,
+        attachment: MessageAttachment? = nil
+    ) {
+        self.id = id
+        self.time = time
+        self.event = event
+        self.topic = topic
+        self.message = message
+        self.title = title
+        self.priority = priority
+        self.tags = tags
+        self.actions = actions
+        self.click = click
+        self.pollId = pollId
+        self.attachment = attachment
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        time = try container.decode(Int64.self, forKey: .time)
+        event = try container.decode(String.self, forKey: .event)
+        topic = try container.decode(String.self, forKey: .topic)
+        message = try container.decodeIfPresent(String.self, forKey: .message)
+        title = try container.decodeIfPresent(String.self, forKey: .title)
+        priority = try container.decodeIfPresent(Int16.self, forKey: .priority)
+        tags = try container.decodeIfPresent([String].self, forKey: .tags)
+        actions = try container.decodeIfPresent([Action].self, forKey: .actions)
+        click = try container.decodeIfPresent(String.self, forKey: .click)
+        pollId = try container.decodeIfPresent(String.self, forKey: .pollId)
+        attachment = try container.decodeIfPresent(MessageAttachment.self, forKey: .attachment)
+    }
     
     func toUserInfo() -> [AnyHashable: Any] {
         // This should mimic the way that the ntfy server encodes a message.
         // See server_firebase.go for more details.
         
-        return [
+        var userInfo: [AnyHashable: Any] = [
             "id": id,
             "time": String(time),
             "event": event,
@@ -94,6 +451,14 @@ struct Message: Decodable {
             "click": click ?? "",
             "poll_id": pollId ?? ""
         ]
+        if let attachment {
+            userInfo["attachment_name"] = attachment.name
+            userInfo["attachment_type"] = attachment.type ?? ""
+            userInfo["attachment_size"] = String(attachment.size ?? 0)
+            userInfo["attachment_expires"] = String(attachment.expires ?? 0)
+            userInfo["attachment_url"] = attachment.url
+        }
+        return userInfo
     }
     
     static func from(userInfo: [AnyHashable: Any]) -> Message? {
@@ -112,6 +477,19 @@ struct Message: Decodable {
         let actions = userInfo["actions"] as? String
         let click = userInfo["click"] as? String
         let pollId = userInfo["poll_id"] as? String
+        let attachmentUrl = userInfo["attachment_url"] as? String
+        let attachment: MessageAttachment?
+        if let attachmentUrl = attachmentUrl, !attachmentUrl.isEmpty {
+            attachment = MessageAttachment(
+                name: userInfo["attachment_name"] as? String ?? "attachment",
+                type: userInfo["attachment_type"] as? String,
+                size: Int64(userInfo["attachment_size"] as? String ?? "0").flatMap { $0 == 0 ? nil : $0 },
+                expires: Int64(userInfo["attachment_expires"] as? String ?? "0").flatMap { $0 == 0 ? nil : $0 },
+                url: attachmentUrl
+            )
+        } else {
+            attachment = nil
+        }
         return Message(
             id: id,
             time: timeInt,
@@ -123,7 +501,8 @@ struct Message: Decodable {
             tags: tags,
             actions: Actions.shared.parse(actions),
             click: click,
-            pollId: pollId
+            pollId: pollId,
+            attachment: attachment
         )
     }
 }
