@@ -22,13 +22,11 @@ extension Subscription {
     }
     
     func lastNotification() -> Notification? {
-        return notificationsSorted().first
-    }
-    
-    func notificationsSorted() -> [Notification] {
-        if let notifications = notifications {
-            return notifications.sortedArray(using: [NSSortDescriptor(keyPath: \Notification.time, ascending: false)]) as! [Notification]
+        guard let notifications else {
+            return nil
         }
-        return []
+        return notifications
+            .sortedArray(using: [NSSortDescriptor(keyPath: \Notification.time, ascending: false)])
+            .first as? Notification
     }
 }

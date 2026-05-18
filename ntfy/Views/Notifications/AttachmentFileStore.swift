@@ -32,7 +32,7 @@ enum AttachmentFileStore {
             request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
         }
 
-        let (bytes, response) = try await URLSession.shared.bytes(for: request)
+        let (temporaryFileUrl, response) = try await URLSession.shared.download(for: request)
         guard let httpResponse = response as? HTTPURLResponse, (200..<300).contains(httpResponse.statusCode) else {
             throw AttachmentDownloadError.badResponse
         }
@@ -43,57 +43,20 @@ enum AttachmentFileStore {
             throw AttachmentDownloadError.tooLarge
         }
 
-        let destinationUrl = try localFileUrl(
-            notificationID: notificationID,
-            attachment: attachment,
-            remoteUrl: remoteUrl,
-            mimeType: resolvedMimeType
-        )
-        try? FileManager.default.removeItem(at: destinationUrl)
-        FileManager.default.createFile(atPath: destinationUrl.path, contents: nil)
-
-        let handle = try FileHandle(forWritingTo: destinationUrl)
-        var totalBytes: Int64 = 0
-        var buffer = Data()
-        var lastProgress = AttachmentProgressState.none.persistedValue
-
-        do {
-            for try await byte in bytes {
-                try Task.checkCancellation()
-
-                buffer.append(byte)
-                totalBytes += 1
-
-                if buffer.count >= 64 * 1024 {
-                    try handle.write(contentsOf: buffer)
-                    buffer.removeAll(keepingCapacity: true)
-                }
-
-                if let maxSize, totalBytes > maxSize {
-                    throw AttachmentDownloadError.tooLarge
-                }
-
-                guard let expectedSize, expectedSize > 0 else {
-                    continue
-                }
-                let progress = Int16(min(99, Int((Double(totalBytes) / Double(expectedSize)) * 100)))
-                if progress != lastProgress {
-                    lastProgress = progress
-                    onProgress?(progress)
-                }
-            }
-
-            if !buffer.isEmpty {
-                try handle.write(contentsOf: buffer)
-            }
-            try handle.close()
-        } catch {
-            try? handle.close()
-            try? FileManager.default.removeItem(at: destinationUrl)
-            throw error
+        let attributes = try FileManager.default.attributesOfItem(atPath: temporaryFileUrl.path)
+        let downloadedSize = (attributes[.size] as? NSNumber)?.int64Value ?? 0
+        if let maxSize, downloadedSize > maxSize {
+            throw AttachmentDownloadError.tooLarge
         }
 
-        return DownloadedAttachmentFile(localFileUrl: destinationUrl, size: totalBytes, mimeType: resolvedMimeType)
+        onProgress?(99)
+        return try storeDownloadedTemporaryFile(
+            notificationID: notificationID,
+            remoteUrl: remoteUrl,
+            attachment: attachment,
+            temporaryFileUrl: temporaryFileUrl,
+            mimeType: resolvedMimeType
+        )
     }
 
     static func existingLocalFileUrl(

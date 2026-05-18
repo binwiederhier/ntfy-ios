@@ -75,7 +75,7 @@ final class NotificationAttachmentController: ObservableObject {
                 }
             } catch is CancellationError {
                 await MainActor.run {
-                    if !notification.attachmentDownloadWasCanceled() {
+                    if notification.attachmentStoredProgressState() != .canceled {
                         notification.resetAttachmentDownload()
                     }
                     self.clearTransientProgressState(for: notification)

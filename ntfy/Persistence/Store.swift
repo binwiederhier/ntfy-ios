@@ -131,11 +131,6 @@ class Store: ObservableObject {
         }
     }
 
-    func updateSubscriptionBaseUrl(_ subscription: Subscription, baseUrl: String) {
-        subscription.baseUrl = normalizeBaseUrl(baseUrl)
-        try? context.save()
-    }
-
     func delete(subscription: Subscription) {
         context.performAndWait {
             if let notifications = subscription.notifications {
@@ -309,18 +304,6 @@ class Store: ObservableObject {
         return normalizeBaseUrl(baseUrl!)
     }
 
-    func saveAttachmentAutoDownloadMaxSize(_ maxSize: Int64) {
-        do {
-            let pref = getPreference(key: Store.prefKeyAttachmentAutoDownloadMaxSize) ?? Preference(context: context)
-            pref.key = Store.prefKeyAttachmentAutoDownloadMaxSize
-            pref.value = String(maxSize)
-            try context.save()
-        } catch let error {
-            Log.w(Store.tag, "Cannot store attachment auto-download preference", error)
-            rollbackAndRefresh()
-        }
-    }
-
     func getAttachmentAutoDownloadMaxSize() -> Int64 {
         guard
             let rawValue = getPreference(key: Store.prefKeyAttachmentAutoDownloadMaxSize)?.value,
@@ -406,29 +389,26 @@ extension Store {
     
     @discardableResult
     func makeSubscription(_ context: NSManagedObjectContext, _ topic: String, _ messages: [Message]) -> Subscription {
-        let notifications = messages.map { makeNotification(context, $0) }
+        let notifications = messages.map { message in
+            let notification = Notification(context: context)
+            notification.id = message.id
+            notification.time = message.time
+            notification.message = message.message
+            notification.title = message.title
+            notification.priority = message.priority ?? 3
+            notification.tags = message.tags?.joined(separator: ",") ?? ""
+            notification.attachmentName = message.attachment?.name
+            notification.attachmentType = message.attachment?.type
+            notification.attachmentSize = message.attachment?.size ?? 0
+            notification.attachmentExpires = message.attachment?.expires ?? 0
+            notification.attachmentUrl = message.attachment?.url
+            notification.attachmentProgress = message.attachment == nil ? 0 : AttachmentProgressState.none.persistedValue
+            return notification
+        }
         let subscription = Subscription(context: context)
         subscription.baseUrl = Config.appBaseUrl
         subscription.topic = topic
         subscription.notifications = NSSet(array: notifications)
         return subscription
-    }
-    
-    @discardableResult
-    func makeNotification(_ context: NSManagedObjectContext, _ message: Message) -> Notification {
-        let notification = Notification(context: context)
-        notification.id = message.id
-        notification.time = message.time
-        notification.message = message.message
-        notification.title = message.title
-        notification.priority = message.priority ?? 3
-        notification.tags = message.tags?.joined(separator: ",") ?? ""
-        notification.attachmentName = message.attachment?.name
-        notification.attachmentType = message.attachment?.type
-        notification.attachmentSize = message.attachment?.size ?? 0
-        notification.attachmentExpires = message.attachment?.expires ?? 0
-        notification.attachmentUrl = message.attachment?.url
-        notification.attachmentProgress = message.attachment == nil ? 0 : AttachmentProgressState.none.persistedValue
-        return notification
     }
 }

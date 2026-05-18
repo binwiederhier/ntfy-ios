@@ -74,13 +74,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
                         didReceiveNewData = true
                     }
                 }
-                messages.forEach { message in
-                    group.enter()
-                    self.showNotification(baseUrl: baseUrl, message) {
-                        group.leave()
-                    }
+                self.showNotificationsSequentially(baseUrl: baseUrl, messages: messages) {
+                    group.leave()
                 }
-                group.leave()
             }
         }
         group.notify(queue: .main) {
@@ -123,6 +119,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
                 }
                 completionHandler?()
             }
+        }
+    }
+
+    private func showNotificationsSequentially(baseUrl: String, messages: [Message], completionHandler: @escaping () -> Void) {
+        guard let firstMessage = messages.first else {
+            completionHandler()
+            return
+        }
+
+        showNotification(baseUrl: baseUrl, firstMessage) {
+            self.showNotificationsSequentially(
+                baseUrl: baseUrl,
+                messages: Array(messages.dropFirst()),
+                completionHandler: completionHandler
+            )
         }
     }
 }

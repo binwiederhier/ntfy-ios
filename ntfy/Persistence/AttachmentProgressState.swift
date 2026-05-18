@@ -16,6 +16,8 @@ enum AttachmentProgressState: Equatable {
     case progress(Int16)
     case done
     
+    // Persisted attachment progress uses a compact Int16 encoding:
+    // negative values are terminal states, 0...99 is download progress, and 100 means done.
     init(storedValue: Int16, hasAttachment: Bool, hasLocalFile: Bool) {
         if hasLocalFile {
             self = .done
@@ -29,13 +31,13 @@ enum AttachmentProgressState: Equatable {
         switch storedValue {
         case -1:
             self = .none
-        case -3:
+        case -2:
             self = .failed
-        case -4:
+        case -3:
             self = .deleted
-        case -5:
+        case -4:
             self = .canceled
-        case -6:
+        case -5:
             self = .skipped
         case 100...:
             self = .done
@@ -51,13 +53,13 @@ enum AttachmentProgressState: Equatable {
         case .none:
             return -1
         case .failed:
-            return -3
+            return -2
         case .deleted:
-            return -4
+            return -3
         case .canceled:
-            return -5
+            return -4
         case .skipped:
-            return -6
+            return -5
         case .progress(let percent):
             return percent
         case .done:

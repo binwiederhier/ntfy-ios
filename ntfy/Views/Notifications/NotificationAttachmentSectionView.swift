@@ -22,24 +22,30 @@ struct NotificationAttachmentSectionView: View {
     }
 
     var body: some View {
+        let storedLocalFileUrl = notification.attachmentStoredLocalFileUrl()
+        let resolvedLocalFileUrl = notification.attachmentLocalFileUrl()
+
         VStack(alignment: .leading, spacing: 8) {
-            if shouldShowImagePreview {
+            if shouldShowImagePreview(storedLocalFileUrl: storedLocalFileUrl) {
                 ZStack(alignment: .topTrailing) {
                     NotificationAttachmentImageView(
-                        localFileUrl: notification.attachmentLocalFileUrl(),
+                        localFileUrl: storedLocalFileUrl,
                         isLoading: notification.isAttachmentDownloading(overrideState: currentProgressState)
                     )
 
-                    if showsImageOnly, showsMenu {
-                        previewMenuButton
+                    if showsImageOnly(storedLocalFileUrl: storedLocalFileUrl),
+                       showsMenu(resolvedLocalFileUrl: resolvedLocalFileUrl) {
+                        previewMenuButton(localFileUrl: resolvedLocalFileUrl)
                             .padding(8)
                     }
                 }
             }
 
-            if !showsImageOnly {
+            if !showsImageOnly(storedLocalFileUrl: storedLocalFileUrl) {
                 HStack(alignment: .center, spacing: 10) {
-                    Button(action: handlePrimaryTap) {
+                    Button(action: {
+                        handlePrimaryTap(localFileUrl: resolvedLocalFileUrl)
+                    }) {
                         HStack(alignment: .center, spacing: 10) {
                             Image(systemName: attachment.systemImageName())
                                 .font(.title3)
@@ -70,8 +76,8 @@ struct NotificationAttachmentSectionView: View {
                             .scaleEffect(0.85)
                     }
 
-                    if showsMenu {
-                        previewMenuButton
+                    if showsMenu(resolvedLocalFileUrl: resolvedLocalFileUrl) {
+                        previewMenuButton(localFileUrl: resolvedLocalFileUrl)
                     }
                 }
                 .padding(10)
@@ -79,21 +85,21 @@ struct NotificationAttachmentSectionView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
 
-            if notification.attachmentDownloadFailed(overrideState: currentProgressState) {
+            if currentProgressState == .failed {
                 Text("The last download attempt failed.")
                     .font(.caption)
                     .foregroundColor(.red)
             }
         }
         .padding(.top, 8)
-        .task(id: imageAutoDownloadKey) {
-            autoDownloadInlineImageIfNeeded()
+        .task(id: imageAutoDownloadKey(storedLocalFileUrl: storedLocalFileUrl)) {
+            autoDownloadInlineImageIfNeeded(storedLocalFileUrl: storedLocalFileUrl)
         }
     }
 
     @ViewBuilder
-    private var attachmentMenuItems: some View {
-        if let localFileUrl = notification.attachmentLocalFileUrl() {
+    private func attachmentMenuItems(localFileUrl: URL?) -> some View {
+        if let localFileUrl {
             Button("Open") {
                 openLocalFile(localFileUrl)
             }
@@ -131,11 +137,11 @@ struct NotificationAttachmentSectionView: View {
         notification.attachmentIsExpired()
     }
 
-    private var shouldShowImagePreview: Bool {
+    private func shouldShowImagePreview(storedLocalFileUrl: URL?) -> Bool {
         guard attachment.isImageAttachment() else {
             return false
         }
-        return notification.attachmentLocalFileUrl() != nil || notification.isAttachmentDownloading(overrideState: currentProgressState)
+        return storedLocalFileUrl != nil || notification.isAttachmentDownloading(overrideState: currentProgressState)
     }
 
     private var statusText: String {
@@ -143,7 +149,7 @@ struct NotificationAttachmentSectionView: View {
     }
 
     private var statusColor: Color {
-        if notification.attachmentDownloadFailed(overrideState: currentProgressState) {
+        if currentProgressState == .failed {
             return .red
         } else if attachmentExpired {
             return .red
@@ -152,8 +158,8 @@ struct NotificationAttachmentSectionView: View {
         }
     }
 
-    private func handlePrimaryTap() {
-        if let localFileUrl = notification.attachmentLocalFileUrl() {
+    private func handlePrimaryTap(localFileUrl: URL?) {
+        if let localFileUrl {
             openLocalFile(localFileUrl)
         } else if !attachmentExpired && !notification.isAttachmentDownloading(overrideState: currentProgressState) {
             controller.startDownload(
@@ -168,9 +174,9 @@ struct NotificationAttachmentSectionView: View {
         onOpen(localFileUrl)
     }
 
-    private var previewMenuButton: some View {
+    private func previewMenuButton(localFileUrl: URL?) -> some View {
         Menu {
-            attachmentMenuItems
+            attachmentMenuItems(localFileUrl: localFileUrl)
         } label: {
             Image(systemName: "ellipsis.circle")
                 .foregroundColor(.gray)
@@ -182,12 +188,12 @@ struct NotificationAttachmentSectionView: View {
         .fixedSize()
     }
 
-    private var showsImageOnly: Bool {
-        attachment.isImageAttachment() && notification.attachmentLocalFileUrl() != nil
+    private func showsImageOnly(storedLocalFileUrl: URL?) -> Bool {
+        attachment.isImageAttachment() && storedLocalFileUrl != nil
     }
 
-    private var showsMenu: Bool {
-        if notification.attachmentLocalFileUrl() != nil {
+    private func showsMenu(resolvedLocalFileUrl: URL?) -> Bool {
+        if resolvedLocalFileUrl != nil {
             return true
         }
         if notification.isAttachmentDownloading(overrideState: currentProgressState) {
@@ -199,34 +205,34 @@ struct NotificationAttachmentSectionView: View {
         return false
     }
 
-    private var imageAutoDownloadKey: String {
+    private func imageAutoDownloadKey(storedLocalFileUrl: URL?) -> String {
         [
             notification.id ?? "",
-            notification.attachmentLocalPath ?? "",
-            String(notification.attachmentProgressValue(overrideState: currentProgressState))
+            storedLocalFileUrl?.path ?? "",
+            String(currentProgressState.persistedValue)
         ].joined(separator: "|")
     }
 
-    private func autoDownloadInlineImageIfNeeded() {
+    private func autoDownloadInlineImageIfNeeded(storedLocalFileUrl: URL?) {
         guard attachment.isImageAttachment() else {
             return
         }
-        guard notification.attachmentLocalFileUrl() == nil else {
+        guard storedLocalFileUrl == nil else {
             return
         }
         guard !notification.isAttachmentDownloading(overrideState: currentProgressState) else {
             return
         }
-        guard !notification.attachmentDownloadFailed(overrideState: currentProgressState) else {
+        guard currentProgressState != .failed else {
             return
         }
-        guard !notification.attachmentDownloadWasCanceled(overrideState: currentProgressState) else {
+        guard currentProgressState != .canceled else {
             return
         }
-        guard !notification.attachmentAutoDownloadWasSkipped(overrideState: currentProgressState) else {
+        guard currentProgressState != .skipped else {
             return
         }
-        guard !notification.attachmentWasDeleted(overrideState: currentProgressState) else {
+        guard currentProgressState != .deleted else {
             return
         }
         guard !attachmentExpired else {

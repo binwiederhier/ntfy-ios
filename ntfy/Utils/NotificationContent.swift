@@ -1,6 +1,5 @@
 import Foundation
 import UserNotifications
-import UniformTypeIdentifiers
 
 extension UNMutableNotificationContent {
     func modify(message: Message, baseUrl: String, notification: Notification? = nil) {
@@ -155,13 +154,14 @@ extension UNMutableNotificationContent {
             return
         }
 
-        let categoryIdentifier = "ntfyActions." + actions.map(\.identifier).joined(separator: ".")
+        let categoryIdentifier = "ntfyActions"
         self.categoryIdentifier = categoryIdentifier
 
         let center = UNUserNotificationCenter.current()
         let category = UNNotificationCategory(identifier: categoryIdentifier, actions: actions, intentIdentifiers: [])
         center.getNotificationCategories { existingCategories in
-            center.setNotificationCategories(existingCategories.union([category]))
+            let preservedCategories = existingCategories.filter { $0.identifier != categoryIdentifier }
+            center.setNotificationCategories(Set(preservedCategories).union([category]))
         }
     }
 
@@ -184,19 +184,6 @@ extension UNMutableNotificationContent {
             body = body + "\n\n" + summary
         }
     }
-}
-
-private func notificationAttachmentFileExtension(url: URL, mimeType: String?) -> String {
-    let pathExtension = url.pathExtension.trimmingCharacters(in: .whitespacesAndNewlines)
-    if !pathExtension.isEmpty {
-        return pathExtension
-    }
-    if let mimeType = mimeType,
-       let type = UTType(mimeType: mimeType),
-       let preferredExtension = type.preferredFilenameExtension {
-        return preferredExtension
-    }
-    return "jpg"
 }
 
 private func fallbackAttachmentSummary(attachment: MessageAttachment) -> String {

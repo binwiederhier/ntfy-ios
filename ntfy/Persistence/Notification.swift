@@ -46,10 +46,6 @@ extension Notification {
         return nil
     }
     
-    func allTags() -> [String] {
-        return parseAllTags(tags)
-    }
-    
     func emojiTags() -> [String] {
         return parseEmojiTags(tags)
     }
@@ -75,16 +71,6 @@ extension Notification {
         )
     }
 
-    func attachmentImageUrl() -> URL? {
-        guard let attachment = messageAttachment(), let attachmentUrl = attachmentRemoteUrl() else {
-            return nil
-        }
-        guard attachment.isImageAttachment() else {
-            return nil
-        }
-        return attachmentUrl
-    }
-
     func attachmentRemoteUrl() -> URL? {
         guard let attachment = messageAttachment() else {
             return nil
@@ -92,36 +78,28 @@ extension Notification {
         return URL(string: attachment.url)
     }
 
-    func attachmentLocalFileUrl() -> URL? {
+    func attachmentStoredLocalFileUrl() -> URL? {
         guard let attachmentLocalPath, !attachmentLocalPath.isEmpty else {
             return nil
         }
-        let url = URL(fileURLWithPath: attachmentLocalPath)
+        return URL(fileURLWithPath: attachmentLocalPath)
+    }
+
+    func attachmentLocalFileUrl() -> URL? {
+        guard let url = attachmentStoredLocalFileUrl() else {
+            return nil
+        }
         guard FileManager.default.fileExists(atPath: url.path) else {
             return nil
         }
         return url
     }
 
-    func attachmentDetailText() -> String {
-        guard let attachment = messageAttachment() else {
-            return ""
-        }
-        var parts: [String] = []
-        if let type = attachment.type, !type.isEmpty {
-            parts.append(type)
-        }
-        if let size = attachment.size, size > 0 {
-            parts.append(formatBytes(size))
-        }
-        return parts.joined(separator: " · ")
-    }
-
     func attachmentStoredProgressState() -> AttachmentProgressState {
         AttachmentProgressState(
             storedValue: attachmentProgress,
             hasAttachment: messageAttachment() != nil,
-            hasLocalFile: attachmentLocalFileUrl() != nil
+            hasLocalFile: attachmentStoredLocalFileUrl() != nil
         )
     }
 
@@ -129,28 +107,8 @@ extension Notification {
         overrideState ?? attachmentStoredProgressState()
     }
 
-    func attachmentProgressValue(overrideState: AttachmentProgressState? = nil) -> Int16 {
-        attachmentProgressState(overrideState: overrideState).persistedValue
-    }
-
     func isAttachmentDownloading(overrideState: AttachmentProgressState? = nil) -> Bool {
         attachmentProgressState(overrideState: overrideState).isDownloading
-    }
-
-    func attachmentDownloadFailed(overrideState: AttachmentProgressState? = nil) -> Bool {
-        attachmentProgressState(overrideState: overrideState) == .failed
-    }
-
-    func attachmentWasDeleted(overrideState: AttachmentProgressState? = nil) -> Bool {
-        attachmentProgressState(overrideState: overrideState) == .deleted
-    }
-
-    func attachmentDownloadWasCanceled(overrideState: AttachmentProgressState? = nil) -> Bool {
-        attachmentProgressState(overrideState: overrideState) == .canceled
-    }
-
-    func attachmentAutoDownloadWasSkipped(overrideState: AttachmentProgressState? = nil) -> Bool {
-        attachmentProgressState(overrideState: overrideState) == .skipped
     }
 
     func attachmentIsExpired(referenceDate: Date = Date()) -> Bool {
@@ -170,8 +128,8 @@ extension Notification {
         }
 
         let progress = attachmentProgressState(overrideState: overrideState)
-        let exists = attachmentLocalFileUrl() != nil
-        let deleted = !exists && (progress == .done || progress == .deleted)
+        let hasStoredLocalFile = attachmentStoredLocalFileUrl() != nil
+        let deleted = !hasStoredLocalFile && (progress == .done || progress == .deleted)
         if progress == .none {
             if attachmentIsExpired() {
                 parts.append("Not downloaded, expired")
@@ -257,12 +215,6 @@ extension Notification {
         formatter.dateStyle = .short
         formatter.timeStyle = .none
         return formatter.string(from: expiresDate)
-    }
-
-    @MainActor
-    func setAttachmentLocalPath(_ localPath: String?) {
-        attachmentLocalPath = localPath
-        try? managedObjectContext?.save()
     }
 
     @MainActor

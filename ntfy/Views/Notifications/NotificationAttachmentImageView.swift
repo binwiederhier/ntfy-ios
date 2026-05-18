@@ -9,21 +9,25 @@ import SwiftUI
 
 struct NotificationAttachmentImageView: View {
     @State private var imagePresentation: PresentedImage?
+    @StateObject private var imageLoader = NotificationAttachmentImageLoader()
 
     let localFileUrl: URL?
     let isLoading: Bool
 
     var body: some View {
         Group {
-            if let localFileUrl, let image = UIImage(contentsOfFile: localFileUrl.path) {
+            if let image = imageLoader.image {
                 renderedImage(image)
-            } else if isLoading {
+            } else if isLoading || imageLoader.isLoading {
                 loadingPlaceholder
             } else {
                 failedPlaceholder
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .task(id: localFileUrl?.path) {
+            await imageLoader.load(from: localFileUrl)
+        }
         .fullScreenCover(item: $imagePresentation) { presentedImage in
             AttachmentFullscreenImageView(image: presentedImage.image)
         }
