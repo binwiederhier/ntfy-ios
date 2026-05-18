@@ -59,9 +59,10 @@ class NotificationService: UNNotificationServiceExtension {
             return
         }
         Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
+        let notification = Store.shared.getNotification(id: message.id)
         let user = store?.getUser(baseUrl: baseUrl)?.toBasicUser()
-        content.modify(message: message, baseUrl: baseUrl)
-        content.attachImageIfNeeded(notification: nil, message: message, user: user) {
+        content.modify(message: message, baseUrl: baseUrl, notification: notification)
+        content.attachImageIfNeeded(notification: notification, message: message, user: user) {
             contentHandler(content)
         }
     }

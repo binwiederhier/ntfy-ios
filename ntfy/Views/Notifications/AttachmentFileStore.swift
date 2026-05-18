@@ -96,6 +96,52 @@ enum AttachmentFileStore {
         return DownloadedAttachmentFile(localFileUrl: destinationUrl, size: totalBytes, mimeType: resolvedMimeType)
     }
 
+    static func existingLocalFileUrl(
+        notificationID: String,
+        remoteUrl: URL,
+        attachment: MessageAttachment,
+        mimeType: String?
+    ) -> URL? {
+        guard let localFileUrl = try? localFileUrl(
+            notificationID: notificationID,
+            attachment: attachment,
+            remoteUrl: remoteUrl,
+            mimeType: mimeType
+        ) else {
+            return nil
+        }
+        guard FileManager.default.fileExists(atPath: localFileUrl.path) else {
+            return nil
+        }
+        return localFileUrl
+    }
+
+    static func storeDownloadedTemporaryFile(
+        notificationID: String,
+        remoteUrl: URL,
+        attachment: MessageAttachment,
+        temporaryFileUrl: URL,
+        mimeType: String?
+    ) throws -> DownloadedAttachmentFile {
+        let destinationUrl = try localFileUrl(
+            notificationID: notificationID,
+            attachment: attachment,
+            remoteUrl: remoteUrl,
+            mimeType: mimeType
+        )
+        try? FileManager.default.removeItem(at: destinationUrl)
+
+        do {
+            try FileManager.default.moveItem(at: temporaryFileUrl, to: destinationUrl)
+        } catch {
+            try FileManager.default.copyItem(at: temporaryFileUrl, to: destinationUrl)
+        }
+
+        let attributes = try FileManager.default.attributesOfItem(atPath: destinationUrl.path)
+        let size = (attributes[.size] as? NSNumber)?.int64Value ?? 0
+        return DownloadedAttachmentFile(localFileUrl: destinationUrl, size: size, mimeType: mimeType)
+    }
+
     private static func localFileUrl(notificationID: String, attachment: MessageAttachment, remoteUrl: URL, mimeType: String?) throws -> URL {
         let baseDir = FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup)!

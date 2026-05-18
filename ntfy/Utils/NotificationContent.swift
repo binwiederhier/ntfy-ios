@@ -70,24 +70,28 @@ extension UNMutableNotificationContent {
     }
 
     func attachImageIfNeeded(notification: Notification?, message: Message, user: BasicUser?, completionHandler: @escaping () -> Void) {
-        if let localFileUrl = notification?.attachmentLocalFileUrl(),
-           let attachment = message.attachment,
-           attachment.isImageAttachment() {
+        guard
+            let attachment = message.attachment,
+            attachment.isImageAttachment(),
+            let url = URL(string: attachment.url)
+        else {
+            completionHandler()
+            return
+        }
+
+        if let localFileUrl = notification?.attachmentLocalFileUrl()
+            ?? AttachmentFileStore.existingLocalFileUrl(
+                notificationID: message.id,
+                remoteUrl: url,
+                attachment: attachment,
+                mimeType: attachment.type
+            ) {
             do {
                 let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: localFileUrl)
                 self.attachments = self.attachments + [notificationAttachment]
             } catch {
                 Log.w("NotificationContent", "Failed to attach local image", error)
             }
-            completionHandler()
-            return
-        }
-
-        guard
-            let attachment = message.attachment,
-            attachment.isImageAttachment(),
-            let url = URL(string: attachment.url)
-        else {
             completionHandler()
             return
         }
@@ -118,15 +122,21 @@ extension UNMutableNotificationContent {
                 return
             }
 
-            let fileExtension = notificationAttachmentFileExtension(url: url, mimeType: mimeType)
-            let destinationUrl = FileManager.default.temporaryDirectory
-                .appendingPathComponent(UUID().uuidString)
-                .appendingPathExtension(fileExtension)
-
             do {
-                try? FileManager.default.removeItem(at: destinationUrl)
-                try FileManager.default.copyItem(at: tempUrl, to: destinationUrl)
-                let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: destinationUrl)
+                let downloaded = try AttachmentFileStore.storeDownloadedTemporaryFile(
+                    notificationID: message.id,
+                    remoteUrl: url,
+                    attachment: attachment,
+                    temporaryFileUrl: tempUrl,
+                    mimeType: mimeType
+                )
+                Store.shared.completeAttachmentDownload(
+                    notificationID: message.id,
+                    localPath: downloaded.localFileUrl.path,
+                    resolvedType: downloaded.mimeType,
+                    resolvedSize: downloaded.size
+                )
+                let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: downloaded.localFileUrl)
                 self.attachments = self.attachments + [notificationAttachment]
             } catch {
                 Log.w("NotificationContent", "Failed to create notification attachment", error)

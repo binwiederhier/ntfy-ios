@@ -111,6 +111,26 @@ class Store: ObservableObject {
         return try? context.fetch(request).first
     }
 
+    func completeAttachmentDownload(notificationID: String, localPath: String, resolvedType: String?, resolvedSize: Int64) {
+        context.performAndWait {
+            let request = Notification.fetchRequest()
+            request.predicate = NSPredicate(format: "id = %@", notificationID)
+            guard let notification = try? context.fetch(request).first else {
+                return
+            }
+
+            notification.attachmentLocalPath = localPath
+            notification.attachmentProgress = AttachmentProgressState.done.persistedValue
+            if resolvedSize > 0 {
+                notification.attachmentSize = resolvedSize
+            }
+            if let resolvedType, !resolvedType.isEmpty {
+                notification.attachmentType = resolvedType
+            }
+            try? context.save()
+        }
+    }
+
     func updateSubscriptionBaseUrl(_ subscription: Subscription, baseUrl: String) {
         subscription.baseUrl = normalizeBaseUrl(baseUrl)
         try? context.save()
@@ -170,7 +190,21 @@ class Store: ObservableObject {
                     notification.attachmentSize = message.attachment?.size ?? 0
                     notification.attachmentExpires = message.attachment?.expires ?? 0
                     notification.attachmentUrl = message.attachment?.url
-                    notification.attachmentProgress = message.attachment == nil ? 0 : AttachmentProgressState.none.persistedValue
+                    if
+                        let attachment = message.attachment,
+                        let remoteUrl = URL(string: attachment.url),
+                        let localFileUrl = AttachmentFileStore.existingLocalFileUrl(
+                            notificationID: message.id,
+                            remoteUrl: remoteUrl,
+                            attachment: attachment,
+                            mimeType: attachment.type
+                        )
+                    {
+                        notification.attachmentLocalPath = localFileUrl.path
+                        notification.attachmentProgress = AttachmentProgressState.done.persistedValue
+                    } else {
+                        notification.attachmentProgress = message.attachment == nil ? 0 : AttachmentProgressState.none.persistedValue
+                    }
                     notification.subscription = subscription
                     subscription.addToNotifications(notification)
                     Log.d(Store.tag, "Storing notification with ID \(notification.id ?? "<unknown>")")
