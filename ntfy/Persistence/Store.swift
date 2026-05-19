@@ -111,23 +111,11 @@ class Store: ObservableObject {
     }
     
     func getSubscription(baseUrl: String, topic: String) -> Subscription? {
-        let fetchRequest = Subscription.fetchRequest()
-        let baseUrlPredicate = NSPredicate(format: "baseUrl = %@", normalizeBaseUrl(baseUrl))
-        let topicPredicate = NSPredicate(format: "topic = %@", topic)
-        
-        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [baseUrlPredicate, topicPredicate])
-        
-        return try? context.fetch(fetchRequest).first
+        try? fetchSubscription(baseUrl: baseUrl, topic: topic)
     }
     
     func getSubscriptions() -> [Subscription]? {
         return try? context.fetch(Subscription.fetchRequest())
-    }
-
-    func getNotification(id: String) -> Notification? {
-        let request = Notification.fetchRequest()
-        request.predicate = NSPredicate(format: "id = %@", id)
-        return try? context.fetch(request).first
     }
 
     func completeAttachmentDownload(notificationID: String, localPath: String, resolvedType: String?, resolvedSize: Int64) {
@@ -169,62 +157,29 @@ class Store: ObservableObject {
         save(notificationsFromMessages: [message], withSubscription: subscription)
     }
 
+    func save(notificationFromMessage message: Message, baseUrl: String, topic: String) -> Bool {
+        var didSave = false
+        context.performAndWait {
+            do {
+                guard let subscription = try fetchSubscription(baseUrl: baseUrl, topic: topic) else {
+                    return
+                }
+                try saveNotifications([message], withSubscription: subscription)
+                didSave = true
+            } catch let error {
+                Log.w(Store.tag, "Cannot store notifications (fromMessages)", error)
+                rollbackAndRefresh()
+            }
+        }
+        return didSave
+    }
+
     func save(notificationsFromMessages messages: [Message], withSubscription subscription: Subscription) {
         guard !messages.isEmpty else { return }
 
         context.performAndWait {
             do {
-                let ids = messages.map(\.id)
-                let existingRequest = Notification.fetchRequest()
-                existingRequest.predicate = NSPredicate(format: "id IN %@", ids)
-                let existingNotifications = try context.fetch(existingRequest)
-                let existingIDs = Set(existingNotifications.compactMap(\.id))
-                let newMessages = messages.filter { !existingIDs.contains($0.id) }
-
-                guard !newMessages.isEmpty else {
-                    if let lastMessage = messages.last {
-                        subscription.lastNotificationId = lastMessage.id
-                        try context.save()
-                    }
-                    return
-                }
-
-                for message in newMessages {
-                    let notification = Notification(context: context)
-                    notification.id = message.id
-                    notification.time = message.time
-                    notification.message = message.message ?? ""
-                    notification.title = message.title ?? ""
-                    notification.priority = (message.priority != nil && message.priority != 0) ? message.priority! : 3
-                    notification.tags = message.tags?.joined(separator: ",") ?? ""
-                    notification.actions = Actions.shared.encode(message.actions)
-                    notification.click = message.click ?? ""
-                    notification.attachmentName = message.attachment?.name
-                    notification.attachmentType = message.attachment?.type
-                    notification.attachmentSize = message.attachment?.size ?? 0
-                    notification.attachmentExpires = message.attachment?.expires ?? 0
-                    notification.attachmentUrl = message.attachment?.url
-                    if
-                        let attachment = message.attachment,
-                        let remoteUrl = URL(string: attachment.url),
-                        let localFileUrl = AttachmentFileStore.existingLocalFileUrl(
-                            notificationID: message.id,
-                            remoteUrl: remoteUrl,
-                            attachment: attachment,
-                            mimeType: attachment.type
-                        )
-                    {
-                        notification.attachmentLocalPath = localFileUrl.path
-                        notification.attachmentProgress = AttachmentProgressState.done.persistedValue
-                    } else {
-                        notification.attachmentProgress = message.attachment == nil ? 0 : AttachmentProgressState.none.persistedValue
-                    }
-                    notification.subscription = subscription
-                    subscription.addToNotifications(notification)
-                    Log.d(Store.tag, "Storing notification with ID \(notification.id ?? "<unknown>")")
-                }
-                subscription.lastNotificationId = messages.last?.id
-                try context.save()
+                try saveNotifications(messages, withSubscription: subscription)
             } catch let error {
                 Log.w(Store.tag, "Cannot store notifications (fromMessages)", error)
                 rollbackAndRefresh()
@@ -291,9 +246,35 @@ class Store: ObservableObject {
     }
     
     func getUser(baseUrl: String) -> User? {
-        let request = User.fetchRequest()
-        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "baseUrl = %@", normalizeBaseUrl(baseUrl))])
-        return try? context.fetch(request).first
+        try? fetchUser(baseUrl: baseUrl)
+    }
+
+    func getBasicUser(baseUrl: String) -> BasicUser? {
+        var basicUser: BasicUser?
+        context.performAndWait {
+            basicUser = try? fetchUser(baseUrl: baseUrl)?.toBasicUser()
+        }
+        return basicUser
+    }
+
+    func findSubscriptionMatch(forPollRequestTopic topic: String) -> (baseUrl: String, topic: String)? {
+        var match: (baseUrl: String, topic: String)?
+        context.performAndWait {
+            guard let subscriptions = try? context.fetch(Subscription.fetchRequest()) else {
+                return
+            }
+            match = subscriptions
+                .first {
+                    $0.urlHash() == topic || $0.topic == topic
+                }
+                .flatMap { subscription in
+                    guard let baseUrl = subscription.baseUrl, let topic = subscription.topic else {
+                        return nil
+                    }
+                    return (baseUrl, topic)
+                }
+        }
+        return match
     }
     
     func delete(user: User) {
@@ -375,6 +356,74 @@ class Store: ObservableObject {
         let request = Preference.fetchRequest()
         request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "key = %@", key)])
         return try? context.fetch(request).first
+    }
+
+    private func fetchSubscription(baseUrl: String, topic: String) throws -> Subscription? {
+        let fetchRequest = Subscription.fetchRequest()
+        let baseUrlPredicate = NSPredicate(format: "baseUrl = %@", normalizeBaseUrl(baseUrl))
+        let topicPredicate = NSPredicate(format: "topic = %@", topic)
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [baseUrlPredicate, topicPredicate])
+        return try context.fetch(fetchRequest).first
+    }
+
+    private func fetchUser(baseUrl: String) throws -> User? {
+        let request = User.fetchRequest()
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "baseUrl = %@", normalizeBaseUrl(baseUrl))])
+        return try context.fetch(request).first
+    }
+
+    private func saveNotifications(_ messages: [Message], withSubscription subscription: Subscription) throws {
+        let ids = messages.map(\.id)
+        let existingRequest = Notification.fetchRequest()
+        existingRequest.predicate = NSPredicate(format: "id IN %@", ids)
+        let existingNotifications = try context.fetch(existingRequest)
+        let existingIDs = Set(existingNotifications.compactMap(\.id))
+        let newMessages = messages.filter { !existingIDs.contains($0.id) }
+
+        guard !newMessages.isEmpty else {
+            if let lastMessage = messages.last {
+                subscription.lastNotificationId = lastMessage.id
+                try context.save()
+            }
+            return
+        }
+
+        for message in newMessages {
+            let notification = Notification(context: context)
+            notification.id = message.id
+            notification.time = message.time
+            notification.message = message.message ?? ""
+            notification.title = message.title ?? ""
+            notification.priority = (message.priority != nil && message.priority != 0) ? message.priority! : 3
+            notification.tags = message.tags?.joined(separator: ",") ?? ""
+            notification.actions = Actions.shared.encode(message.actions)
+            notification.click = message.click ?? ""
+            notification.attachmentName = message.attachment?.name
+            notification.attachmentType = message.attachment?.type
+            notification.attachmentSize = message.attachment?.size ?? 0
+            notification.attachmentExpires = message.attachment?.expires ?? 0
+            notification.attachmentUrl = message.attachment?.url
+            if
+                let attachment = message.attachment,
+                let remoteUrl = URL(string: attachment.url),
+                let localFileUrl = AttachmentFileStore.existingLocalFileUrl(
+                    notificationID: message.id,
+                    remoteUrl: remoteUrl,
+                    attachment: attachment,
+                    mimeType: attachment.type
+                )
+            {
+                notification.attachmentLocalPath = localFileUrl.path
+                notification.attachmentProgress = AttachmentProgressState.done.persistedValue
+            } else {
+                notification.attachmentProgress = message.attachment == nil ? 0 : AttachmentProgressState.none.persistedValue
+            }
+            notification.subscription = subscription
+            subscription.addToNotifications(notification)
+            Log.d(Store.tag, "Storing notification with ID \(notification.id ?? "<unknown>")")
+        }
+        subscription.lastNotificationId = messages.last?.id
+        try context.save()
     }
 
     private func deleteAttachmentLocalFile(for notification: Notification) {

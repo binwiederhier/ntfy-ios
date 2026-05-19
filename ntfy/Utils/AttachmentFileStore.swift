@@ -32,7 +32,13 @@ enum AttachmentFileStore {
             request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
         }
 
-        let (temporaryFileUrl, response) = try await URLSession.shared.download(for: request)
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 30
+
+        let delegate = DownloadDelegate(maxSize: maxSize, onProgress: onProgress)
+        let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
+        let (temporaryFileUrl, response) = try await delegate.download(using: session, request: request)
         guard let httpResponse = response as? HTTPURLResponse, (200..<300).contains(httpResponse.statusCode) else {
             throw AttachmentDownloadError.badResponse
         }
@@ -44,7 +50,7 @@ enum AttachmentFileStore {
         }
 
         let attributes = try FileManager.default.attributesOfItem(atPath: temporaryFileUrl.path)
-        let downloadedSize = (attributes[.size] as? NSNumber)?.int64Value ?? 0
+        let downloadedSize = (attributes[FileAttributeKey.size] as? NSNumber)?.int64Value ?? 0
         if let maxSize, downloadedSize > maxSize {
             throw AttachmentDownloadError.tooLarge
         }
@@ -101,7 +107,7 @@ enum AttachmentFileStore {
         }
 
         let attributes = try FileManager.default.attributesOfItem(atPath: destinationUrl.path)
-        let size = (attributes[.size] as? NSNumber)?.int64Value ?? 0
+        let size = (attributes[FileAttributeKey.size] as? NSNumber)?.int64Value ?? 0
         return DownloadedAttachmentFile(localFileUrl: destinationUrl, size: size, mimeType: mimeType)
     }
 

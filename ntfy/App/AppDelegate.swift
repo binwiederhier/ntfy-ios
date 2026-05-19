@@ -108,10 +108,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
 
     private func showNotification(baseUrl: String, _ message: Message, completionHandler: (() -> Void)? = nil) {
         let user = Store.shared.getUser(baseUrl: baseUrl)?.toBasicUser()
-        let notification = Store.shared.getNotification(id: message.id)
         let content = UNMutableNotificationContent()
-        content.modify(message: message, baseUrl: baseUrl, notification: notification)
-        content.attachImageIfNeeded(notification: notification, message: message, user: user) {
+        content.modify(message: message, baseUrl: baseUrl)
+        content.attachImageIfNeeded(message: message, user: user) {
             let request = UNNotificationRequest(identifier: message.id, content: content, trigger: nil /* now */)
             UNUserNotificationCenter.current().add(request) { error in
                 if let error = error {

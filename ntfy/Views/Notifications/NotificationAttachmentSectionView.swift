@@ -17,6 +17,7 @@ struct NotificationAttachmentSectionView: View {
     let onShare: (URL) -> Void
     let onSave: (URL) -> Void
     let onCopy: () -> Void
+    @State private var isPreparingAutoDownload = false
     
     private var currentProgressState: AttachmentProgressState {
         controller.progressState(for: notification)
@@ -102,6 +103,15 @@ struct NotificationAttachmentSectionView: View {
             }
         }
         .padding(.top, 8)
+        .onAppear {
+            syncPreparingAutoDownloadState(resolvedLocalFileUrl: resolvedLocalFileUrl)
+        }
+        .onChange(of: resolvedLocalFileUrl?.path ?? "") { _ in
+            syncPreparingAutoDownloadState(resolvedLocalFileUrl: resolvedLocalFileUrl)
+        }
+        .onChange(of: currentProgressState.persistedValue) { _ in
+            syncPreparingAutoDownloadState(resolvedLocalFileUrl: resolvedLocalFileUrl)
+        }
         .task(id: imageAutoDownloadKey(resolvedLocalFileUrl: resolvedLocalFileUrl)) {
             autoDownloadInlineImageIfNeeded(resolvedLocalFileUrl: resolvedLocalFileUrl)
         }
@@ -155,7 +165,7 @@ struct NotificationAttachmentSectionView: View {
                 .frame(height: 160)
                 .overlay {
                     VStack(spacing: 10) {
-                        if notification.isAttachmentDownloading(overrideState: currentProgressState) {
+                        if shouldShowLoadingPlaceholder(resolvedLocalFileUrl: localFileUrl) {
                             ProgressView()
                         } else {
                             Image(systemName: "photo")
@@ -180,7 +190,7 @@ struct NotificationAttachmentSectionView: View {
                                 .padding(.horizontal, 20)
                         }
 
-                        if !notification.isAttachmentDownloading(overrideState: currentProgressState) {
+                        if !shouldShowLoadingPlaceholder(resolvedLocalFileUrl: localFileUrl) {
                             Text("Tap to load image")
                                 .font(.caption.weight(.semibold))
                                 .foregroundColor(.accentColor)
@@ -189,7 +199,7 @@ struct NotificationAttachmentSectionView: View {
                 }
         }
         .buttonStyle(.plain)
-        .disabled(notification.isAttachmentDownloading(overrideState: currentProgressState))
+        .disabled(shouldShowLoadingPlaceholder(resolvedLocalFileUrl: localFileUrl))
     }
 
     private var attachmentExpired: Bool {
@@ -277,45 +287,70 @@ struct NotificationAttachmentSectionView: View {
     private func imageAutoDownloadKey(resolvedLocalFileUrl: URL?) -> String {
         [
             notification.id ?? "",
-            resolvedLocalFileUrl?.path ?? "",
-            String(currentProgressState.persistedValue)
+            resolvedLocalFileUrl?.path ?? ""
         ].joined(separator: "|")
     }
 
     private func autoDownloadInlineImageIfNeeded(resolvedLocalFileUrl: URL?) {
-        guard attachment.isImageAttachment() else {
+        syncPreparingAutoDownloadState(resolvedLocalFileUrl: resolvedLocalFileUrl)
+        guard shouldAutoDownloadInlineImage(resolvedLocalFileUrl: resolvedLocalFileUrl) else {
+            isPreparingAutoDownload = false
+            if attachment.isImageAttachment(),
+               resolvedLocalFileUrl == nil,
+               !attachmentExpired,
+               currentProgressState == .none,
+               !Store.shared.shouldAutoDownloadAttachment(attachment) {
+                Log.d("NotificationAttachmentSectionView", "Skipping inline auto-download for \(notification.id ?? "<nil>") because it exceeds the auto-download policy")
+                notification.skipAttachmentAutoDownload()
+            }
             return
         }
-        guard resolvedLocalFileUrl == nil else {
-            return
-        }
-        guard !notification.isAttachmentDownloading(overrideState: currentProgressState) else {
-            return
-        }
-        guard currentProgressState != .failed else {
-            return
-        }
-        guard currentProgressState != .canceled else {
-            return
-        }
-        guard currentProgressState != .skipped else {
-            return
-        }
-        guard currentProgressState != .deleted else {
-            return
-        }
-        guard !attachmentExpired else {
-            return
-        }
-        guard Store.shared.shouldAutoDownloadAttachment(attachment) else {
-            notification.skipAttachmentAutoDownload()
-            return
-        }
+        Log.d("NotificationAttachmentSectionView", "Starting inline auto-download for \(notification.id ?? "<nil>")")
         controller.startDownload(
             notification: notification,
             attachment: attachment,
             authorizationHeader: authorizationHeader,
             isAutomatic: true
         )
+        isPreparingAutoDownload = false
+    }
+
+    private func shouldShowLoadingPlaceholder(resolvedLocalFileUrl: URL?) -> Bool {
+        isPreparingAutoDownload || notification.isAttachmentDownloading(overrideState: currentProgressState)
+    }
+
+    private func shouldAutoDownloadInlineImage(resolvedLocalFileUrl: URL?) -> Bool {
+        guard attachment.isImageAttachment() else {
+            return false
+        }
+        guard resolvedLocalFileUrl == nil else {
+            return false
+        }
+        guard !notification.isAttachmentDownloading(overrideState: currentProgressState) else {
+            return false
+        }
+        guard currentProgressState != .failed else {
+            return false
+        }
+        guard currentProgressState != .canceled else {
+            return false
+        }
+        guard currentProgressState != .skipped else {
+            return false
+        }
+        guard currentProgressState != .deleted else {
+            return false
+        }
+        guard !attachmentExpired else {
+            return false
+        }
+        guard Store.shared.shouldAutoDownloadAttachment(attachment) else {
+            return false
+        }
+        return true
+    }
+
+    private func syncPreparingAutoDownloadState(resolvedLocalFileUrl: URL?) {
+        isPreparingAutoDownload = shouldAutoDownloadInlineImage(resolvedLocalFileUrl: resolvedLocalFileUrl)
     }
 }

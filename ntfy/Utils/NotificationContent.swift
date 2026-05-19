@@ -2,7 +2,7 @@ import Foundation
 import UserNotifications
 
 extension UNMutableNotificationContent {
-    func modify(message: Message, baseUrl: String, notification: Notification? = nil) {
+    func modify(message: Message, baseUrl: String) {
         // Body and title
         if let body = message.message {
             self.body = body
@@ -34,7 +34,6 @@ extension UNMutableNotificationContent {
         //
         // We also must set the .foreground flag, which brings the notification to the foreground and avoids an error about
         // permissions. This is described in https://stackoverflow.com/a/44580916/1440785
-        appendAttachmentSummaryIfNeeded(message: message, notification: notification)
         configureNotificationActions(message: message)
         
         // Play a sound, and group by topic
@@ -68,30 +67,26 @@ extension UNMutableNotificationContent {
         self.userInfo["base_url"] = baseUrl
     }
 
-    func attachImageIfNeeded(notification: Notification?, message: Message, user: BasicUser?, completionHandler: @escaping () -> Void) {
-        guard
-            let attachment = message.attachment,
-            attachment.isImageAttachment(),
-            let url = URL(string: attachment.url)
-        else {
-            completionHandler()
+    func attachImageIfNeeded(message: Message, user: BasicUser?, completionHandler: @escaping () -> Void) {
+        guard let attachment = message.attachment else {
+            completeAttachmentHandling(message: message, didAttachImage: false, completionHandler: completionHandler)
+            return
+        }
+        guard attachment.isImageAttachment(), let url = URL(string: attachment.url) else {
+            completeAttachmentHandling(message: message, didAttachImage: false, completionHandler: completionHandler)
             return
         }
 
-        if let localFileUrl = notification?.attachmentLocalFileUrl()
-            ?? AttachmentFileStore.existingLocalFileUrl(
-                notificationID: message.id,
-                remoteUrl: url,
-                attachment: attachment,
-                mimeType: attachment.type
-            ) {
-            do {
-                let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: localFileUrl)
-                self.attachments = self.attachments + [notificationAttachment]
-            } catch {
-                Log.w("NotificationContent", "Failed to attach local image", error)
+        if let localFileUrl = AttachmentFileStore.existingLocalFileUrl(
+            notificationID: message.id,
+            remoteUrl: url,
+            attachment: attachment,
+            mimeType: attachment.type
+        ) {
+            DispatchQueue.main.async {
+                let didAttachImage = self.attachLocalImage(from: localFileUrl)
+                self.completeAttachmentHandling(message: message, didAttachImage: didAttachImage, completionHandler: completionHandler)
             }
-            completionHandler()
             return
         }
 
@@ -106,18 +101,18 @@ extension UNMutableNotificationContent {
         config.timeoutIntervalForResource = 20
 
         URLSession(configuration: config).downloadTask(with: request) { tempUrl, response, _ in
-            defer { completionHandler() }
-
             guard
                 let tempUrl,
                 let httpResponse = response as? HTTPURLResponse,
                 (200..<300).contains(httpResponse.statusCode)
             else {
+                self.completeAttachmentHandling(message: message, didAttachImage: false, completionHandler: completionHandler)
                 return
             }
 
             let mimeType = attachment.type ?? httpResponse.mimeType
             guard mimeType?.lowercased().hasPrefix("image/") == true || attachment.isImageAttachment() else {
+                self.completeAttachmentHandling(message: message, didAttachImage: false, completionHandler: completionHandler)
                 return
             }
 
@@ -135,12 +130,26 @@ extension UNMutableNotificationContent {
                     resolvedType: downloaded.mimeType,
                     resolvedSize: downloaded.size
                 )
-                let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: downloaded.localFileUrl)
-                self.attachments = self.attachments + [notificationAttachment]
+                DispatchQueue.main.async {
+                    let didAttachImage = self.attachLocalImage(from: downloaded.localFileUrl)
+                    self.completeAttachmentHandling(message: message, didAttachImage: didAttachImage, completionHandler: completionHandler)
+                }
             } catch {
                 Log.w("NotificationContent", "Failed to create notification attachment", error)
+                self.completeAttachmentHandling(message: message, didAttachImage: false, completionHandler: completionHandler)
             }
         }.resume()
+    }
+
+    private func attachLocalImage(from localFileUrl: URL) -> Bool {
+        do {
+            let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: localFileUrl)
+            attachments = attachments + [notificationAttachment]
+            return true
+        } catch {
+            Log.w("NotificationContent", "Failed to attach local image", error)
+            return false
+        }
     }
 
     private func configureNotificationActions(message: Message) {
@@ -165,15 +174,22 @@ extension UNMutableNotificationContent {
         }
     }
 
-    private func appendAttachmentSummaryIfNeeded(message: Message, notification: Notification?) {
+    private func completeAttachmentHandling(message: Message, didAttachImage: Bool, completionHandler: @escaping () -> Void) {
+        DispatchQueue.main.async {
+            self.appendAttachmentSummaryIfNeeded(message: message, didAttachImage: didAttachImage)
+            completionHandler()
+        }
+    }
+
+    private func appendAttachmentSummaryIfNeeded(message: Message, didAttachImage: Bool) {
         guard let attachment = message.attachment else {
             return
         }
-        if attachment.isImageAttachment(), notification?.attachmentLocalFileUrl() != nil {
+        if attachment.isImageAttachment(), didAttachImage {
             return
         }
 
-        let summary = notification?.notificationAttachmentSummary() ?? fallbackAttachmentSummary(attachment: attachment)
+        let summary = fallbackAttachmentSummary(attachment: attachment)
         guard !summary.isEmpty else {
             return
         }

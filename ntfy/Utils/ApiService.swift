@@ -19,7 +19,11 @@ class ApiService {
     }
     
     func poll(subscription: Subscription, messageId: String, user: BasicUser?, completionHandler: @escaping (Message?, Error?) -> Void) {
-        guard let url = URL(string: "\(subscription.urlString())/json?poll=1&id=\(messageId)") else {
+        poll(baseUrl: subscription.baseUrl ?? "?", topic: subscription.topic ?? "?", messageId: messageId, user: user, completionHandler: completionHandler)
+    }
+
+    func poll(baseUrl: String, topic: String, messageId: String, user: BasicUser?, completionHandler: @escaping (Message?, Error?) -> Void) {
+        guard let url = URL(string: "\(topicUrl(baseUrl: baseUrl, topic: topic))/json?poll=1&id=\(messageId)") else {
             completionHandler(nil, URLError(.badURL))
             return
         }

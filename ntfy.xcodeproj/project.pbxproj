@@ -17,6 +17,8 @@
 		2939B21B2F8F293C00A52946 /* UserTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2142F8F293C00A52946 /* UserTableView.swift */; };
 		2968F2AD2FBA530200480665 /* AttachmentProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */; };
 		2968F2AE2FBA530200480665 /* AttachmentProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */; };
+		29C6D8312FBD1B750057C9AC /* DownloadDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29C6D8302FBD1B750057C9AC /* DownloadDelegate.swift */; };
+		29C6D8322FBD1B750057C9AC /* DownloadDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29C6D8302FBD1B750057C9AC /* DownloadDelegate.swift */; };
 		29E8419B2FB417E400F927E4 /* SubscriptionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E841992FB417E400F927E4 /* SubscriptionListView.swift */; };
 		29E8419C2FB417E400F927E4 /* SubscriptionAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E841982FB417E400F927E4 /* SubscriptionAddView.swift */; };
 		29E841A52FB417EA00F927E4 /* NotificationAttachmentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E8419E2FB417EA00F927E4 /* NotificationAttachmentController.swift */; };
@@ -103,6 +105,7 @@
 		2939B2132F8F293C00A52946 /* UserRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRowView.swift; sourceTree = "<group>"; };
 		2939B2142F8F293C00A52946 /* UserTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTableView.swift; sourceTree = "<group>"; };
 		2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentProgressState.swift; sourceTree = "<group>"; };
+		29C6D8302FBD1B750057C9AC /* DownloadDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadDelegate.swift; sourceTree = "<group>"; };
 		29E841982FB417E400F927E4 /* SubscriptionAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionAddView.swift; sourceTree = "<group>"; };
 		29E841992FB417E400F927E4 /* SubscriptionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionListView.swift; sourceTree = "<group>"; };
 		29E8419D2FB417EA00F927E4 /* AttachmentFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentFileStore.swift; sourceTree = "<group>"; };
@@ -190,9 +193,7 @@
 		29E841A42FB417EA00F927E4 /* Notifications */ = {
 			isa = PBXGroup;
 			children = (
-				29E8419D2FB417EA00F927E4 /* AttachmentFileStore.swift */,
 				29E8419E2FB417EA00F927E4 /* NotificationAttachmentController.swift */,
-				29E8419F2FB417EA00F927E4 /* NotificationAttachmentImageLoader.swift */,
 				29E841A02FB417EA00F927E4 /* NotificationAttachmentImageView.swift */,
 				29E841A12FB417EA00F927E4 /* NotificationAttachmentSectionView.swift */,
 				29E841A22FB417EA00F927E4 /* NotificationListView.swift */,
@@ -280,6 +281,7 @@
 				9474F1F82830835400CDE4DD /* Store.swift */,
 				9474F20B283321C300CDE4DD /* Notification.swift */,
 				2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */,
+				29E8419F2FB417EA00F927E4 /* NotificationAttachmentImageLoader.swift */,
 				E27008112AF1030A006E33BA /* NotificationsObservable.swift */,
 				94A3F7C7283734D900C48E79 /* SubscriptionManager.swift */,
 				E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */,
@@ -304,7 +306,9 @@
 				94CD1969283E666900973B93 /* EmojiManager.swift */,
 				9474F211283327C200CDE4DD /* Helpers.swift */,
 				94A3F7C928386B2100C48E79 /* Config.swift */,
+				29E8419D2FB417EA00F927E4 /* AttachmentFileStore.swift */,
 				9474F216283531A200CDE4DD /* Log.swift */,
+				29C6D8302FBD1B750057C9AC /* DownloadDelegate.swift */,
 				94867142283EC9950093C7A4 /* Actions.swift */,
 				948671462841B0B20093C7A4 /* NotificationContent.swift */,
 				948671492841D0CE0093C7A4 /* ActionExecutor.swift */,
@@ -438,6 +442,7 @@
 				18A28C5C2FBCF00000A52946 /* AttachmentAutoDownloadView.swift in Sources */,
 				2968F2AD2FBA530200480665 /* AttachmentProgressState.swift in Sources */,
 				2939B2192F8F293C00A52946 /* DefaultServerView.swift in Sources */,
+				29C6D8312FBD1B750057C9AC /* DownloadDelegate.swift in Sources */,
 				2939B21A2F8F293C00A52946 /* SettingsView.swift in Sources */,
 				2939B21B2F8F293C00A52946 /* UserTableView.swift in Sources */,
 				E27008102AF0F64B006E33BA /* SubscriptionsObservable.swift in Sources */,
@@ -487,6 +492,7 @@
 				94867145284058C60093C7A4 /* ApiService.swift in Sources */,
 				2968F2AE2FBA530200480665 /* AttachmentProgressState.swift in Sources */,
 				9474F2052831D51500CDE4DD /* Store.swift in Sources */,
+				29C6D8322FBD1B750057C9AC /* DownloadDelegate.swift in Sources */,
 				29F001032FB560E300F927E4 /* AttachmentFileStore.swift in Sources */,
 				9474F2062831D73C00CDE4DD /* ntfy.xcdatamodeld in Sources */,
 				94A3F7CB28386B2100C48E79 /* Config.swift in Sources */,

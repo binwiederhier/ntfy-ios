@@ -33,9 +33,11 @@ final class NotificationAttachmentController: ObservableObject {
         guard let notificationID = notification.id, let remoteUrl = notification.attachmentRemoteUrl() else {
             return
         }
+        let logPrefix = isAutomatic ? "automatic" : "manual"
         let maxSize: Int64?
         if isAutomatic {
             guard Store.shared.shouldAutoDownloadAttachment(attachment) else {
+                Log.d("NotificationAttachmentController", "Skipping \(logPrefix) attachment download for \(notificationID): policy denied")
                 notification.skipAttachmentAutoDownload()
                 return
             }
@@ -44,6 +46,7 @@ final class NotificationAttachmentController: ObservableObject {
             maxSize = nil
         }
 
+        Log.d("NotificationAttachmentController", "Starting \(logPrefix) attachment download for \(notificationID) from \(remoteUrl.absoluteString)")
         setTransientProgressState(.progress(0), for: notification)
         downloadTask = Task {
             defer {
@@ -66,6 +69,7 @@ final class NotificationAttachmentController: ObservableObject {
                     }
                 )
                 await MainActor.run {
+                    Log.d("NotificationAttachmentController", "Completed \(logPrefix) attachment download for \(notificationID) at \(downloaded.localFileUrl.path)")
                     notification.completeAttachmentDownload(
                         localPath: downloaded.localFileUrl.path,
                         resolvedType: downloaded.mimeType,
@@ -75,6 +79,7 @@ final class NotificationAttachmentController: ObservableObject {
                 }
             } catch is CancellationError {
                 await MainActor.run {
+                    Log.d("NotificationAttachmentController", "Canceled \(logPrefix) attachment download for \(notificationID)")
                     if notification.attachmentStoredProgressState() != .canceled {
                         notification.resetAttachmentDownload()
                     }
@@ -82,6 +87,7 @@ final class NotificationAttachmentController: ObservableObject {
                 }
             } catch AttachmentDownloadError.tooLarge {
                 await MainActor.run {
+                    Log.d("NotificationAttachmentController", "Rejected \(logPrefix) attachment download for \(notificationID): too large")
                     if isAutomatic {
                         notification.skipAttachmentAutoDownload()
                     } else {
@@ -91,6 +97,7 @@ final class NotificationAttachmentController: ObservableObject {
                 }
             } catch {
                 await MainActor.run {
+                    Log.w("NotificationAttachmentController", "Failed \(logPrefix) attachment download for \(notificationID)", error)
                     notification.failAttachmentDownload()
                     self.clearTransientProgressState(for: notification)
                 }
