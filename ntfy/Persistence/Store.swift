@@ -5,15 +5,34 @@ import Combine
 /// Handles all persistence in the app by storing/loading subscriptions and notifications using Core Data.
 /// There are sadly a lot of hacks in here, because I don't quite understand this fully.
 class Store: ObservableObject {
+    private enum Constants {
+        static let kilobyte: Int64 = 1024
+        static let megabyte = kilobyte * 1024
+
+        static let autoDownloadNever: Int64 = 0
+        static let autoDownloadAlways: Int64 = 1
+        static let autoDownload100KB = 100 * kilobyte
+        static let autoDownload500KB = 500 * kilobyte
+        static let autoDownloadDefault = megabyte
+        static let autoDownload5MB = 5 * megabyte
+        static let autoDownload10MB = 10 * megabyte
+        static let autoDownload50MB = 50 * megabyte
+    }
+
     static let shared = Store()
     static let tag = "Store"
     static let appGroup = "group.io.heckel.ntfy" // Must match app group of ntfy = ntfyNSE targets
     static let modelName = "ntfy" // Must match .xdatamodeld folder
     static let prefKeyDefaultBaseUrl = "defaultBaseUrl"
     static let prefKeyAttachmentAutoDownloadMaxSize = "attachmentAutoDownloadMaxSize"
-    static let autoDownloadNever: Int64 = 0
-    static let autoDownloadAlways: Int64 = 1
-    static let autoDownloadDefault: Int64 = 1024 * 1024
+    static let autoDownloadNever = Constants.autoDownloadNever
+    static let autoDownloadAlways = Constants.autoDownloadAlways
+    static let autoDownload100KB = Constants.autoDownload100KB
+    static let autoDownload500KB = Constants.autoDownload500KB
+    static let autoDownloadDefault = Constants.autoDownloadDefault
+    static let autoDownload5MB = Constants.autoDownload5MB
+    static let autoDownload10MB = Constants.autoDownload10MB
+    static let autoDownload50MB = Constants.autoDownload50MB
     private let container: NSPersistentContainer
     var context: NSManagedObjectContext {
         return container.viewContext
@@ -312,6 +331,18 @@ class Store: ObservableObject {
             return Store.autoDownloadDefault
         }
         return maxSize
+    }
+
+    func saveAttachmentAutoDownloadMaxSize(_ maxSize: Int64) {
+        do {
+            let pref = getPreference(key: Store.prefKeyAttachmentAutoDownloadMaxSize) ?? Preference(context: context)
+            pref.key = Store.prefKeyAttachmentAutoDownloadMaxSize
+            pref.value = String(maxSize)
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot store attachment auto-download preference", error)
+            rollbackAndRefresh()
+        }
     }
 
     func shouldAutoDownloadAttachment(_ attachment: MessageAttachment) -> Bool {

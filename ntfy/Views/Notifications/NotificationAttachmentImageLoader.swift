@@ -9,8 +9,15 @@ import SwiftUI
 
 @MainActor
 final class NotificationAttachmentImageLoader: ObservableObject {
+    enum Phase {
+        case idle
+        case loading
+        case loaded
+        case failed
+    }
+
     @Published var image: UIImage?
-    @Published var isLoading = false
+    @Published private(set) var phase: Phase = .idle
 
     private static let cache = NSCache<NSString, UIImage>()
     private var currentPath: String?
@@ -18,7 +25,7 @@ final class NotificationAttachmentImageLoader: ObservableObject {
     func load(from localFileUrl: URL?) async {
         guard let localFileUrl else {
             image = nil
-            isLoading = false
+            phase = .idle
             currentPath = nil
             return
         }
@@ -31,11 +38,11 @@ final class NotificationAttachmentImageLoader: ObservableObject {
         currentPath = path
         if let cachedImage = Self.cache.object(forKey: path as NSString) {
             image = cachedImage
-            isLoading = false
+            phase = .loaded
             return
         }
 
-        isLoading = true
+        phase = .loading
         image = nil
 
         let decodedImage = await Task.detached(priority: .userInitiated) {
@@ -49,9 +56,10 @@ final class NotificationAttachmentImageLoader: ObservableObject {
         if let decodedImage {
             Self.cache.setObject(decodedImage, forKey: path as NSString)
             image = decodedImage
+            phase = .loaded
         } else {
             image = nil
+            phase = .failed
         }
-        isLoading = false
     }
 }

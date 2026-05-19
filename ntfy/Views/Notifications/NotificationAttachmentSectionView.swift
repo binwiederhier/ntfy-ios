@@ -16,32 +16,42 @@ struct NotificationAttachmentSectionView: View {
     let onOpen: (URL) -> Void
     let onShare: (URL) -> Void
     let onSave: (URL) -> Void
+    let onCopy: () -> Void
     
     private var currentProgressState: AttachmentProgressState {
         controller.progressState(for: notification)
     }
 
     var body: some View {
-        let storedLocalFileUrl = notification.attachmentStoredLocalFileUrl()
         let resolvedLocalFileUrl = notification.attachmentLocalFileUrl()
 
         VStack(alignment: .leading, spacing: 8) {
-            if shouldShowImagePreview(storedLocalFileUrl: storedLocalFileUrl) {
+            if shouldShowImagePreview(resolvedLocalFileUrl: resolvedLocalFileUrl) {
                 ZStack(alignment: .topTrailing) {
                     NotificationAttachmentImageView(
-                        localFileUrl: storedLocalFileUrl,
+                        localFileUrl: resolvedLocalFileUrl,
                         isLoading: notification.isAttachmentDownloading(overrideState: currentProgressState)
                     )
 
-                    if showsImageOnly(storedLocalFileUrl: storedLocalFileUrl),
+                    if showsImageOnly(resolvedLocalFileUrl: resolvedLocalFileUrl),
                        showsMenu(resolvedLocalFileUrl: resolvedLocalFileUrl) {
+                        previewMenuButton(localFileUrl: resolvedLocalFileUrl)
+                            .padding(8)
+                    }
+                }
+            } else if shouldShowImagePlaceholder(resolvedLocalFileUrl: resolvedLocalFileUrl) {
+                ZStack(alignment: .topTrailing) {
+                    imagePlaceholderCard(localFileUrl: resolvedLocalFileUrl)
+
+                    if showsMenu(resolvedLocalFileUrl: resolvedLocalFileUrl) {
                         previewMenuButton(localFileUrl: resolvedLocalFileUrl)
                             .padding(8)
                     }
                 }
             }
 
-            if !showsImageOnly(storedLocalFileUrl: storedLocalFileUrl) {
+            if !showsImageOnly(resolvedLocalFileUrl: resolvedLocalFileUrl)
+                && !shouldShowImagePlaceholder(resolvedLocalFileUrl: resolvedLocalFileUrl) {
                 HStack(alignment: .center, spacing: 10) {
                     Button(action: {
                         handlePrimaryTap(localFileUrl: resolvedLocalFileUrl)
@@ -92,8 +102,8 @@ struct NotificationAttachmentSectionView: View {
             }
         }
         .padding(.top, 8)
-        .task(id: imageAutoDownloadKey(storedLocalFileUrl: storedLocalFileUrl)) {
-            autoDownloadInlineImageIfNeeded(storedLocalFileUrl: storedLocalFileUrl)
+        .task(id: imageAutoDownloadKey(resolvedLocalFileUrl: resolvedLocalFileUrl)) {
+            autoDownloadInlineImageIfNeeded(resolvedLocalFileUrl: resolvedLocalFileUrl)
         }
     }
 
@@ -129,19 +139,78 @@ struct NotificationAttachmentSectionView: View {
         if !attachmentExpired, let remoteUrl = notification.attachmentRemoteUrl() {
             Button("Copy URL") {
                 UIPasteboard.general.setValue(remoteUrl.absoluteString, forPasteboardType: UTType.plainText.identifier)
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                onCopy()
             }
         }
+    }
+
+    private func imagePlaceholderCard(localFileUrl: URL?) -> some View {
+        Button(action: {
+            handlePrimaryTap(localFileUrl: localFileUrl)
+        }) {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemFill))
+                .frame(maxWidth: .infinity)
+                .frame(height: 160)
+                .overlay {
+                    VStack(spacing: 10) {
+                        if notification.isAttachmentDownloading(overrideState: currentProgressState) {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "photo")
+                                .font(.title2)
+                                .foregroundColor(.gray)
+                        }
+
+                        Text(attachment.displayName())
+                            .font(.subheadline)
+                            .bold()
+                            .foregroundColor(.primary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
+
+                        if !statusText.isEmpty {
+                            Text(statusText)
+                                .font(.caption)
+                                .foregroundColor(statusColor)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                        }
+
+                        if !notification.isAttachmentDownloading(overrideState: currentProgressState) {
+                            Text("Tap to load image")
+                                .font(.caption.weight(.semibold))
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                }
+        }
+        .buttonStyle(.plain)
+        .disabled(notification.isAttachmentDownloading(overrideState: currentProgressState))
     }
 
     private var attachmentExpired: Bool {
         notification.attachmentIsExpired()
     }
 
-    private func shouldShowImagePreview(storedLocalFileUrl: URL?) -> Bool {
+    private func shouldShowImagePreview(resolvedLocalFileUrl: URL?) -> Bool {
         guard attachment.isImageAttachment() else {
             return false
         }
-        return storedLocalFileUrl != nil || notification.isAttachmentDownloading(overrideState: currentProgressState)
+        return resolvedLocalFileUrl != nil
+    }
+
+    private func shouldShowImagePlaceholder(resolvedLocalFileUrl: URL?) -> Bool {
+        guard attachment.isImageAttachment() else {
+            return false
+        }
+        guard resolvedLocalFileUrl == nil else {
+            return false
+        }
+        return !attachmentExpired
     }
 
     private var statusText: String {
@@ -188,8 +257,8 @@ struct NotificationAttachmentSectionView: View {
         .fixedSize()
     }
 
-    private func showsImageOnly(storedLocalFileUrl: URL?) -> Bool {
-        attachment.isImageAttachment() && storedLocalFileUrl != nil
+    private func showsImageOnly(resolvedLocalFileUrl: URL?) -> Bool {
+        attachment.isImageAttachment() && resolvedLocalFileUrl != nil
     }
 
     private func showsMenu(resolvedLocalFileUrl: URL?) -> Bool {
@@ -205,19 +274,19 @@ struct NotificationAttachmentSectionView: View {
         return false
     }
 
-    private func imageAutoDownloadKey(storedLocalFileUrl: URL?) -> String {
+    private func imageAutoDownloadKey(resolvedLocalFileUrl: URL?) -> String {
         [
             notification.id ?? "",
-            storedLocalFileUrl?.path ?? "",
+            resolvedLocalFileUrl?.path ?? "",
             String(currentProgressState.persistedValue)
         ].joined(separator: "|")
     }
 
-    private func autoDownloadInlineImageIfNeeded(storedLocalFileUrl: URL?) {
+    private func autoDownloadInlineImageIfNeeded(resolvedLocalFileUrl: URL?) {
         guard attachment.isImageAttachment() else {
             return
         }
-        guard storedLocalFileUrl == nil else {
+        guard resolvedLocalFileUrl == nil else {
             return
         }
         guard !notification.isAttachmentDownloading(overrideState: currentProgressState) else {

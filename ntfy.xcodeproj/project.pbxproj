@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		02024E60283D7CBB0064224A /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02024E5F283D7CBB0064224A /* Extensions.swift */; };
+		18A28C5C2FBCF00000A52946 /* AttachmentAutoDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A28C5B2FBCF00000A52946 /* AttachmentAutoDownloadView.swift */; };
 		2939B2162F8F293C00A52946 /* UserRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2132F8F293C00A52946 /* UserRowView.swift */; };
 		2939B2172F8F293C00A52946 /* UserEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2122F8F293C00A52946 /* UserEditorView.swift */; };
 		2939B2182F8F293C00A52946 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B20F2F8F293C00A52946 /* AboutView.swift */; };
@@ -94,6 +95,7 @@
 
 /* Begin PBXFileReference section */
 		02024E5F283D7CBB0064224A /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		18A28C5B2FBCF00000A52946 /* AttachmentAutoDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentAutoDownloadView.swift; sourceTree = "<group>"; };
 		2939B20F2F8F293C00A52946 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		2939B2102F8F293C00A52946 /* DefaultServerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultServerView.swift; sourceTree = "<group>"; };
 		2939B2112F8F293C00A52946 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 			isa = PBXGroup;
 			children = (
 				2939B20F2F8F293C00A52946 /* AboutView.swift */,
+				18A28C5B2FBCF00000A52946 /* AttachmentAutoDownloadView.swift */,
 				2939B2102F8F293C00A52946 /* DefaultServerView.swift */,
 				2939B2112F8F293C00A52946 /* SettingsView.swift */,
 				2939B2122F8F293C00A52946 /* UserEditorView.swift */,
@@ -432,6 +435,7 @@
 				2939B2162F8F293C00A52946 /* UserRowView.swift in Sources */,
 				2939B2172F8F293C00A52946 /* UserEditorView.swift in Sources */,
 				2939B2182F8F293C00A52946 /* AboutView.swift in Sources */,
+				18A28C5C2FBCF00000A52946 /* AttachmentAutoDownloadView.swift in Sources */,
 				2968F2AD2FBA530200480665 /* AttachmentProgressState.swift in Sources */,
 				2939B2192F8F293C00A52946 /* DefaultServerView.swift in Sources */,
 				2939B21A2F8F293C00A52946 /* SettingsView.swift in Sources */,

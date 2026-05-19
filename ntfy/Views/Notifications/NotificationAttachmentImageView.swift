@@ -18,7 +18,7 @@ struct NotificationAttachmentImageView: View {
         Group {
             if let image = imageLoader.image {
                 renderedImage(image)
-            } else if isLoading || imageLoader.isLoading {
+            } else if isLoading || imageLoader.phase == .idle || imageLoader.phase == .loading {
                 loadingPlaceholder
             } else {
                 failedPlaceholder

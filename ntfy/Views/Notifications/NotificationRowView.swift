@@ -88,7 +88,8 @@ struct NotificationRowView: View {
                         Task { @MainActor in
                             AttachmentExportPresenter.shared.present(url: url)
                         }
-                    }
+                    },
+                    onCopy: showCopyFeedback
                 )
             }
             if !notification.actionsList().isEmpty {
@@ -148,6 +149,10 @@ struct NotificationRowView: View {
     private func copyMessage() {
         UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+        showCopyFeedback()
+    }
+
+    private func showCopyFeedback() {
         onCopyMessage()
     }
     
