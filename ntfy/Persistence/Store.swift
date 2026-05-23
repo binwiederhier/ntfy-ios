@@ -257,22 +257,56 @@ class Store: ObservableObject {
         return basicUser
     }
 
-    func findSubscriptionMatch(forPollRequestTopic topic: String) -> (baseUrl: String, topic: String)? {
+    func findSubscriptionMatch(forPollRequestTopic topic: String, preferredBaseUrl: String? = nil) -> (baseUrl: String, topic: String)? {
         var match: (baseUrl: String, topic: String)?
         context.performAndWait {
             guard let subscriptions = try? context.fetch(Subscription.fetchRequest()) else {
+                Log.w(Store.tag, "\(#function): Can't find subscriptions with topic=\(topic)")
                 return
             }
-            match = subscriptions
-                .first {
-                    $0.urlHash() == topic || $0.topic == topic
-                }
-                .flatMap { subscription in
+            let normalizedPreferredBaseUrl = preferredBaseUrl.map(normalizeBaseUrl)
+            let normalizedDefaultBaseUrl = normalizeBaseUrl(Config.appBaseUrl)
+            let matchingSubscriptions = subscriptions.filter {
+                $0.urlHash() == topic || $0.topic == topic
+            }
+            Log.d(
+                Store.tag,
+                "\(#function) topic=\(topic) matched \(matchingSubscriptions.count) subscription(s)",
+                matchingSubscriptions.compactMap { subscription -> String? in
                     guard let baseUrl = subscription.baseUrl, let topic = subscription.topic else {
                         return nil
                     }
-                    return (baseUrl, topic)
+                    return topicUrl(baseUrl: baseUrl, topic: topic)
                 }
+            )
+
+            let prioritizedMatch = matchingSubscriptions.first {
+                guard let baseUrl = $0.baseUrl else {
+                    return false
+                }
+                if let normalizedPreferredBaseUrl {
+                    return normalizeBaseUrl(baseUrl) == normalizedPreferredBaseUrl
+                }
+                return false
+            } ?? matchingSubscriptions.first {
+                guard let baseUrl = $0.baseUrl, let subscriptionTopic = $0.topic else {
+                    return false
+                }
+                return subscriptionTopic == topic && normalizeBaseUrl(baseUrl) == normalizedDefaultBaseUrl
+            } ?? matchingSubscriptions.first
+
+            match = prioritizedMatch.flatMap { subscription in
+                guard let baseUrl = subscription.baseUrl, let topic = subscription.topic else {
+                    return nil
+                }
+                return (baseUrl, topic)
+            }
+            if match == nil {
+                Log.w(
+                    Store.tag,
+                    "\(#function) No poll request subscription match topic=\(topic) and preferredBaseUrl=\(normalizedPreferredBaseUrl ?? "<nil>")"
+                )
+            }
         }
         return match
     }
