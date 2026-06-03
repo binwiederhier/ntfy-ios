@@ -36,29 +36,31 @@ extension UNMutableNotificationContent {
         // permissions. This is described in https://stackoverflow.com/a/44580916/1440785
         configureNotificationActions(message: message)
         
-        // Play a sound, and group by topic
-        self.sound = .default
+        // Group by topic, and use a critical sound for highest-priority alerts.
         self.threadIdentifier = topicUrl(baseUrl: baseUrl, topic: message.topic)
         
         // Map priorities to interruption level (light up screen, ...) and relevance (order)
-        if #available(iOS 15.0, *) {
-            switch message.priority {
-            case 1:
-                self.interruptionLevel = .passive
-                self.relevanceScore = 0
-            case 2:
-                self.interruptionLevel = .passive
-                self.relevanceScore = 0.25
-            case 4:
-                self.interruptionLevel = .timeSensitive
-                self.relevanceScore = 0.75
-            case 5:
-                self.interruptionLevel = .critical
-                self.relevanceScore = 1
-            default:
-                self.interruptionLevel = .active
-                self.relevanceScore = 0.5
-            }
+        switch message.priority {
+        case 1:
+            self.sound = .default
+            self.interruptionLevel = .passive
+            self.relevanceScore = 0
+        case 2:
+            self.sound = .default
+            self.interruptionLevel = .passive
+            self.relevanceScore = 0.25
+        case 4:
+            self.sound = .default
+            self.interruptionLevel = .timeSensitive
+            self.relevanceScore = 0.75
+        case 5:
+            self.sound = .defaultCritical
+            self.interruptionLevel = .critical
+            self.relevanceScore = 1
+        default:
+            self.sound = .default
+            self.interruptionLevel = .active
+            self.relevanceScore = 0.5
         }
         
         // Make sure the userInfo matches, so that when the notification is tapped, the AppDelegate
