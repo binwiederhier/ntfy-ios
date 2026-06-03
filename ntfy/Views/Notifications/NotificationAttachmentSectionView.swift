@@ -112,8 +112,8 @@ struct NotificationAttachmentSectionView: View {
         .onChange(of: currentProgressState.persistedValue) { _ in
             syncPreparingAutoDownloadState(resolvedLocalFileUrl: resolvedLocalFileUrl)
         }
-        .task(id: imageAutoDownloadKey(resolvedLocalFileUrl: resolvedLocalFileUrl)) {
-            autoDownloadInlineImageIfNeeded(resolvedLocalFileUrl: resolvedLocalFileUrl)
+        .task(id: attachmentAutoDownloadKey(resolvedLocalFileUrl: resolvedLocalFileUrl)) {
+            autoDownloadAttachmentIfNeeded(resolvedLocalFileUrl: resolvedLocalFileUrl)
         }
     }
 
@@ -284,28 +284,27 @@ struct NotificationAttachmentSectionView: View {
         return false
     }
 
-    private func imageAutoDownloadKey(resolvedLocalFileUrl: URL?) -> String {
+    private func attachmentAutoDownloadKey(resolvedLocalFileUrl: URL?) -> String {
         [
             notification.id ?? "",
             resolvedLocalFileUrl?.path ?? ""
         ].joined(separator: "|")
     }
 
-    private func autoDownloadInlineImageIfNeeded(resolvedLocalFileUrl: URL?) {
+    private func autoDownloadAttachmentIfNeeded(resolvedLocalFileUrl: URL?) {
         syncPreparingAutoDownloadState(resolvedLocalFileUrl: resolvedLocalFileUrl)
-        guard shouldAutoDownloadInlineImage(resolvedLocalFileUrl: resolvedLocalFileUrl) else {
+        guard shouldAutoDownloadAttachment(resolvedLocalFileUrl: resolvedLocalFileUrl) else {
             isPreparingAutoDownload = false
-            if attachment.isImageAttachment(),
-               resolvedLocalFileUrl == nil,
+            if resolvedLocalFileUrl == nil,
                !attachmentExpired,
                currentProgressState == .none,
                !Store.shared.shouldAutoDownloadAttachment(attachment) {
-                Log.d("NotificationAttachmentSectionView", "Skipping inline auto-download for \(notification.id ?? "<nil>") because it exceeds the auto-download policy")
+                Log.d("NotificationAttachmentSectionView", "Skipping auto-download for \(notification.id ?? "<nil>") because it exceeds the auto-download policy")
                 notification.skipAttachmentAutoDownload()
             }
             return
         }
-        Log.d("NotificationAttachmentSectionView", "Starting inline auto-download for \(notification.id ?? "<nil>")")
+        Log.d("NotificationAttachmentSectionView", "Starting auto-download for \(notification.id ?? "<nil>")")
         controller.startDownload(
             notification: notification,
             attachment: attachment,
@@ -319,10 +318,7 @@ struct NotificationAttachmentSectionView: View {
         isPreparingAutoDownload || notification.isAttachmentDownloading(overrideState: currentProgressState)
     }
 
-    private func shouldAutoDownloadInlineImage(resolvedLocalFileUrl: URL?) -> Bool {
-        guard attachment.isImageAttachment() else {
-            return false
-        }
+    private func shouldAutoDownloadAttachment(resolvedLocalFileUrl: URL?) -> Bool {
         guard resolvedLocalFileUrl == nil else {
             return false
         }
@@ -351,6 +347,7 @@ struct NotificationAttachmentSectionView: View {
     }
 
     private func syncPreparingAutoDownloadState(resolvedLocalFileUrl: URL?) {
-        isPreparingAutoDownload = shouldAutoDownloadInlineImage(resolvedLocalFileUrl: resolvedLocalFileUrl)
+        isPreparingAutoDownload = attachment.isImageAttachment()
+            && shouldAutoDownloadAttachment(resolvedLocalFileUrl: resolvedLocalFileUrl)
     }
 }

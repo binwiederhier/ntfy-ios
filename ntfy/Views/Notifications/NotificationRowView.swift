@@ -319,17 +319,47 @@ extension NotificationRowView {
     }
 
     @MainActor
-    private final class AttachmentExportPresenter: NSObject, UIDocumentPickerDelegate {
+    private final class AttachmentExportPresenter: NSObject, UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate {
         static let shared = AttachmentExportPresenter()
+        private var activePicker: UIDocumentPickerViewController?
+        private var activeExportUrl: URL?
 
         func present(url: URL) {
             guard let presenter = topViewController(from: rootViewController()) else {
                 return
             }
 
-            let picker = UIDocumentPickerViewController(forExporting: [url], asCopy: true)
+            let exportUrl: URL
+            do {
+                exportUrl = try makeTemporaryExportCopy(of: url)
+            } catch {
+                Log.w("AttachmentExportPresenter", "Failed to prepare attachment export copy", error)
+                return
+            }
+
+            cleanupActiveExport()
+
+            let picker = UIDocumentPickerViewController(forExporting: [exportUrl], asCopy: true)
             picker.delegate = self
+            picker.presentationController?.delegate = self
+            activePicker = picker
+            activeExportUrl = exportUrl
             presenter.present(picker, animated: true)
+        }
+
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            cleanupIfActive(controller)
+        }
+
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+            cleanupIfActive(controller)
+        }
+
+        func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+            guard let picker = presentationController.presentedViewController as? UIDocumentPickerViewController else {
+                return
+            }
+            cleanupIfActive(picker)
         }
 
         private func rootViewController() -> UIViewController? {
@@ -352,6 +382,32 @@ extension NotificationRowView {
                 return topViewController(from: presentedViewController)
             }
             return controller
+        }
+
+        private func cleanupIfActive(_ controller: UIDocumentPickerViewController) {
+            guard activePicker === controller else {
+                return
+            }
+            cleanupActiveExport()
+        }
+
+        private func cleanupActiveExport() {
+            activePicker = nil
+            if let activeExportUrl {
+                try? FileManager.default.removeItem(at: activeExportUrl)
+            }
+            activeExportUrl = nil
+        }
+
+        private func makeTemporaryExportCopy(of url: URL) throws -> URL {
+            let tempDir = FileManager.default.temporaryDirectory
+                .appendingPathComponent("ntfy-export", isDirectory: true)
+            try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+
+            let destinationUrl = tempDir.appendingPathComponent("\(UUID().uuidString)-\(url.lastPathComponent)")
+            try? FileManager.default.removeItem(at: destinationUrl)
+            try FileManager.default.copyItem(at: url, to: destinationUrl)
+            return destinationUrl
         }
     }
 

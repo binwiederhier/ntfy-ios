@@ -18,8 +18,6 @@ class NotificationService: UNNotificationServiceExtension {
         self.store = Store.shared
         self.contentHandler = contentHandler
         self.bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-        
-        Log.d(tag, "Notification received (in service)") // Logs from extensions are not printed in Xcode!
 
         if let bestAttemptContent = bestAttemptContent {
             let userInfo = bestAttemptContent.userInfo
@@ -28,6 +26,10 @@ class NotificationService: UNNotificationServiceExtension {
                 contentHandler(request.content)
                 return
             }
+            Log.d(
+                tag,
+                "\(#function) event=\(message.event), topic=\(message.topic), pollId=\(message.pollId ?? "<nil>"), baseUrl=\(userInfo["base_url"] as? String ?? "<nil>")"
+            )
             switch message.event {
             case "poll_request":
                 handlePollRequest(request, bestAttemptContent, message, contentHandler)
@@ -45,7 +47,8 @@ class NotificationService: UNNotificationServiceExtension {
         // Called just before the extension will be terminated by the system.
         // Use this as an opportunity to deliver your "best attempt" at modified content,
         // otherwise the original push payload will be used.
-        
+
+        Log.w(tag, "\(#function): delivering best attempt content")
         if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
             contentHandler(bestAttemptContent)
         }
@@ -67,8 +70,11 @@ class NotificationService: UNNotificationServiceExtension {
     
     private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
         let pollId = pollRequest.pollId ?? pollRequest.id
-        guard
-            let subscription = store?.findSubscriptionMatch(forPollRequestTopic: pollRequest.topic)
+        let preferredBaseUrl = bestAttemptContent?.userInfo["base_url"] as? String
+        guard let subscription = store?.findSubscriptionMatch(
+                forPollRequestTopic: pollRequest.topic,
+                preferredBaseUrl: preferredBaseUrl
+            )
         else {
             Log.w(tag, "Cannot find subscription for poll request topic=\(pollRequest.topic), pollId=\(pollRequest.pollId ?? "<nil>")")
             contentHandler(request.content)
