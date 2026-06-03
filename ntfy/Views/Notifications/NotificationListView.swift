@@ -54,22 +54,7 @@ struct NotificationListView: View {
         .listStyle(PlainListStyle())
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.editMode, self.$editMode)
-        .navigationBarBackButtonHidden(true)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                if (self.editMode != .active) {
-                    Button(action: {
-                        // iOS bug (?): We create a custom back button, because the original back button doesn't reset
-                        // selectedBaseUrl early enough and the row stays highlighted for a long time,
-                        // which is weird and feels wrong. This avoids that behavior.
-                        
-                        self.delegate.selectedBaseUrl = nil
-                    }){
-                        Image(systemName: "chevron.left")
-                    }
-                    .padding([.top, .bottom, .trailing], 40)
-                }
-            }
             ToolbarItem(placement: .principal) {
                 Text(subscription.topicName())
                     .font(.headline)
@@ -176,6 +161,11 @@ struct NotificationListView: View {
         })
         .onAppear {
             cancelSubscriptionNotifications()
+        }
+        .onDisappear {
+            if delegate.selectedBaseUrl == subscription.urlString() {
+                delegate.selectedBaseUrl = nil
+            }
         }
     }
     
