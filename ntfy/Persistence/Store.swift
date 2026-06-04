@@ -315,7 +315,7 @@ class Store: ObservableObject {
         context.delete(user)
         try? context.save()
     }
-    
+
     // MARK: Preferences
     
     func saveDefaultBaseUrl(baseUrl: String?) {
