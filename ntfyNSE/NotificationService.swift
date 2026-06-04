@@ -18,8 +18,6 @@ class NotificationService: UNNotificationServiceExtension {
         self.store = Store.shared
         self.contentHandler = contentHandler
         self.bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-        
-        Log.d(tag, "Notification received (in service)") // Logs from extensions are not printed in Xcode!
 
         if let bestAttemptContent = bestAttemptContent {
             let userInfo = bestAttemptContent.userInfo
@@ -28,6 +26,10 @@ class NotificationService: UNNotificationServiceExtension {
                 contentHandler(request.content)
                 return
             }
+            Log.d(
+                tag,
+                "\(#function) event=\(message.event), topic=\(message.topic), pollId=\(message.pollId ?? "<nil>"), baseUrl=\(userInfo["base_url"] as? String ?? "<nil>")"
+            )
             switch message.event {
             case "poll_request":
                 handlePollRequest(request, bestAttemptContent, message, contentHandler)
@@ -45,36 +47,34 @@ class NotificationService: UNNotificationServiceExtension {
         // Called just before the extension will be terminated by the system.
         // Use this as an opportunity to deliver your "best attempt" at modified content,
         // otherwise the original push payload will be used.
-        
+
+        Log.w(tag, "\(#function): delivering best attempt content")
         if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
             contentHandler(bestAttemptContent)
         }
     }
     
     private func handleMessage(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ baseUrl: String, _ message: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
-        // Modify notification based on message
-        content.modify(message: message, baseUrl: baseUrl)
-        
-        // Save notification to store, and display it
-        guard let subscription = store?.getSubscription(baseUrl: baseUrl, topic: message.topic) else {
+        // Save notification first so attachment downloads can update persistent state.
+        guard store?.save(notificationFromMessage: message, baseUrl: baseUrl, topic: message.topic) == true else {
             Log.w(tag, "Subscription \(topicUrl(baseUrl: baseUrl, topic: message.topic)) unknown")
             contentHandler(request.content)
             return
         }
-        Store.shared.save(notificationFromMessage: message, withSubscription: subscription)
-        contentHandler(content)
+        let user = store?.getBasicUser(baseUrl: baseUrl)
+        content.modify(message: message, baseUrl: baseUrl)
+        content.attachImageIfNeeded(message: message, user: user) {
+            contentHandler(content)
+        }
     }
     
     private func handlePollRequest(_ request: UNNotificationRequest, _ content: UNMutableNotificationContent, _ pollRequest: Message, _ contentHandler: @escaping (UNNotificationContent) -> Void) {
-        let subscription = store?.getSubscriptions()?.first { subscription in
-            // Poll requests usually target the hashed topic URL, but tolerate raw topic payloads too
-            subscription.urlHash() == pollRequest.topic || subscription.topic == pollRequest.topic
-        }
-        let baseUrl = subscription?.baseUrl
         let pollId = pollRequest.pollId ?? pollRequest.id
-        guard
-            let subscription = subscription,
-            let baseUrl = baseUrl
+        let preferredBaseUrl = bestAttemptContent?.userInfo["base_url"] as? String
+        guard let subscription = store?.findSubscriptionMatch(
+                forPollRequestTopic: pollRequest.topic,
+                preferredBaseUrl: preferredBaseUrl
+            )
         else {
             Log.w(tag, "Cannot find subscription for poll request topic=\(pollRequest.topic), pollId=\(pollRequest.pollId ?? "<nil>")")
             contentHandler(request.content)
@@ -82,15 +82,15 @@ class NotificationService: UNNotificationServiceExtension {
         }
         
         // Poll original server
-        let user = store?.getUser(baseUrl: baseUrl)?.toBasicUser()
+        let user = store?.getBasicUser(baseUrl: subscription.baseUrl)
         // The extension only needs contentHandler to be called from the async callback
-        ApiService.shared.poll(subscription: subscription, messageId: pollId, user: user) { message, error in
+        ApiService.shared.poll(baseUrl: subscription.baseUrl, topic: subscription.topic, messageId: pollId, user: user) { message, error in
             guard let message = message else {
-                Log.w(self.tag, "Error fetching poll request message topic=\(pollRequest.topic), pollId=\(pollId), subscription=\(subscription.urlString())", error)
+                Log.w(self.tag, "Error fetching poll request message topic=\(pollRequest.topic), pollId=\(pollId), subscription=\(topicUrl(baseUrl: subscription.baseUrl, topic: subscription.topic))", error)
                 contentHandler(request.content)
                 return
             }
-            self.handleMessage(request, content, baseUrl, message, contentHandler)
+            self.handleMessage(request, content, subscription.baseUrl, message, contentHandler)
         }
     }
 }

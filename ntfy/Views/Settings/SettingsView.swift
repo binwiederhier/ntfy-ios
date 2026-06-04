@@ -16,6 +16,11 @@ struct SettingsView: View {
                     DefaultServerView()
                 }
                 Section(
+                    header: Text("Notifications")
+                ) {
+                    AttachmentAutoDownloadView()
+                }
+                Section(
                     header: Text("Users"),
                     footer: Text("To access read-protected topics, you may add or edit users here. All topics for a given server will use the same user.")
                 ) {

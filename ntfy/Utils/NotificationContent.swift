@@ -1,8 +1,6 @@
 import Foundation
 import UserNotifications
 
-private let actionsCategory = "ntfyActions" // It seems ok to re-use the same category
-
 extension UNMutableNotificationContent {
     func modify(message: Message, baseUrl: String) {
         // Body and title
@@ -36,38 +34,33 @@ extension UNMutableNotificationContent {
         //
         // We also must set the .foreground flag, which brings the notification to the foreground and avoids an error about
         // permissions. This is described in https://stackoverflow.com/a/44580916/1440785
-        if let actions = message.actions, !actions.isEmpty {
-            self.categoryIdentifier = actionsCategory
-            
-            let center = UNUserNotificationCenter.current()
-            let notificationActions = actions.map { UNNotificationAction(identifier: $0.id, title: $0.label, options: [.foreground]) }
-            let category = UNNotificationCategory(identifier: actionsCategory, actions: notificationActions, intentIdentifiers: [])
-            center.setNotificationCategories([category])
-        }
+        configureNotificationActions(message: message)
         
-        // Play a sound, and group by topic
-        self.sound = .default
+        // Group by topic, and use a critical sound for highest-priority alerts.
         self.threadIdentifier = topicUrl(baseUrl: baseUrl, topic: message.topic)
         
         // Map priorities to interruption level (light up screen, ...) and relevance (order)
-        if #available(iOS 15.0, *) {
-            switch message.priority {
-            case 1:
-                self.interruptionLevel = .passive
-                self.relevanceScore = 0
-            case 2:
-                self.interruptionLevel = .passive
-                self.relevanceScore = 0.25
-            case 4:
-                self.interruptionLevel = .timeSensitive
-                self.relevanceScore = 0.75
-            case 5:
-                self.interruptionLevel = .critical
-                self.relevanceScore = 1
-            default:
-                self.interruptionLevel = .active
-                self.relevanceScore = 0.5
-            }
+        switch message.priority {
+        case 1:
+            self.sound = .default
+            self.interruptionLevel = .passive
+            self.relevanceScore = 0
+        case 2:
+            self.sound = .default
+            self.interruptionLevel = .passive
+            self.relevanceScore = 0.25
+        case 4:
+            self.sound = .default
+            self.interruptionLevel = .timeSensitive
+            self.relevanceScore = 0.75
+        case 5:
+            self.sound = .defaultCritical
+            self.interruptionLevel = .critical
+            self.relevanceScore = 1
+        default:
+            self.sound = .default
+            self.interruptionLevel = .active
+            self.relevanceScore = 0.5
         }
         
         // Make sure the userInfo matches, so that when the notification is tapped, the AppDelegate
@@ -75,4 +68,149 @@ extension UNMutableNotificationContent {
         self.userInfo = message.toUserInfo()
         self.userInfo["base_url"] = baseUrl
     }
+
+    func attachImageIfNeeded(message: Message, user: BasicUser?, completionHandler: @escaping () -> Void) {
+        guard let attachment = message.attachment else {
+            completeAttachmentHandling(message: message, didAttachImage: false, completionHandler: completionHandler)
+            return
+        }
+        guard attachment.isImageAttachment(), let url = URL(string: attachment.url) else {
+            completeAttachmentHandling(message: message, didAttachImage: false, completionHandler: completionHandler)
+            return
+        }
+
+        if let localFileUrl = AttachmentFileStore.existingLocalFileUrl(
+            notificationID: message.id,
+            remoteUrl: url,
+            attachment: attachment,
+            mimeType: attachment.type
+        ) {
+            DispatchQueue.main.async {
+                let didAttachImage = self.attachLocalImage(from: localFileUrl)
+                self.completeAttachmentHandling(message: message, didAttachImage: didAttachImage, completionHandler: completionHandler)
+            }
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
+        if let user = user {
+            request.setValue(user.toHeader(), forHTTPHeaderField: "Authorization")
+        }
+
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 20
+        config.timeoutIntervalForResource = 20
+
+        URLSession(configuration: config).downloadTask(with: request) { tempUrl, response, _ in
+            guard
+                let tempUrl,
+                let httpResponse = response as? HTTPURLResponse,
+                (200..<300).contains(httpResponse.statusCode)
+            else {
+                self.completeAttachmentHandling(message: message, didAttachImage: false, completionHandler: completionHandler)
+                return
+            }
+
+            let mimeType = attachment.type ?? httpResponse.mimeType
+            guard mimeType?.lowercased().hasPrefix("image/") == true || attachment.isImageAttachment() else {
+                self.completeAttachmentHandling(message: message, didAttachImage: false, completionHandler: completionHandler)
+                return
+            }
+
+            do {
+                let downloaded = try AttachmentFileStore.storeDownloadedTemporaryFile(
+                    notificationID: message.id,
+                    remoteUrl: url,
+                    attachment: attachment,
+                    temporaryFileUrl: tempUrl,
+                    mimeType: mimeType
+                )
+                Store.shared.completeAttachmentDownload(
+                    notificationID: message.id,
+                    localPath: downloaded.localFileUrl.path,
+                    resolvedType: downloaded.mimeType,
+                    resolvedSize: downloaded.size
+                )
+                DispatchQueue.main.async {
+                    let didAttachImage = self.attachLocalImage(from: downloaded.localFileUrl)
+                    self.completeAttachmentHandling(message: message, didAttachImage: didAttachImage, completionHandler: completionHandler)
+                }
+            } catch {
+                Log.w("NotificationContent", "Failed to create notification attachment", error)
+                self.completeAttachmentHandling(message: message, didAttachImage: false, completionHandler: completionHandler)
+            }
+        }.resume()
+    }
+
+    private func attachLocalImage(from localFileUrl: URL) -> Bool {
+        do {
+            let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: localFileUrl)
+            attachments = attachments + [notificationAttachment]
+            return true
+        } catch {
+            Log.w("NotificationContent", "Failed to attach local image", error)
+            return false
+        }
+    }
+
+    private func configureNotificationActions(message: Message) {
+        let userActions = message.actions ?? []
+        let actions = userActions.prefix(4).map {
+            UNNotificationAction(identifier: $0.id, title: $0.label, options: [.foreground])
+        }
+
+        guard !actions.isEmpty else {
+            categoryIdentifier = ""
+            return
+        }
+
+        let categoryIdentifier = "ntfyActions"
+        self.categoryIdentifier = categoryIdentifier
+
+        let center = UNUserNotificationCenter.current()
+        let category = UNNotificationCategory(identifier: categoryIdentifier, actions: actions, intentIdentifiers: [])
+        center.getNotificationCategories { existingCategories in
+            let preservedCategories = existingCategories.filter { $0.identifier != categoryIdentifier }
+            center.setNotificationCategories(Set(preservedCategories).union([category]))
+        }
+    }
+
+    private func completeAttachmentHandling(message: Message, didAttachImage: Bool, completionHandler: @escaping () -> Void) {
+        DispatchQueue.main.async {
+            self.appendAttachmentSummaryIfNeeded(message: message, didAttachImage: didAttachImage)
+            completionHandler()
+        }
+    }
+
+    private func appendAttachmentSummaryIfNeeded(message: Message, didAttachImage: Bool) {
+        guard let attachment = message.attachment else {
+            return
+        }
+        if attachment.isImageAttachment(), didAttachImage {
+            return
+        }
+
+        let summary = fallbackAttachmentSummary(attachment: attachment)
+        guard !summary.isEmpty else {
+            return
+        }
+
+        if body.isEmpty {
+            body = summary
+        } else {
+            body = body + "\n\n" + summary
+        }
+    }
+}
+
+private func fallbackAttachmentSummary(attachment: MessageAttachment) -> String {
+    var parts = [attachment.displayName()]
+    if let size = attachment.size, size > 0 {
+        parts.append(formatBytes(size))
+    }
+    if attachment.isExpired() {
+        parts.append("expired")
+    }
+    return "Attachment: " + parts.joined(separator: ", ")
 }

@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import UIKit
 
 enum ActiveAlert {
     case clear, unsubscribe, selected
@@ -20,6 +21,7 @@ struct NotificationListView: View {
     
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
+    @State private var showCopiedConfirmation = false
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -31,41 +33,28 @@ struct NotificationListView: View {
     }
 
     var body: some View {
-        if #available(iOS 15.0, *) {
-            notificationList
-                .refreshable {
-                    subscriptionManager.poll(subscription)
-                }
-        } else {
-            notificationList
-        }
+        notificationList
+            .refreshable {
+                subscriptionManager.poll(subscription)
+            }
     }
     
     private var notificationList: some View {
-        List(selection: $selection) {
-            ForEach(notificationsModel.notifications, id: \.self) { notification in
-                NotificationRowView(notification: notification)
+        Group {
+            if editMode == .active {
+                List(selection: $selection) {
+                    notificationRows
+                }
+            } else {
+                List {
+                    notificationRows
+                }
             }
         }
         .listStyle(PlainListStyle())
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.editMode, self.$editMode)
-        .navigationBarBackButtonHidden(true)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                if (self.editMode != .active) {
-                    Button(action: {
-                        // iOS bug (?): We create a custom back button, because the original back button doesn't reset
-                        // selectedBaseUrl early enough and the row stays highlighted for a long time,
-                        // which is weird and feels wrong. This avoids that behavior.
-                        
-                        self.delegate.selectedBaseUrl = nil
-                    }){
-                        Image(systemName: "chevron.left")
-                    }
-                    .padding([.top, .bottom, .trailing], 40)
-                }
-            }
             ToolbarItem(placement: .principal) {
                 Text(subscription.topicName())
                     .font(.headline)
@@ -76,11 +65,6 @@ struct NotificationListView: View {
                     editButton
                 } else {
                     Menu {
-                        if #unavailable(iOS 15.0) {
-                            Button("Refresh") {
-                                subscriptionManager.poll(subscription)
-                            }
-                        }
                         if notificationsModel.notifications.count > 0 {
                             editButton
                         }
@@ -155,19 +139,43 @@ struct NotificationListView: View {
                         .multilineTextAlignment(.center)
                         .padding(.bottom)
                     
-                    if #available(iOS 15.0, *) {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
-                            .foregroundColor(.gray)
-                    } else {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on https://ntfy.sh and https://ntfy.sh/docs.")
-                            .foregroundColor(.gray)
-                    }
+                    Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
+                        .foregroundColor(.gray)
                 }
                 .padding(40)
             }
         })
+        .overlay(Group {
+            if showCopiedConfirmation {
+                Text("Copied to Clipboard")
+                    .font(.body)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.accentColor.cornerRadius(20))
+                    .shadow(radius: 5)
+                    .padding(.bottom, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        })
         .onAppear {
             cancelSubscriptionNotifications()
+        }
+        .onDisappear {
+            if delegate.selectedBaseUrl == subscription.urlString() {
+                delegate.selectedBaseUrl = nil
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var notificationRows: some View {
+        ForEach(notificationsModel.notifications, id: \.self) { notification in
+            NotificationRowView(
+                notification: notification,
+                onCopyMessage: showCopyConfirmation
+            )
         }
     }
     
@@ -190,19 +198,25 @@ struct NotificationListView: View {
     }
     
     private func sendTestNotification() {
+        guard let baseUrl = subscription.baseUrl else {
+            Log.w(tag, "Cannot send test notification: subscription base URL is missing")
+            return
+        }
+
         let possibleTags: Array<String> = ["warning", "skull", "success", "triangular_flag_on_post", "de", "us", "dog", "cat", "rotating_light", "bike", "backup", "rsync", "this-s-a-tag", "ios"]
         let priority = Int.random(in: 1..<6)
         let tags = Array(possibleTags.shuffled().prefix(Int.random(in: 0..<4)))
-        DispatchQueue.global(qos: .background).async {
-            let user = store.getUser(baseUrl: subscription.baseUrl!)?.toBasicUser()
-            ApiService.shared.publish(
-                subscription: subscription,
-                user: user,
-                message: "This is a test notification from the ntfy iOS app. It has a priority of \(priority). If you send another one, it may look different.",
-                title: "Test: You can set a title if you like",
-                priority: priority,
-                tags: tags
-            ) {
+
+        let user = store.getUser(baseUrl: baseUrl)?.toBasicUser()
+        ApiService.shared.publish(
+            subscription: subscription,
+            user: user,
+            message: "This is a test notification from the ntfy iOS app. It has a priority of \(priority). If you send another one, it may look different.",
+            title: "Test: You can set a title if you like",
+            priority: priority,
+            tags: tags
+        ) {
+            DispatchQueue.main.async {
                 subscriptionManager.poll(subscription)
             }
         }
@@ -243,89 +257,18 @@ struct NotificationListView: View {
             }
         }
     }
-}
-
-struct NotificationRowView: View {
-    @EnvironmentObject private var store: Store
-    @ObservedObject var notification: Notification
     
-    var body: some View {
-        if #available(iOS 15.0, *) {
-            notificationRow
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        store.delete(notification: notification)
-                    } label: {
-                        Label("Delete", systemImage: "trash.circle")
-                    }
-                }
-        } else {
-            notificationRow
+    private func showCopyConfirmation() {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            showCopiedConfirmation = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                showCopiedConfirmation = false
+            }
         }
     }
     
-    private var notificationRow: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 2) {
-                Text(notification.shortDateTime())
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                if [1,2,4,5].contains(notification.priority) {
-                    Image("priority-\(notification.priority)")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 16)
-                }
-            }
-            .padding([.bottom], 2)
-            if let title = notification.formatTitle(), title != "" {
-                Text(title)
-                    .font(.headline)
-                    .bold()
-                    .padding([.bottom], 2)
-            }
-            Text(notification.formatMessage())
-                .font(.body)
-            if !notification.nonEmojiTags().isEmpty {
-                Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .padding([.top], 2)
-            }
-            if !notification.actionsList().isEmpty {
-                HStack {
-                    ForEach(notification.actionsList()) { action in
-                        if #available(iOS 15, *) {
-                            Button(action.label) {
-                                ActionExecutor.execute(action)
-                            }
-                            .buttonStyle(.borderedProminent)
-                        } else {
-                            Button(action: {
-                                ActionExecutor.execute(action)
-                            }) {
-                                Text(action.label)
-                                    .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
-                                    .foregroundColor(.white)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                            }
-                            .background(Color.accentColor)
-                            .cornerRadius(10)
-                        }
-                    }
-                }
-                .padding([.top], 5)
-            }
-        }
-        .padding(.all, 4)
-        .onTapGesture {
-            // TODO: This gives no feedback to the user, and it only works if the text is tapped
-            UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
-        }
-    }
 }
 
 struct NotificationListView_Previews: PreviewProvider {
