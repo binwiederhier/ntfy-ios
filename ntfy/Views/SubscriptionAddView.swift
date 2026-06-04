@@ -153,8 +153,7 @@ struct SubscriptionAddView: View {
         loading = true
         addError = nil
         let user = store.getUser(baseUrl: selectedBaseUrl)?.toBasicUser()
-        let headers = store.getServerHeaders(baseUrl: selectedBaseUrl)
-        ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: sanitizedTopic, user: user, headers: headers) { result in
+        ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: sanitizedTopic, user: user) { result in
             switch result {
             case .Success:
                 DispatchQueue.global(qos: .background).async {
@@ -181,8 +180,7 @@ struct SubscriptionAddView: View {
         loading = true
         loginError = nil
         let user = BasicUser(username: username, password: password)
-        let headers = store.getServerHeaders(baseUrl: selectedBaseUrl)
-        ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: sanitizedTopic, user: user, headers: headers) { result in
+        ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: sanitizedTopic, user: user) { result in
             switch result {
             case .Success:
                 DispatchQueue.global(qos: .background).async {

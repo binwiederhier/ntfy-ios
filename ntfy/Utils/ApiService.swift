@@ -3,29 +3,29 @@ import Foundation
 class ApiService {
     static let shared = ApiService()
     static let userAgent = "ntfy/\(Config.version) (build \(Config.build); iOS \(Config.osVersion))"
-    
+
     private let tag = "ApiService"
-    
-    func poll(subscription: Subscription, user: BasicUser?, headers: [String: String]? = nil, completionHandler: @escaping ([Message]?, Error?) -> Void) {
+
+    func poll(subscription: Subscription, user: BasicUser?, completionHandler: @escaping ([Message]?, Error?) -> Void) {
         guard let url = URL(string: subscription.urlString()) else {
             completionHandler(nil, URLError(.badURL))
             return
         }
         let since = subscription.lastNotificationId ?? "all"
         let urlString = "\(url)/json?poll=1&since=\(since)"
-        
+
         Log.d(tag, "Polling from \(urlString) with user \(user?.username ?? "anonymous")")
-        fetchJsonData(urlString: urlString, user: user, headers: headers, completionHandler: completionHandler)
+        fetchJsonData(urlString: urlString, user: user, completionHandler: completionHandler)
     }
-    
-    func poll(subscription: Subscription, messageId: String, user: BasicUser?, headers: [String: String]? = nil, completionHandler: @escaping (Message?, Error?) -> Void) {
+
+    func poll(subscription: Subscription, messageId: String, user: BasicUser?, completionHandler: @escaping (Message?, Error?) -> Void) {
         guard let url = URL(string: "\(subscription.urlString())/json?poll=1&id=\(messageId)") else {
             completionHandler(nil, URLError(.badURL))
             return
         }
         Log.d(tag, "Polling single message from \(url) with user \(user?.username ?? "anonymous")")
-        
-        let request = newRequest(url: url, user: user, headers: headers)
+
+        let request = newRequest(url: url, user: user)
         newSession(timeout: 30).dataTask(with: request) { (data, response, error) in
             if let error = error {
                 completionHandler(nil, error)
@@ -51,7 +51,6 @@ class ApiService {
     func publish(
         subscription: Subscription,
         user: BasicUser?,
-        headers: [String: String]? = nil,
         message: String,
         title: String,
         priority: Int = 3,
@@ -59,10 +58,10 @@ class ApiService {
         completionHandler: (() -> Void)? = nil
     ) {
         guard let url = URL(string: subscription.urlString()) else { return }
-        var request = newRequest(url: url, user: user, headers: headers)
+        var request = newRequest(url: url, user: user)
 
         Log.d(tag, "Publishing to \(url)")
-        
+
         request.httpMethod = "POST"
         request.setValue(title, forHTTPHeaderField: "Title")
         request.setValue(String(priority), forHTTPHeaderField: "Priority")
@@ -77,10 +76,10 @@ class ApiService {
             completionHandler?()
         }.resume()
     }
-    
-    func checkAuth(baseUrl: String, topic: String, user: BasicUser?, headers: [String: String]? = nil, completionHandler: @escaping(AuthResult) -> Void) {
+
+    func checkAuth(baseUrl: String, topic: String, user: BasicUser?, completionHandler: @escaping(AuthResult) -> Void) {
         guard let url = URL(string: topicAuthUrl(baseUrl: baseUrl, topic: topic)) else { return }
-        let request = newRequest(url: url, user: user, headers: headers)
+        let request = newRequest(url: url, user: user)
         Log.d(tag, "Checking auth for \(url) with user \(user?.username ?? "anonymous")")
         newSession(timeout: 10).dataTask(with: request) { (data, response, error) in
             if let error = error {
@@ -109,12 +108,12 @@ class ApiService {
         }.resume()
     }
 
-    private func fetchJsonData<T: Decodable>(urlString: String, user: BasicUser?, headers: [String: String]?, completionHandler: @escaping ([T]?, Error?) -> ()) {
+    private func fetchJsonData<T: Decodable>(urlString: String, user: BasicUser?, completionHandler: @escaping ([T]?, Error?) -> ()) {
         guard let url = URL(string: urlString) else {
             completionHandler(nil, URLError(.badURL))
             return
         }
-        let request = newRequest(url: url, user: user, headers: headers)
+        let request = newRequest(url: url, user: user)
         newSession(timeout: 30).dataTask(with: request) { (data, response, error) in
             if let error {
                 Log.e(self.tag, "Error fetching data", error)
@@ -145,23 +144,28 @@ class ApiService {
             }
         }.resume()
     }
-    
-    private func newRequest(url: URL, user: BasicUser?, headers: [String: String]? = nil) -> URLRequest {
+
+    private func newRequest(url: URL, user: BasicUser?) -> URLRequest {
         var request = URLRequest(url: url)
         request.setValue(ApiService.userAgent, forHTTPHeaderField: "User-Agent")
         if let user = user {
             request.setValue(user.toHeader(), forHTTPHeaderField: "Authorization")
         }
-        applyCustomHeaders(headers, to: &request)
+        // Custom headers are owned by the networking layer: look up by server, never threaded through call sites.
+        if let baseUrl = baseUrl(from: url) {
+            for (key, value) in ServerConfigStore.shared.getHeaders(baseUrl: baseUrl) {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+        }
         return request
     }
 
-    private func applyCustomHeaders(_ headers: [String: String]?, to request: inout URLRequest) {
-        headers?.forEach { key, value in
-            request.setValue(value, forHTTPHeaderField: key)
-        }
+    private func baseUrl(from url: URL) -> String? {
+        guard let scheme = url.scheme, let host = url.host else { return nil }
+        let portSuffix = url.port.map { ":\($0)" } ?? ""
+        return "\(scheme)://\(host)\(portSuffix)"
     }
-    
+
     private func newSession(timeout: TimeInterval) -> URLSession {
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.timeoutIntervalForRequest = timeout
@@ -173,7 +177,7 @@ class ApiService {
 struct BasicUser {
     let username: String
     let password: String
-    
+
     func toHeader() -> String {
         return "Basic " + String(format: "%@:%@", username, password).data(using: String.Encoding.utf8)!.base64EncodedString()
     }

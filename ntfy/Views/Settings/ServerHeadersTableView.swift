@@ -1,6 +1,5 @@
 import Foundation
 import SwiftUI
-import CoreData
 
 struct HeaderItem: Identifiable {
     let id = UUID()
@@ -9,31 +8,29 @@ struct HeaderItem: Identifiable {
 }
 
 struct ServerHeadersTableView: View {
-    @EnvironmentObject private var store: Store
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \ServerConfig.baseUrl, ascending: true)]) var configs: FetchedResults<ServerConfig>
+    @State private var configuredBaseUrls: [String] = []
 
-    @State private var selectedConfig: ServerConfig?
+    @State private var editingBaseUrl: String?
     @State private var showDialog = false
 
     @State private var baseUrl: String = ""
     @State private var headerItems: [HeaderItem] = []
 
     var body: some View {
-        let _ = selectedConfig?.baseUrl // Workaround for FB7823148, see https://developer.apple.com/forums/thread/652080
         List {
-            ForEach(configs) { config in
+            ForEach(configuredBaseUrls, id: \.self) { url in
                 Button(action: {
-                    selectedConfig = config
-                    baseUrl = config.baseUrl ?? "?"
-                    headerItems = headerItemsFromConfig(config)
+                    editingBaseUrl = url
+                    baseUrl = url
+                    headerItems = headerItemsFor(baseUrl: url)
                     showDialog = true
                 }) {
-                    ServerHeaderRowView(config: config)
+                    ServerHeaderRowView(baseUrl: url, headerCount: ServerConfigStore.shared.getHeaders(baseUrl: url).count)
                         .foregroundColor(.primary)
                 }
             }
             Button(action: {
-                selectedConfig = nil
+                editingBaseUrl = nil
                 baseUrl = ""
                 headerItems = [HeaderItem()]
                 showDialog = true
@@ -46,13 +43,14 @@ struct ServerHeadersTableView: View {
             }
             .padding(.all, 4)
         }
+        .onAppear { reloadConfiguredBaseUrls() }
         .sheet(isPresented: $showDialog, onDismiss: { resetState() }) {
             NavigationView {
                 Form {
                     Section(
                         footer: Text("Custom headers are sent with all requests to this server.")
                     ) {
-                        if selectedConfig == nil {
+                        if editingBaseUrl == nil {
                             TextField("Service URL, e.g. https://ntfy.home.io", text: $baseUrl)
                                 .disableAutocapitalization()
                                 .disableAutocorrection(true)
@@ -99,11 +97,11 @@ struct ServerHeadersTableView: View {
                         }
                     }
                 }
-                .navigationTitle(selectedConfig == nil ? "Add headers" : "Edit headers")
+                .navigationTitle(editingBaseUrl == nil ? "Add headers" : "Edit headers")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        if selectedConfig == nil {
+                        if editingBaseUrl == nil {
                             Button("Cancel") {
                                 cancelAction()
                             }
@@ -140,8 +138,8 @@ struct ServerHeadersTableView: View {
         }
     }
 
-    private func headerItemsFromConfig(_ config: ServerConfig) -> [HeaderItem] {
-        let headers = CustomHeaders.decode(config.headers)
+    private func headerItemsFor(baseUrl: String) -> [HeaderItem] {
+        let headers = ServerConfigStore.shared.getHeaders(baseUrl: baseUrl)
         let items = headers.keys.sorted().map { key in
             HeaderItem(key: key, value: headers[key] ?? "")
         }
@@ -150,13 +148,9 @@ struct ServerHeadersTableView: View {
 
     private func saveAction() {
         let headers = normalizedHeaders()
-        if headers.isEmpty {
-            if let config = selectedConfig {
-                store.deleteServerConfig(config)
-            }
-        } else {
-            store.saveServerConfig(baseUrl: normalizedBaseUrl, headers: headers)
-        }
+        let targetUrl = editingBaseUrl ?? normalizedBaseUrl
+        ServerConfigStore.shared.saveHeaders(baseUrl: targetUrl, headers: headers)
+        reloadConfiguredBaseUrls()
         resetAndHide()
     }
 
@@ -165,8 +159,9 @@ struct ServerHeadersTableView: View {
     }
 
     private func deleteAction() {
-        if let config = selectedConfig {
-            store.deleteServerConfig(config)
+        if let url = editingBaseUrl {
+            ServerConfigStore.shared.deleteHeaders(baseUrl: url)
+            reloadConfiguredBaseUrls()
         }
         resetAndHide()
     }
@@ -201,9 +196,6 @@ struct ServerHeadersTableView: View {
         for item in headerItems {
             let key = item.key.trimmingCharacters(in: .whitespacesAndNewlines)
             let value = item.value.trimmingCharacters(in: .whitespacesAndNewlines)
-            if key.isEmpty && value.isEmpty {
-                continue
-            }
             if key.isEmpty || value.isEmpty {
                 continue
             }
@@ -213,11 +205,11 @@ struct ServerHeadersTableView: View {
     }
 
     private func isValid() -> Bool {
-        if selectedConfig == nil {
+        if editingBaseUrl == nil {
             if normalizedBaseUrl.range(of: "^https?://.+", options: .regularExpression, range: nil, locale: nil) == nil {
                 return false
             }
-            if store.getServerConfig(baseUrl: normalizedBaseUrl) != nil {
+            if configuredBaseUrls.contains(normalizedBaseUrl) {
                 return false
             }
             if normalizedHeaders().isEmpty {
@@ -230,27 +222,31 @@ struct ServerHeadersTableView: View {
         return true
     }
 
+    private func reloadConfiguredBaseUrls() {
+        configuredBaseUrls = ServerConfigStore.shared.allConfiguredBaseUrls()
+    }
+
     private func resetAndHide() {
         showDialog = false
     }
 
     fileprivate func resetState() {
-        selectedConfig = nil
+        editingBaseUrl = nil
         baseUrl = ""
         headerItems = []
     }
 }
 
 struct ServerHeaderRowView: View {
-    @ObservedObject var config: ServerConfig
+    let baseUrl: String
+    let headerCount: Int
 
     var body: some View {
-        let headers = CustomHeaders.decode(config.headers)
         HStack {
             Image(systemName: "slider.horizontal.3")
             VStack(alignment: .leading, spacing: 0) {
-                Text(shortUrl(url: config.baseUrl ?? "?"))
-                Text("\(headers.count) header(s)")
+                Text(shortUrl(url: baseUrl))
+                Text("\(headerCount) header(s)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             }
