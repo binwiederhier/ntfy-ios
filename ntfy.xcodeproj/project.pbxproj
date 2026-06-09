@@ -17,6 +17,7 @@
 		2939B21B2F8F293C00A52946 /* UserTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2142F8F293C00A52946 /* UserTableView.swift */; };
 		2968F2AD2FBA530200480665 /* AttachmentProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */; };
 		2968F2AE2FBA530200480665 /* AttachmentProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */; };
+		29B4EB062FD7C5C1005CA516 /* CriticalAlertsSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B4EB052FD7C5C1005CA516 /* CriticalAlertsSettingView.swift */; };
 		29C6D8312FBD1B750057C9AC /* DownloadDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29C6D8302FBD1B750057C9AC /* DownloadDelegate.swift */; };
 		29C6D8322FBD1B750057C9AC /* DownloadDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29C6D8302FBD1B750057C9AC /* DownloadDelegate.swift */; };
 		29E8419B2FB417E400F927E4 /* SubscriptionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E841992FB417E400F927E4 /* SubscriptionListView.swift */; };
@@ -105,6 +106,7 @@
 		2939B2132F8F293C00A52946 /* UserRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRowView.swift; sourceTree = "<group>"; };
 		2939B2142F8F293C00A52946 /* UserTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTableView.swift; sourceTree = "<group>"; };
 		2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentProgressState.swift; sourceTree = "<group>"; };
+		29B4EB052FD7C5C1005CA516 /* CriticalAlertsSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalAlertsSettingView.swift; sourceTree = "<group>"; };
 		29C6D8302FBD1B750057C9AC /* DownloadDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadDelegate.swift; sourceTree = "<group>"; };
 		29E841982FB417E400F927E4 /* SubscriptionAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionAddView.swift; sourceTree = "<group>"; };
 		29E841992FB417E400F927E4 /* SubscriptionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionListView.swift; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 				18A28C5B2FBCF00000A52946 /* AttachmentAutoDownloadView.swift */,
 				2939B2102F8F293C00A52946 /* DefaultServerView.swift */,
 				2939B2112F8F293C00A52946 /* SettingsView.swift */,
+				29B4EB052FD7C5C1005CA516 /* CriticalAlertsSettingView.swift */,
 				2939B2122F8F293C00A52946 /* UserEditorView.swift */,
 				2939B2132F8F293C00A52946 /* UserRowView.swift */,
 				2939B2142F8F293C00A52946 /* UserTableView.swift */,
@@ -469,6 +472,7 @@
 				9474F1F72830830700CDE4DD /* ntfy.xcdatamodeld in Sources */,
 				29E841A52FB417EA00F927E4 /* NotificationAttachmentController.swift in Sources */,
 				29E841A62FB417EA00F927E4 /* NotificationRowView.swift in Sources */,
+				29B4EB062FD7C5C1005CA516 /* CriticalAlertsSettingView.swift in Sources */,
 				29E841A72FB417EA00F927E4 /* NotificationAttachmentImageLoader.swift in Sources */,
 				29E841A82FB417EA00F927E4 /* NotificationAttachmentImageView.swift in Sources */,
 				29E841A92FB417EA00F927E4 /* AttachmentFileStore.swift in Sources */,

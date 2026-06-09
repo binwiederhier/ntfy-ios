@@ -4,6 +4,7 @@ import StoreKit
 
 struct SettingsView: View {
     @EnvironmentObject private var store: Store
+    @EnvironmentObject private var delegate: AppDelegate
     @State private var userDialog: UserDialog?
     
     var body: some View {
@@ -19,6 +20,11 @@ struct SettingsView: View {
                     header: Text("Notifications")
                 ) {
                     AttachmentAutoDownloadView()
+                }
+                Section(
+                    footer: Text("Priority 5 notifications appear on the Lock Screen and play a sound even if a Focus is on or iPhone is muted.")
+                ) {
+                    CriticalAlertsSettingView()
                 }
                 Section(
                     header: Text("Users"),
@@ -51,7 +57,6 @@ struct SettingsView: View {
         .navigationViewStyle(StackNavigationViewStyle())
     }
 }
-
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {

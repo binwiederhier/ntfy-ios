@@ -36,7 +36,8 @@ extension UNMutableNotificationContent {
         // permissions. This is described in https://stackoverflow.com/a/44580916/1440785
         configureNotificationActions(message: message)
         
-        // Group by topic, and use a critical sound for highest-priority alerts.
+        // Group by topic, and only elevate priority 5 alerts to critical when the user opted in
+        // and iOS has granted critical alert permission.
         self.threadIdentifier = topicUrl(baseUrl: baseUrl, topic: message.topic)
         
         // Map priorities to interruption level (light up screen, ...) and relevance (order)
@@ -54,8 +55,13 @@ extension UNMutableNotificationContent {
             self.interruptionLevel = .timeSensitive
             self.relevanceScore = 0.75
         case 5:
-            self.sound = .defaultCritical
-            self.interruptionLevel = .critical
+            if Store.shared.getCriticalAlertsEnabled() && Store.getCriticalAlertsAuthorized() {
+                self.sound = .defaultCritical
+                self.interruptionLevel = .critical
+            } else {
+                self.sound = .default
+                self.interruptionLevel = .timeSensitive
+            }
             self.relevanceScore = 1
         default:
             self.sound = .default
