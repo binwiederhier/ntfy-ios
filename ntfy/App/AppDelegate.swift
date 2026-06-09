@@ -12,6 +12,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     
     // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
     @Published var selectedBaseUrl: String? = nil
+    @Published private(set) var criticalAlertSetting: UNNotificationSetting = .notSupported
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Log.d(tag, "Launching AppDelegate")
@@ -22,19 +23,73 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         // Register app permissions for push notifications
         UNUserNotificationCenter.current().delegate = self
         Messaging.messaging().delegate = self
+        requestStandardNotificationAuthorization()
+        refreshNotificationSettings()
         
+        // Register too receive remote notifications
+        application.registerForRemoteNotifications()
+                
+        return true
+    }
+
+    func refreshNotificationSettings(completion: (() -> Void)? = nil) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            let isAuthorized = settings.criticalAlertSetting == .enabled
+            DispatchQueue.main.async {
+                self.criticalAlertSetting = settings.criticalAlertSetting
+                Store.saveCriticalAlertsAuthorized(isAuthorized)
+                completion?()
+            }
+        }
+    }
+
+    func requestCriticalAlertsAuthorization(completion: @escaping (Bool) -> Void) {
+        if criticalAlertSetting == .enabled {
+            completion(true)
+            return
+        }
+
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound, .criticalAlert]) { success, error in
+            if let error {
+                Log.e(self.tag, "Failed to register for critical alerts", error)
+            } else if success {
+                Log.d(self.tag, "Successfully requested critical alerts")
+            }
+
+            self.refreshNotificationSettings {
+                completion(self.criticalAlertSetting == .enabled)
+            }
+        }
+    }
+
+    // TODO: Needs to be tested on multiple devices/iOS versions
+    func openNotificationSettings() {
+        let settingsURLString: String
+        #if targetEnvironment(simulator)
+        settingsURLString = UIApplication.openSettingsURLString
+        #else
+        if #available(iOS 16.0, *) {
+            settingsURLString = UIApplication.openNotificationSettingsURLString
+        } else if #available(iOS 15.4, *) {
+            settingsURLString = UIApplicationOpenNotificationSettingsURLString
+        } else {
+            settingsURLString = UIApplication.openSettingsURLString
+        }
+        #endif
+        guard let url = URL(string: settingsURLString) else {
+            return
+        }
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+    }
+
+    private func requestStandardNotificationAuthorization() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
             guard success else {
                 Log.e(self.tag, "Failed to register for local push notifications", error)
                 return
             }
             Log.d(self.tag, "Successfully registered for local push notifications")
         }
-        
-        // Register too receive remote notifications
-        application.registerForRemoteNotifications()
-                
-        return true
     }
     
     /// Executed when a background notification arrives on the "~poll" topic. This is used to trigger polling of local topics.

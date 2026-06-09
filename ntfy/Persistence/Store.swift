@@ -25,6 +25,7 @@ class Store: ObservableObject {
     static let modelName = "ntfy" // Must match .xdatamodeld folder
     static let prefKeyDefaultBaseUrl = "defaultBaseUrl"
     static let prefKeyAttachmentAutoDownloadMaxSize = "attachmentAutoDownloadMaxSize"
+    static let prefKeyCriticalAlertsEnabled = "criticalAlertsEnabled"
     static let autoDownloadNever = Constants.autoDownloadNever
     static let autoDownloadAlways = Constants.autoDownloadAlways
     static let autoDownload100KB = Constants.autoDownload100KB
@@ -33,6 +34,8 @@ class Store: ObservableObject {
     static let autoDownload5MB = Constants.autoDownload5MB
     static let autoDownload10MB = Constants.autoDownload10MB
     static let autoDownload50MB = Constants.autoDownload50MB
+    private static let sharedDefaults = UserDefaults(suiteName: Store.appGroup)!
+    private static let sharedDefaultsKeyCriticalAlertsAuthorized = "criticalAlertsAuthorized"
     private let container: NSPersistentContainer
     var context: NSManagedObjectContext {
         return container.viewContext
@@ -358,6 +361,30 @@ class Store: ObservableObject {
             Log.w(Store.tag, "Cannot store attachment auto-download preference", error)
             rollbackAndRefresh()
         }
+    }
+
+    func getCriticalAlertsEnabled() -> Bool {
+        getPreference(key: Store.prefKeyCriticalAlertsEnabled)?.value == "true"
+    }
+
+    func saveCriticalAlertsEnabled(_ enabled: Bool) {
+        do {
+            let pref = getPreference(key: Store.prefKeyCriticalAlertsEnabled) ?? Preference(context: context)
+            pref.key = Store.prefKeyCriticalAlertsEnabled
+            pref.value = String(enabled)
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot store critical alerts preference", error)
+            rollbackAndRefresh()
+        }
+    }
+
+    static func getCriticalAlertsAuthorized() -> Bool {
+        sharedDefaults.bool(forKey: sharedDefaultsKeyCriticalAlertsAuthorized)
+    }
+
+    static func saveCriticalAlertsAuthorized(_ enabled: Bool) {
+        sharedDefaults.set(enabled, forKey: sharedDefaultsKeyCriticalAlertsAuthorized)
     }
 
     func shouldAutoDownloadAttachment(_ attachment: MessageAttachment) -> Bool {

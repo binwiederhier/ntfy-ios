@@ -4,6 +4,7 @@ import StoreKit
 
 struct SettingsView: View {
     @EnvironmentObject private var store: Store
+    @EnvironmentObject private var delegate: AppDelegate
     @State private var userDialog: UserDialog?
     
     var body: some View {
@@ -19,6 +20,12 @@ struct SettingsView: View {
                     header: Text("Notifications")
                 ) {
                     AttachmentAutoDownloadView()
+                }
+                Section(
+                    header: Text("Critical alerts"),
+                    footer: Text("When enabled, priority 5 messages are delivered as critical alerts after iOS grants permission.")
+                ) {
+                    CriticalAlertsSettingView()
                 }
                 Section(
                     header: Text("Users"),
@@ -51,7 +58,6 @@ struct SettingsView: View {
         .navigationViewStyle(StackNavigationViewStyle())
     }
 }
-
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
