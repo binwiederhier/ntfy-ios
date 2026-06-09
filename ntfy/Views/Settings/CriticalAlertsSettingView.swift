@@ -20,10 +20,19 @@ struct CriticalAlertsSettingView: View {
     }
 
     var body: some View {
-        Toggle("Critical alerts for priority 5", isOn: Binding(
+        Toggle(isOn: Binding(
             get: { criticalAlertsEnabled },
             set: handleToggleChanged
-        ))
+        )) {
+            HStack(spacing: 14) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.red)
+                    .font(.system(size: 22))
+
+                Text("Critical Alerts")
+                    .foregroundColor(.primary)
+            }
+        }
         .alert("Enable Critical Alerts", isPresented: $showingSettingsAlert) {
             Button("Open Notification Settings") {
                 delegate.openNotificationSettings()

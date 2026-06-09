@@ -22,8 +22,7 @@ struct SettingsView: View {
                     AttachmentAutoDownloadView()
                 }
                 Section(
-                    header: Text("Critical alerts"),
-                    footer: Text("When enabled, priority 5 messages are delivered as critical alerts after iOS grants permission.")
+                    footer: Text("Priority 5 notifications appear on the Lock Screen and play a sound even if a Focus is on or iPhone is muted.")
                 ) {
                     CriticalAlertsSettingView()
                 }
