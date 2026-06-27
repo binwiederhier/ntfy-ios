@@ -17,12 +17,13 @@ struct SettingsView: View {
                     DefaultServerView()
                 }
                 Section(
-                    header: Text("Notifications")
+                    header: Text("Notifications"),
+                    footer: Text("Automatically download attachments up to the selected size. Attachments larger than this limit must be downloaded manually.")
                 ) {
                     AttachmentAutoDownloadView()
                 }
                 Section(
-                    footer: Text("Priority 5 notifications appear on the Lock Screen and play a sound even if a Focus is on or iPhone is muted.")
+                    footer: Text("Max priority notifications break through to grab your attention, appearing on the lock screen and playing a sound even when focus mode is on or your device is muted.")
                 ) {
                     CriticalAlertsSettingView()
                 }
