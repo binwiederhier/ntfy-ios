@@ -15,6 +15,11 @@
 		2939B2192F8F293C00A52946 /* DefaultServerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2102F8F293C00A52946 /* DefaultServerView.swift */; };
 		2939B21A2F8F293C00A52946 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2112F8F293C00A52946 /* SettingsView.swift */; };
 		2939B21B2F8F293C00A52946 /* UserTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2142F8F293C00A52946 /* UserTableView.swift */; };
+		2939B21D2F8F293C00A52946 /* ServerHeadersTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B21C2F8F293C00A52946 /* ServerHeadersTableView.swift */; };
+		2939B21F2F8F293C00A52946 /* CustomHeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B21E2F8F293C00A52946 /* CustomHeaders.swift */; };
+		2939B2202F8F293C00A52946 /* CustomHeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B21E2F8F293C00A52946 /* CustomHeaders.swift */; };
+		2939B2212F8F293C00A52946 /* ServerConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2222F8F293C00A52946 /* ServerConfigStore.swift */; };
+		2939B2232F8F293C00A52946 /* ServerConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2222F8F293C00A52946 /* ServerConfigStore.swift */; };
 		2968F2AD2FBA530200480665 /* AttachmentProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */; };
 		2968F2AE2FBA530200480665 /* AttachmentProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */; };
 		29B4EB062FD7C5C1005CA516 /* CriticalAlertsSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B4EB052FD7C5C1005CA516 /* CriticalAlertsSettingView.swift */; };
@@ -105,6 +110,9 @@
 		2939B2122F8F293C00A52946 /* UserEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserEditorView.swift; sourceTree = "<group>"; };
 		2939B2132F8F293C00A52946 /* UserRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRowView.swift; sourceTree = "<group>"; };
 		2939B2142F8F293C00A52946 /* UserTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTableView.swift; sourceTree = "<group>"; };
+		2939B21C2F8F293C00A52946 /* ServerHeadersTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerHeadersTableView.swift; sourceTree = "<group>"; };
+		2939B21E2F8F293C00A52946 /* CustomHeaders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomHeaders.swift; sourceTree = "<group>"; };
+		2939B2222F8F293C00A52946 /* ServerConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConfigStore.swift; sourceTree = "<group>"; };
 		2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentProgressState.swift; sourceTree = "<group>"; };
 		29B4EB052FD7C5C1005CA516 /* CriticalAlertsSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalAlertsSettingView.swift; sourceTree = "<group>"; };
 		29C6D8302FBD1B750057C9AC /* DownloadDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadDelegate.swift; sourceTree = "<group>"; };
@@ -180,6 +188,7 @@
 				2939B2122F8F293C00A52946 /* UserEditorView.swift */,
 				2939B2132F8F293C00A52946 /* UserRowView.swift */,
 				2939B2142F8F293C00A52946 /* UserTableView.swift */,
+				2939B21C2F8F293C00A52946 /* ServerHeadersTableView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -282,6 +291,7 @@
 				9474F1F52830830700CDE4DD /* ntfy.xcdatamodeld */,
 				9474F1FE28316ACE00CDE4DD /* Subscription.swift */,
 				9474F1F82830835400CDE4DD /* Store.swift */,
+				2939B2222F8F293C00A52946 /* ServerConfigStore.swift */,
 				9474F20B283321C300CDE4DD /* Notification.swift */,
 				2968F2AC2FBA530200480665 /* AttachmentProgressState.swift */,
 				29E8419F2FB417EA00F927E4 /* NotificationAttachmentImageLoader.swift */,
@@ -308,6 +318,7 @@
 				9474F20E283326C500CDE4DD /* ApiService.swift */,
 				94CD1969283E666900973B93 /* EmojiManager.swift */,
 				9474F211283327C200CDE4DD /* Helpers.swift */,
+				2939B21E2F8F293C00A52946 /* CustomHeaders.swift */,
 				94A3F7C928386B2100C48E79 /* Config.swift */,
 				29E8419D2FB417EA00F927E4 /* AttachmentFileStore.swift */,
 				9474F216283531A200CDE4DD /* Log.swift */,
@@ -448,11 +459,14 @@
 				29C6D8312FBD1B750057C9AC /* DownloadDelegate.swift in Sources */,
 				2939B21A2F8F293C00A52946 /* SettingsView.swift in Sources */,
 				2939B21B2F8F293C00A52946 /* UserTableView.swift in Sources */,
+				2939B21D2F8F293C00A52946 /* ServerHeadersTableView.swift in Sources */,
 				E27008102AF0F64B006E33BA /* SubscriptionsObservable.swift in Sources */,
 				02024E60283D7CBB0064224A /* Extensions.swift in Sources */,
 				948671472841B0B20093C7A4 /* NotificationContent.swift in Sources */,
 				9474F1F92830835400CDE4DD /* Store.swift in Sources */,
+				2939B2212F8F293C00A52946 /* ServerConfigStore.swift in Sources */,
 				9474F212283327C200CDE4DD /* Helpers.swift in Sources */,
+				2939B21F2F8F293C00A52946 /* CustomHeaders.swift in Sources */,
 				9474F217283531A300CDE4DD /* Log.swift in Sources */,
 				94A3F7C8283734D900C48E79 /* SubscriptionManager.swift in Sources */,
 				9474F1D2282F2D2C00CDE4DD /* AppDelegate.swift in Sources */,
@@ -490,12 +504,14 @@
 				9474F2132834755A00CDE4DD /* Notification.swift in Sources */,
 				94E9196C28353E0100F30170 /* Log.swift in Sources */,
 				9474F2152834758700CDE4DD /* Helpers.swift in Sources */,
+				2939B2202F8F293C00A52946 /* CustomHeaders.swift in Sources */,
 				9474F1E7282F3FFD00CDE4DD /* NotificationService.swift in Sources */,
 				94CD196B283E666900973B93 /* EmojiManager.swift in Sources */,
 				94867144283ECD370093C7A4 /* Actions.swift in Sources */,
 				94867145284058C60093C7A4 /* ApiService.swift in Sources */,
 				2968F2AE2FBA530200480665 /* AttachmentProgressState.swift in Sources */,
 				9474F2052831D51500CDE4DD /* Store.swift in Sources */,
+				2939B2232F8F293C00A52946 /* ServerConfigStore.swift in Sources */,
 				29C6D8322FBD1B750057C9AC /* DownloadDelegate.swift in Sources */,
 				29F001032FB560E300F927E4 /* AttachmentFileStore.swift in Sources */,
 				9474F2062831D73C00CDE4DD /* ntfy.xcdatamodeld in Sources */,
