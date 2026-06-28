@@ -46,6 +46,11 @@ extension Notification {
         return nil
     }
     
+    /// Whether the stored message should be rendered as Markdown (see `Message.isMarkdown`).
+    var isMarkdown: Bool {
+        Message.isMarkdownContentType(contentType)
+    }
+
     func emojiTags() -> [String] {
         return parseEmojiTags(tags)
     }
@@ -262,6 +267,23 @@ extension Notification {
     }
 }
 
+/// Renders a Markdown string down to clean plain text, dropping the formatting markers
+/// (`**`, `_`, `#`, link syntax, …). Used for surfaces that cannot display rich text, such as
+/// the system notification banner — APNs strips any styling from the banner, so showing the raw
+/// `**markers**` there just looks broken. Falls back to the original string if parsing fails.
+func markdownToPlainText(_ source: String) -> String {
+    let options: AttributedString.MarkdownParsingOptions
+    if #available(iOS 16.0, *) {
+        options = .init(interpretedSyntax: .inlineOnlyPreservingWhitespace, failurePolicy: .returnPartiallyParsedIfPossible)
+    } else {
+        options = .init(interpretedSyntax: .inlineOnly, failurePolicy: .returnPartiallyParsedIfPossible)
+    }
+    guard let attributed = try? AttributedString(markdown: source, options: options) else {
+        return source
+    }
+    return String(attributed.characters)
+}
+
 struct MessageAttachment: Codable {
     var name: String
     var type: String?
@@ -336,10 +358,24 @@ struct Message: Decodable {
     var click: String?
     var pollId: String?
     var attachment: MessageAttachment?
+    var contentType: String?
 
     enum CodingKeys: String, CodingKey {
         case id, time, event, topic, message, title, priority, tags, actions, click, attachment
         case pollId = "poll_id"
+        case contentType = "content_type"
+    }
+
+    /// Whether the message body should be rendered as Markdown, as indicated by the server's
+    /// `content_type` (set when a message is published with the `Markdown: true` header).
+    var isMarkdown: Bool {
+        Message.isMarkdownContentType(contentType)
+    }
+
+    /// Returns true if the given content type denotes Markdown. Tolerates an optional charset
+    /// suffix, e.g. `text/markdown; charset=utf-8`.
+    static func isMarkdownContentType(_ contentType: String?) -> Bool {
+        contentType?.lowercased().hasPrefix("text/markdown") ?? false
     }
 
     init(
@@ -354,7 +390,8 @@ struct Message: Decodable {
         actions: [Action]? = nil,
         click: String? = nil,
         pollId: String? = nil,
-        attachment: MessageAttachment? = nil
+        attachment: MessageAttachment? = nil,
+        contentType: String? = nil
     ) {
         self.id = id
         self.time = time
@@ -368,6 +405,7 @@ struct Message: Decodable {
         self.click = click
         self.pollId = pollId
         self.attachment = attachment
+        self.contentType = contentType
     }
 
     init(from decoder: Decoder) throws {
@@ -384,6 +422,7 @@ struct Message: Decodable {
         click = try container.decodeIfPresent(String.self, forKey: .click)
         pollId = try container.decodeIfPresent(String.self, forKey: .pollId)
         attachment = try container.decodeIfPresent(MessageAttachment.self, forKey: .attachment)
+        contentType = try container.decodeIfPresent(String.self, forKey: .contentType)
     }
     
     func toUserInfo() -> [AnyHashable: Any] {
@@ -401,7 +440,8 @@ struct Message: Decodable {
             "tags": tags?.joined(separator: ",") ?? "",
             "actions": Actions.shared.encode(actions),
             "click": click ?? "",
-            "poll_id": pollId ?? ""
+            "poll_id": pollId ?? "",
+            "content_type": contentType ?? ""
         ]
         if let attachment {
             userInfo["attachment_name"] = attachment.name
@@ -429,6 +469,7 @@ struct Message: Decodable {
         let actions = userInfo["actions"] as? String
         let click = userInfo["click"] as? String
         let pollId = userInfo["poll_id"] as? String
+        let contentType = userInfo["content_type"] as? String
         let attachmentUrl = userInfo["attachment_url"] as? String
         let attachment: MessageAttachment?
         if let attachmentUrl = attachmentUrl, !attachmentUrl.isEmpty {
@@ -454,7 +495,8 @@ struct Message: Decodable {
             actions: Actions.shared.parse(actions),
             click: click,
             pollId: pollId,
-            attachment: attachment
+            attachment: attachment,
+            contentType: contentType
         )
     }
 }

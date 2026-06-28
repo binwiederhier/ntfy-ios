@@ -459,6 +459,7 @@ class Store: ObservableObject {
             notification.tags = message.tags?.joined(separator: ",") ?? ""
             notification.actions = Actions.shared.encode(message.actions)
             notification.click = message.click ?? ""
+            notification.contentType = message.contentType
             notification.attachmentName = message.attachment?.name
             notification.attachmentType = message.attachment?.type
             notification.attachmentSize = message.attachment?.size ?? 0
@@ -504,7 +505,9 @@ extension Store {
             Message(id: "3", time: 1643058956, event: "message", topic: "stats", message: "This message does not have a title, but is instead super long. Like really really long. It can't be any longer I think. I mean, there is s 4,000 byte limit of the message, so I guess I have to make this 4,000 bytes long. Or do I? 😁 I don't know. It's quite tedious to come up with something so long, so I'll stop now. Bye!", title: nil, priority: 5, tags: ["facepalm"], actions: nil)
         ],
         "backups": [],
-        "announcements": [],
+        "announcements": [
+            Message(id: "md1", time: 1653048956, event: "message", topic: "announcements", message: "**Bold**, *italic*, ~~strike~~ and `inline code` all render. Plus a [link](https://ntfy.sh) and a bare URL https://docs.ntfy.sh\n\n- first item\n- second item", title: "Markdown release 🎉", priority: 3, tags: ["tada"], actions: nil, contentType: "text/markdown")
+        ],
         "alerts": [],
         "playground": []
     ]
@@ -538,6 +541,7 @@ extension Store {
             notification.title = message.title
             notification.priority = message.priority ?? 3
             notification.tags = message.tags?.joined(separator: ",") ?? ""
+            notification.contentType = message.contentType
             notification.attachmentName = message.attachment?.name
             notification.attachmentType = message.attachment?.type
             notification.attachmentSize = message.attachment?.size ?? 0
