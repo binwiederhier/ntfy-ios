@@ -5,7 +5,9 @@ extension UNMutableNotificationContent {
     func modify(message: Message, baseUrl: String) {
         // Body and title
         if let body = message.message {
-            self.body = body
+            // The notification banner can't render rich text, so for Markdown messages we strip
+            // the formatting markers to clean plain text rather than showing raw `**`/`_`/`#`.
+            self.body = message.isMarkdown ? markdownToPlainText(body) : body
         }
         
         // Set notification title to short URL if there is no title. The title is always set

@@ -110,7 +110,7 @@ struct NotificationRowView: View {
     
     private var messageText: some View {
         Group {
-            Text(notification.linkifiedMessageAttributedString())
+            Text(notification.displayMessageAttributedString())
                 .font(.body)
         }
     }
