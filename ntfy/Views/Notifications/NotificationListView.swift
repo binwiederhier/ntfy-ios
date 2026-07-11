@@ -139,7 +139,21 @@ struct NotificationListView: View {
                         .multilineTextAlignment(.center)
                         .padding(.bottom)
                     
-                    Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
+                    Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:")
+                        .foregroundColor(.gray)
+                        .padding(.bottom)
+
+                    HStack(alignment: .top, spacing: 4) {
+                        Text("$")
+                        Text("curl -d \"hi\" \(subscription.urlString())")
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .font(.system(.body, design: .monospaced))
+                    .foregroundColor(.gray)
+                    .padding(.bottom)
+
+                    Text("Detailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
                         .foregroundColor(.gray)
                 }
                 .padding(40)
