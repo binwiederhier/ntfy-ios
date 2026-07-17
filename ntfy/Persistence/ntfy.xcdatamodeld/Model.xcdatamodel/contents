@@ -11,6 +11,7 @@
         <attribute name="attachmentUrl" optional="YES" attributeType="String"/>
         <attribute name="click" optional="YES" attributeType="String"/>
         <attribute name="id" attributeType="String"/>
+        <attribute name="isRead" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="message" attributeType="String"/>
         <attribute name="priority" optional="YES" attributeType="Integer 16" minValueString="1" maxValueString="5" defaultValueString="3" usesScalarValueType="YES"/>
         <attribute name="tags" optional="YES" attributeType="String"/>
@@ -29,6 +30,7 @@
     </entity>
     <entity name="Subscription" representedClassName="Subscription" syncable="YES" codeGenerationType="class">
         <attribute name="baseUrl" attributeType="String"/>
+        <attribute name="icon" optional="YES" attributeType="String"/>
         <attribute name="lastNotificationId" optional="YES" attributeType="String"/>
         <attribute name="topic" attributeType="String" minValueString="1" maxValueString="64" regularExpressionString="^[-_A-Za-z0-9]{1,64}$"/>
         <relationship name="notifications" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Notification" inverseName="subscription" inverseEntity="Notification"/>

@@ -23,20 +23,11 @@ struct SubscriptionAddView: View {
     }
     
     var body: some View {
-        NavigationView {
-            // This is a little weird, but it works. The nagivation link for the login view
-            // is rendered in the backgroun (it's hidden), abd we toggle it manually.
-            // If anyone has a better way to do a two-page layout let me know.
-            
+        NavigationStack {
             addView
-                .background(Group {
-                    NavigationLink(
-                        destination: loginView,
-                        isActive: $showLogin
-                    ) {
-                        EmptyView()
-                    }
-                })
+                .navigationDestination(isPresented: $showLogin) {
+                    loginView
+                }
         }
     }
     

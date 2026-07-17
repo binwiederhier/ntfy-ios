@@ -121,6 +121,13 @@ class Store: ObservableObject {
         return try? context.fetch(Subscription.fetchRequest())
     }
 
+    func saveIcon(for subscription: Subscription, icon: String?) {
+        context.performAndWait {
+            subscription.icon = (icon?.isEmpty ?? true) ? nil : icon
+            try? context.save()
+        }
+    }
+
     func completeAttachmentDownload(notificationID: String, localPath: String, resolvedType: String?, resolvedSize: Int64) {
         context.performAndWait {
             let request = Notification.fetchRequest()
@@ -229,6 +236,36 @@ class Store: ObservableObject {
             } catch let error {
                 Log.w(Store.tag, "Cannot delete notification(s)", error)
                 rollbackAndRefresh()
+            }
+        }
+    }
+
+    func deleteAllNotifications() {
+        context.performAndWait {
+            guard let notifications = try? context.fetch(Notification.fetchRequest()) else { return }
+            Log.d(Store.tag, "Deleting all \(notifications.count) notification(s) across all subscriptions")
+            do {
+                notifications.forEach { notification in
+                    deleteAttachmentLocalFile(for: notification)
+                    context.delete(notification)
+                }
+                try context.save()
+            } catch let error {
+                Log.w(Store.tag, "Cannot delete notification(s)", error)
+                rollbackAndRefresh()
+            }
+        }
+    }
+
+    func markRead(_ notification: Notification) {
+        guard !notification.isRead else { return }
+        context.performAndWait {
+            notification.isRead = true
+            do {
+                try context.save()
+                Log.d(Store.tag, "Marked notification \(notification.id ?? "?") as read")
+            } catch {
+                Log.w(Store.tag, "Failed to save isRead for notification \(notification.id ?? "?")", error)
             }
         }
     }

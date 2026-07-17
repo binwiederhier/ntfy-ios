@@ -54,7 +54,9 @@ extension SubscriptionsObservable: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         Log.d(tag, "Fetching notifications")
         DispatchQueue.main.async {
-            self.objectWillChange.send()
+            withAnimation {
+                self.objectWillChange.send()
+            }
         }
     }
 }

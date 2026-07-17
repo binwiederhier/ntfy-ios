@@ -14,17 +14,22 @@ struct NotificationRowView: View {
     @Environment(\.openURL) private var openURL
     @ObservedObject var notification: Notification
     let onCopyMessage: () -> Void
+    var subscriptionLabel: String? = nil
     @StateObject private var attachmentController = NotificationAttachmentController()
     @State private var attachmentPresentation: AttachmentPresentation?
-    
+
     var body: some View {
         notificationRow
             .swipeActions(edge: .trailing) {
                 Button(role: .destructive) {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
                     store.delete(notification: notification)
                 } label: {
                     Label("Delete", systemImage: "trash.circle")
                 }
+            }
+            .onAppear {
+                store.markRead(notification)
             }
             .sheet(item: $attachmentPresentation) { attachmentPresentation in
                 switch attachmentPresentation.mode {
@@ -50,6 +55,15 @@ struct NotificationRowView: View {
                                 .scaledToFit()
                                 .frame(width: 16, height: 16)
                         }
+                    }
+                    if let subscriptionLabel {
+                        Text(subscriptionLabel)
+                            .font(.caption)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 2)
+                            .background(Color.accentColor)
+                            .clipShape(Capsule())
                     }
                     Spacer()
                     if clickUrl != nil {

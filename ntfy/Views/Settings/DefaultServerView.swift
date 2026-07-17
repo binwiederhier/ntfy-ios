@@ -40,7 +40,7 @@ struct DefaultServerView: View {
             .contentShape(Rectangle())
         }
         .sheet(isPresented: $showDialog) {
-            NavigationView {
+            NavigationStack {
                 Form {
                     Section(
                         footer: Text("When subscribing to new topics, this server will be used as a default. Note that if you pick your own ntfy server, you must configure upstream-base-url to receive instant push notifications.")

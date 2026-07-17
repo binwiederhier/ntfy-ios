@@ -35,7 +35,7 @@ struct UserEditorView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(
                     footer: isNewUser
@@ -66,16 +66,10 @@ struct UserEditorView: View {
                             Button("Cancel") {
                                 onCancel()
                             }
-                            if #available(iOS 15.0, *) {
-                                Button(role: .destructive) {
-                                    deleteAction()
-                                } label: {
-                                    Text("Delete")
-                                }
-                            } else {
-                                Button("Delete") {
-                                    deleteAction()
-                                }
+                            Button(role: .destructive) {
+                                deleteAction()
+                            } label: {
+                                Text("Delete")
                             }
                         } label: {
                             Image(systemName: "ellipsis.circle")

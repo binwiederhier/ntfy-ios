@@ -16,17 +16,4 @@ extension Subscription {
     func urlHash() -> String {
         return topicHash(baseUrl: baseUrl ?? "?", topic: topic ?? "?")
     }
-    
-    func notificationCount() -> Int {
-        return notifications?.count ?? 0
-    }
-    
-    func lastNotification() -> Notification? {
-        guard let notifications else {
-            return nil
-        }
-        return notifications
-            .sortedArray(using: [NSSortDescriptor(keyPath: \Notification.time, ascending: false)])
-            .first as? Notification
-    }
 }

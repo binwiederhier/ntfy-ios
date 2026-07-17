@@ -8,7 +8,7 @@ struct SettingsView: View {
     @State private var userDialog: UserDialog?
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(
                     header: Text("General"),
@@ -55,7 +55,6 @@ struct SettingsView: View {
                 }
             )
         }
-        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

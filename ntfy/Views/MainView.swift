@@ -2,6 +2,12 @@ import Foundation
 import SwiftUI
 
 struct MainView: View {
+    @StateObject private var allNotificationsModel = AllNotificationsObservable()
+
+    private var unreadCount: Int {
+        allNotificationsModel.notifications.reduce(0) { $1.isRead ? $0 : $0 + 1 }
+    }
+
     var body: some View {
         TabView {
             SubscriptionListView()
@@ -9,6 +15,7 @@ struct MainView: View {
                     Image(systemName: "message.fill")
                     Text("Notifications")
                 }
+                .badge(unreadCount)
             SettingsView()
                 .tabItem {
                     Image(systemName: "gearshape.fill")

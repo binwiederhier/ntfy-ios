@@ -21,13 +21,8 @@ extension Notification {
 
 struct DisableAutocapitalizationModifier: ViewModifier {
     func body(content: Content) -> some View {
-        if #available(iOS 15.0, *) {
-            content
-                .textInputAutocapitalization(.never)
-        } else {
-            content
-                .autocapitalization(.none)
-        }
+        content
+            .textInputAutocapitalization(.never)
     }
 }
 

@@ -14,22 +14,23 @@ struct NotificationListView: View {
     @EnvironmentObject private var store: Store
     
     @ObservedObject var subscription: Subscription
-    @ObservedObject var notificationsModel: NotificationsObservable
-    
+    @StateObject private var notificationsModel: NotificationsObservable
+
     @State private var editMode = EditMode.inactive
     @State private var selection = Set<Notification>()
-    
+
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
     @State private var showCopiedConfirmation = false
-    
+    @State private var searchText = ""
+
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
-    
+
     init(subscription: Subscription) {
         self.subscription = subscription
-        self.notificationsModel = NotificationsObservable(subscriptionID: subscription.objectID)
+        _notificationsModel = StateObject(wrappedValue: NotificationsObservable(subscriptionID: subscription.objectID))
     }
 
     var body: some View {
@@ -51,7 +52,8 @@ struct NotificationListView: View {
                 }
             }
         }
-        .listStyle(PlainListStyle())
+        .listStyle(.insetGrouped)
+        .searchable(text: $searchText, prompt: "Search notifications")
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.editMode, self.$editMode)
         .toolbar {
@@ -130,21 +132,11 @@ struct NotificationListView: View {
                     secondaryButton: .cancel())
             }
         }
-        .overlay(Group {
-            if notificationsModel.notifications.count == 0 {
-                VStack {
-                    Text("You haven't received any notifications for this topic yet.")
-                        .font(.title2)
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                        .padding(.bottom)
-                    
-                    Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
-                        .foregroundColor(.gray)
-                }
-                .padding(40)
+        .overlay {
+            if notificationsModel.notifications.isEmpty {
+                emptyState
             }
-        })
+        }
         .overlay(Group {
             if showCopiedConfirmation {
                 Text("Copied to Clipboard")
@@ -171,11 +163,44 @@ struct NotificationListView: View {
     
     @ViewBuilder
     private var notificationRows: some View {
-        ForEach(notificationsModel.notifications, id: \.self) { notification in
+        ForEach(filteredNotifications, id: \.self) { notification in
             NotificationRowView(
                 notification: notification,
                 onCopyMessage: showCopyConfirmation
             )
+        }
+    }
+
+    private var filteredNotifications: [Notification] {
+        guard !searchText.isEmpty else {
+            return notificationsModel.notifications
+        }
+        return notificationsModel.notifications.filter {
+            $0.formatMessage().localizedCaseInsensitiveContains(searchText) ||
+            ($0.formatTitle()?.localizedCaseInsensitiveContains(searchText) ?? false)
+        }
+    }
+
+    @ViewBuilder
+    private var emptyState: some View {
+        if #available(iOS 17.0, *) {
+            ContentUnavailableView {
+                Label("No notifications yet", systemImage: "bell.slash")
+            } description: {
+                Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
+            }
+        } else {
+            VStack {
+                Text("You haven't received any notifications for this topic yet.")
+                    .font(.title2)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding(.bottom)
+
+                Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
+                    .foregroundColor(.gray)
+            }
+            .padding(40)
         }
     }
     
@@ -223,15 +248,18 @@ struct NotificationListView: View {
     }
     
     private func unsubscribe() {
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
         subscriptionManager.unsubscribe(subscription)
         delegate.selectedBaseUrl = nil
     }
-    
+
     private func deleteAll() {
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
         store.delete(allNotificationsFor: subscription)
     }
-    
+
     private func deleteSelected() {
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
         store.delete(notifications: selection)
         selection = Set<Notification>()
         editMode = .inactive

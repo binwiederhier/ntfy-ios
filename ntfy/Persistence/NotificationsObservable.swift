@@ -37,8 +37,13 @@ class NotificationsObservable: NSObject, ObservableObject {
 
 extension NotificationsObservable: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        let fetched = self.fetchedResultsController.fetchedObjects ?? []
+        let unread = fetched.filter { !$0.isRead }.count
+        Log.d(tag, "Content changed for subscription \(subscriptionID), count=\(fetched.count), unread=\(unread)")
         DispatchQueue.main.async {
-            self.notifications = self.fetchedResultsController.fetchedObjects ?? []
+            withAnimation {
+                self.notifications = fetched
+            }
         }
     }
 }
