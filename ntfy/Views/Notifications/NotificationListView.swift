@@ -22,6 +22,8 @@ struct NotificationListView: View {
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
     @State private var showCopiedConfirmation = false
+    @State private var showingRenameSheet = false
+    @State private var newDisplayName = ""
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -67,6 +69,10 @@ struct NotificationListView: View {
                     Menu {
                         if notificationsModel.notifications.count > 0 {
                             editButton
+                        }
+                        Button("Rename") {
+                            self.newDisplayName = subscription.customDisplayName ?? ""
+                            self.showingRenameSheet = true
                         }
                         Button("Send test notification") {
                             self.sendTestNotification()
@@ -161,6 +167,38 @@ struct NotificationListView: View {
         })
         .onAppear {
             cancelSubscriptionNotifications()
+        }
+        .sheet(isPresented: $showingRenameSheet) {
+            NavigationView {
+                Form {
+                    Section(
+                        header: Text("Display name"),
+                        footer: Text("Leave empty to show the default topic URL.")
+                    ) {
+                        TextField(
+                            topicShortUrl(baseUrl: subscription.baseUrl ?? "", topic: subscription.topic ?? ""),
+                            text: $newDisplayName
+                        )
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                    }
+                }
+                .navigationTitle("Rename")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            showingRenameSheet = false
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Save") {
+                            store.updateSubscription(subscription: subscription, displayName: newDisplayName)
+                            showingRenameSheet = false
+                        }
+                    }
+                }
+            }
         }
         .onDisappear {
             if delegate.selectedBaseUrl == subscription.urlString() {

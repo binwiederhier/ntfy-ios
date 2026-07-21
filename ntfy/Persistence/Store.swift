@@ -121,6 +121,16 @@ class Store: ObservableObject {
         return try? context.fetch(Subscription.fetchRequest())
     }
 
+    func updateSubscription(subscription: Subscription, displayName: String?) {
+        let trimmed = displayName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let trimmed = trimmed, !trimmed.isEmpty {
+            subscription.customDisplayName = String(trimmed.prefix(64))
+        } else {
+            subscription.customDisplayName = nil
+        }
+        try? context.save()
+    }
+
     func completeAttachmentDownload(notificationID: String, localPath: String, resolvedType: String?, resolvedSize: Int64) {
         context.performAndWait {
             let request = Notification.fetchRequest()
