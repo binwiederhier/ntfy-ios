@@ -6,6 +6,9 @@ extension Subscription {
     }
     
     func displayName() -> String {
+        if let customDisplayName = customDisplayName, !customDisplayName.isEmpty {
+            return customDisplayName
+        }
         return topicShortUrl(baseUrl: baseUrl ?? "?", topic: topic ?? "?")
     }
     
