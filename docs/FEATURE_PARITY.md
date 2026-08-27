@@ -2,12 +2,13 @@
 
 This document is to keep track of the feature parity between the iOS and Android ntfy.sh apps.
 
-**Last Updated: 2023-05-23**
+**Last Updated: 2026-08-26**
 
 | Feature                               | iOS                | Android            | Notes                                                                                                         |
 | ------------------------------------- | ------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------- |
 | Subscribe to default server topic     | :white_check_mark: | :white_check_mark: |
 | Subscribe to self-hosted server topic | :white_check_mark: | :white_check_mark: | Reliable delivery only with [`upstream_base_url`][ntfy_ios_instant_notifications]                             |
+| Subscribe with an `ntfy://` link       | :white_check_mark: | :white_check_mark: |                                                                                                               |
 | Instant delivery                      | :x:                | :white_check_mark: | Foreground services not possible in iOS                                                                       |
 | Pause notifications                   | :x:                | :white_check_mark: | Will likely require [Filtering][ios_filtering] to prevent displaying notifications while still receiving them |
 | Send test notification                | :white_check_mark: | :white_check_mark: | Not fully implemented                                                                                         |

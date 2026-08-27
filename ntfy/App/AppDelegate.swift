@@ -9,8 +9,10 @@ import CoreData
 class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     private let tag = "AppDelegate"
     private let pollTopic = "~poll" // See ntfy server if ever changed
+    private let deepLinkQueue = DispatchQueue(label: "io.heckel.ntfy.deep-link", qos: .userInitiated)
     
     // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
+    @Published var selectedTab = 0
     @Published var selectedBaseUrl: String? = nil
     @Published private(set) var criticalAlertSetting: UNNotificationSetting = .notSupported
 
@@ -30,6 +32,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         application.registerForRemoteNotifications()
                 
         return true
+    }
+
+    func openDeepLink(_ url: URL) {
+        guard let deepLink = NtfyDeepLink(url: url) else {
+            Log.w(tag, "Ignoring invalid deep link \(url)")
+            return
+        }
+
+        deepLinkQueue.async {
+            let store = Store.shared
+            var isSubscribed = false
+            DispatchQueue.main.sync {
+                isSubscribed = store.getSubscription(baseUrl: deepLink.baseUrl, topic: deepLink.topic) != nil
+            }
+            if !isSubscribed {
+                SubscriptionManager(store: store).subscribe(baseUrl: deepLink.baseUrl, topic: deepLink.topic)
+            }
+            DispatchQueue.main.async {
+                self.selectedTab = 0
+                self.selectedBaseUrl = topicUrl(baseUrl: deepLink.baseUrl, topic: deepLink.topic)
+            }
+        }
     }
 
     func refreshNotificationSettings(completion: (() -> Void)? = nil) {
