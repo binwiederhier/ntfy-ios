@@ -57,10 +57,35 @@ final class NtfyDeepLinkTests: XCTestCase {
         XCTAssertNil(parse("ntfy://example.com/alerts?display=%20%20")?.displayName)
     }
 
+    func testQRCodeAcceptsNtfyAndWebTopicLinks() {
+        XCTAssertEqual(parseQR("ntfy://example.com/alerts")?.baseUrl, "https://example.com")
+        XCTAssertEqual(parseQR("https://example.com/alerts")?.baseUrl, "https://example.com")
+        XCTAssertEqual(parseQR("http://example.com:8080/alerts")?.baseUrl, "http://example.com:8080")
+    }
+
+    func testQRCodeNormalizesWebDefaultPorts() {
+        XCTAssertEqual(parseQR("https://example.com:443/alerts")?.baseUrl, "https://example.com")
+        XCTAssertEqual(parseQR("http://example.com:80/alerts")?.baseUrl, "http://example.com")
+    }
+
+    func testQRCodeRejectsNonTopicURLsAndCredentials() {
+        XCTAssertNil(parseQR("https://example.com/one/two"))
+        XCTAssertNil(parseQR("https://user:password@example.com/alerts"))
+        XCTAssertNil(parseQR("mailto:user@example.com"))
+        XCTAssertNil(parseQR("not a URL"))
+    }
+
     private func parse(_ value: String) -> NtfyDeepLink? {
         guard let url = URL(string: value) else {
             return nil
         }
         return NtfyDeepLink(url: url)
+    }
+
+    private func parseQR(_ value: String) -> NtfyDeepLink? {
+        guard let url = URL(string: value) else {
+            return nil
+        }
+        return NtfyDeepLink(qrCodeURL: url)
     }
 }

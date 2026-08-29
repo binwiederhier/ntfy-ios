@@ -10,6 +10,7 @@
 		C0DE00010000000000000001 /* NtfyDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00020000000000000002 /* NtfyDeepLink.swift */; };
 		C0DE00030000000000000003 /* NtfyDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00020000000000000002 /* NtfyDeepLink.swift */; };
 		C0DE00130000000000000013 /* NtfyDeepLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00110000000000000011 /* NtfyDeepLinkTests.swift */; };
+		C0DE00300000000000000030 /* SubscriptionQRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00310000000000000031 /* SubscriptionQRScannerView.swift */; };
 		02024E60283D7CBB0064224A /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02024E5F283D7CBB0064224A /* Extensions.swift */; };
 		18A28C5C2FBCF00000A52946 /* AttachmentAutoDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A28C5B2FBCF00000A52946 /* AttachmentAutoDownloadView.swift */; };
 		2939B2162F8F293C00A52946 /* UserRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2132F8F293C00A52946 /* UserRowView.swift */; };
@@ -103,6 +104,7 @@
 		C0DE00020000000000000002 /* NtfyDeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyDeepLink.swift; sourceTree = "<group>"; };
 		C0DE00100000000000000010 /* ntfyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ntfyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0DE00110000000000000011 /* NtfyDeepLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyDeepLinkTests.swift; sourceTree = "<group>"; };
+		C0DE00310000000000000031 /* SubscriptionQRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionQRScannerView.swift; sourceTree = "<group>"; };
 		02024E5F283D7CBB0064224A /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		18A28C5B2FBCF00000A52946 /* AttachmentAutoDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentAutoDownloadView.swift; sourceTree = "<group>"; };
 		2939B20F2F8F293C00A52946 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -202,6 +204,7 @@
 			children = (
 				29E841982FB417E400F927E4 /* SubscriptionAddView.swift */,
 				29E841992FB417E400F927E4 /* SubscriptionListView.swift */,
+				C0DE00310000000000000031 /* SubscriptionQRScannerView.swift */,
 			);
 			path = Subscriptions;
 			sourceTree = "<group>";
@@ -501,6 +504,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0DE00010000000000000001 /* NtfyDeepLink.swift in Sources */,
+				C0DE00300000000000000030 /* SubscriptionQRScannerView.swift in Sources */,
 				2939B2162F8F293C00A52946 /* UserRowView.swift in Sources */,
 				2939B2172F8F293C00A52946 /* UserEditorView.swift in Sources */,
 				2939B2182F8F293C00A52946 /* AboutView.swift in Sources */,

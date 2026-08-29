@@ -9,9 +9,12 @@ struct SubscriptionAddView: View {
     @Binding var isShowing: Bool
     
     @EnvironmentObject private var store: Store
+    @EnvironmentObject private var delegate: AppDelegate
     @State private var topic: String = ""
     @State private var useAnother: Bool = false
     @State private var baseUrl: String = ""
+    @State private var scannedSubscription: NtfyDeepLink?
+    @State private var showingQRScanner = false
     
     @State private var showLogin: Bool = false
     @State private var username: String = ""
@@ -35,6 +38,7 @@ struct SubscriptionAddView: View {
         self._topic = State(initialValue: initialSubscription?.topic ?? "")
         self._useAnother = State(initialValue: initialSubscription != nil)
         self._baseUrl = State(initialValue: initialSubscription?.baseUrl ?? "")
+        self._scannedSubscription = State(initialValue: nil)
     }
 
     private var subscriptionManager: SubscriptionManager {
@@ -68,6 +72,9 @@ struct SubscriptionAddView: View {
                 subscribeOrShowLoginAction()
             }
         }
+        .sheet(isPresented: $showingQRScanner) {
+            SubscriptionQRScannerView(onScan: handleScannedSubscription)
+        }
     }
     
     private var addView: some View {
@@ -91,8 +98,17 @@ struct SubscriptionAddView: View {
                             .disableAutocorrection(true)
                     }
                 }
+                if initialSubscription == nil {
+                    Section {
+                        Button {
+                            showingQRScanner = true
+                        } label: {
+                            Label("Scan QR code", systemImage: "qrcode.viewfinder")
+                        }
+                    }
+                }
             }
-            .disabled(loading)
+            .disabled(loading || activeSubscription != nil)
             if let error = addError {
                 ErrorView(error: error)
             }
@@ -230,25 +246,49 @@ struct SubscriptionAddView: View {
     }
     
     private var selectedBaseUrl: String {
-        if let initialSubscription {
-            return initialSubscription.baseUrl
+        if let activeSubscription {
+            return activeSubscription.baseUrl
         }
         return normalizeBaseUrl(useAnother ? baseUrl : store.getDefaultBaseUrl())
+    }
+
+    private var activeSubscription: NtfyDeepLink? {
+        scannedSubscription ?? initialSubscription
     }
 
     private func subscribeAndFinish() {
         subscriptionManager.subscribe(
             baseUrl: selectedBaseUrl,
             topic: sanitizedTopic,
-            displayName: initialSubscription?.displayName
+            displayName: activeSubscription?.displayName
         )
         finishSubscription()
     }
 
     private func finishSubscription() {
         isShowing = false
-        onSubscribed?()
+        if let scannedSubscription {
+            delegate.showSubscription(scannedSubscription)
+        } else {
+            onSubscribed?()
+        }
         resetFormAfterDismissal()
+    }
+
+    private func handleScannedSubscription(_ subscription: NtfyDeepLink) {
+        scannedSubscription = subscription
+        topic = subscription.topic
+        baseUrl = subscription.baseUrl
+        useAnother = true
+        showingQRScanner = false
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            if store.getSubscription(baseUrl: selectedBaseUrl, topic: sanitizedTopic) != nil {
+                finishSubscription()
+            } else {
+                subscribeOrShowLoginAction()
+            }
+        }
     }
     
     private func resetAndHide() {
@@ -291,5 +331,6 @@ struct SubscriptionAddView_Previews: PreviewProvider {
         let store = Store.preview
         SubscriptionAddView(isShowing: $isShowing)
             .environmentObject(store)
+            .environmentObject(AppDelegate())
     }
 }
