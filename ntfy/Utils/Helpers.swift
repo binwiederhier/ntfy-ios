@@ -1,47 +1,6 @@
 import Foundation
 import CryptoKit
 
-struct NtfyDeepLink: Equatable {
-    let baseUrl: String
-    let topic: String
-
-    init?(url: URL) {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              components.scheme?.lowercased() == "ntfy",
-              let host = components.host,
-              !host.isEmpty else {
-            return nil
-        }
-
-        let pathSegments = components.path
-            .split(separator: "/", omittingEmptySubsequences: false)
-            .dropFirst()
-        guard pathSegments.count == 1, let topic = pathSegments.first, !topic.isEmpty else {
-            return nil
-        }
-
-        let secureValue = components.queryItems?
-            .first { $0.name == "secure" }?
-            .value?
-            .lowercased()
-        let secure = secureValue != "false" && secureValue != "0"
-        let defaultPort = secure ? 443 : 80
-
-        var baseComponents = URLComponents()
-        baseComponents.scheme = secure ? "https" : "http"
-        baseComponents.host = host
-        if components.port != defaultPort {
-            baseComponents.port = components.port
-        }
-
-        guard let baseUrl = baseComponents.string else {
-            return nil
-        }
-        self.baseUrl = baseUrl
-        self.topic = String(topic)
-    }
-}
-
 func topicUrl(baseUrl: String, topic: String) -> String {
     return "\(normalizeBaseUrl(baseUrl))/\(topic)"
 }

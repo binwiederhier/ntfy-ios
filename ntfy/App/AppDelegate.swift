@@ -9,11 +9,11 @@ import CoreData
 class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     private let tag = "AppDelegate"
     private let pollTopic = "~poll" // See ntfy server if ever changed
-    private let deepLinkQueue = DispatchQueue(label: "io.heckel.ntfy.deep-link", qos: .userInitiated)
     
     // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
     @Published var selectedTab = 0
     @Published var selectedBaseUrl: String? = nil
+    @Published var pendingDeepLink: NtfyDeepLink? = nil
     @Published private(set) var criticalAlertSetting: UNNotificationSetting = .notSupported
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
@@ -36,24 +36,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
 
     func openDeepLink(_ url: URL) {
         guard let deepLink = NtfyDeepLink(url: url) else {
-            Log.w(tag, "Ignoring invalid deep link \(url)")
+            Log.w(tag, "Ignoring invalid ntfy deep link")
             return
         }
 
-        deepLinkQueue.async {
+        DispatchQueue.main.async {
             let store = Store.shared
-            var isSubscribed = false
-            DispatchQueue.main.sync {
-                isSubscribed = store.getSubscription(baseUrl: deepLink.baseUrl, topic: deepLink.topic) != nil
-            }
-            if !isSubscribed {
-                SubscriptionManager(store: store).subscribe(baseUrl: deepLink.baseUrl, topic: deepLink.topic)
-            }
-            DispatchQueue.main.async {
-                self.selectedTab = 0
-                self.selectedBaseUrl = topicUrl(baseUrl: deepLink.baseUrl, topic: deepLink.topic)
+            self.selectedTab = 0
+            if store.getSubscription(baseUrl: deepLink.baseUrl, topic: deepLink.topic) != nil {
+                self.showSubscription(deepLink)
+            } else if self.pendingDeepLink?.id != deepLink.id {
+                self.pendingDeepLink = deepLink
             }
         }
+    }
+
+    func showSubscription(_ deepLink: NtfyDeepLink) {
+        pendingDeepLink = nil
+        selectedTab = 0
+        selectedBaseUrl = deepLink.id
     }
 
     func refreshNotificationSettings(completion: (() -> Void)? = nil) {

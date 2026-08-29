@@ -2,6 +2,9 @@ import SwiftUI
 
 struct SubscriptionAddView: View {
     private let tag = "SubscriptionAddView"
+    private let initialSubscription: NtfyDeepLink?
+    private let subscribeOnAppear: Bool
+    private let onSubscribed: (() -> Void)?
     
     @Binding var isShowing: Bool
     
@@ -17,6 +20,22 @@ struct SubscriptionAddView: View {
     @State private var loading = false
     @State private var addError: String?
     @State private var loginError: String?
+    @State private var didAttemptInitialSubscription = false
+
+    init(
+        isShowing: Binding<Bool>,
+        initialSubscription: NtfyDeepLink? = nil,
+        subscribeOnAppear: Bool = false,
+        onSubscribed: (() -> Void)? = nil
+    ) {
+        self._isShowing = isShowing
+        self.initialSubscription = initialSubscription
+        self.subscribeOnAppear = subscribeOnAppear
+        self.onSubscribed = onSubscribed
+        self._topic = State(initialValue: initialSubscription?.topic ?? "")
+        self._useAnother = State(initialValue: initialSubscription != nil)
+        self._baseUrl = State(initialValue: initialSubscription?.baseUrl ?? "")
+    }
 
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -37,6 +56,17 @@ struct SubscriptionAddView: View {
                         EmptyView()
                     }
                 })
+        }
+        .onAppear {
+            guard subscribeOnAppear, !didAttemptInitialSubscription else {
+                return
+            }
+            didAttemptInitialSubscription = true
+            if store.getSubscription(baseUrl: selectedBaseUrl, topic: sanitizedTopic) != nil {
+                finishSubscription()
+            } else {
+                subscribeOrShowLoginAction()
+            }
         }
     }
     
@@ -62,6 +92,7 @@ struct SubscriptionAddView: View {
                     }
                 }
             }
+            .disabled(loading)
             if let error = addError {
                 ErrorView(error: error)
             }
@@ -87,7 +118,7 @@ struct SubscriptionAddView: View {
                     .fixedSize(horizontal: true, vertical: false)
 
                 }
-                .disabled(!isAddViewValid())
+                .disabled(!isAddViewValid() || loading)
             }
         }
     }
@@ -104,6 +135,7 @@ struct SubscriptionAddView: View {
                     SecureField("Password", text: $password)
                 }
             }
+            .disabled(loading)
             if let error = loginError {
                 ErrorView(error: error)
             }
@@ -120,7 +152,7 @@ struct SubscriptionAddView: View {
                         Text("Subscribe")
                     }
                 }
-                .disabled(!isLoginViewValid())
+                .disabled(!isLoginViewValid() || loading)
             }
         }
     }
@@ -154,24 +186,20 @@ struct SubscriptionAddView: View {
         addError = nil
         let user = store.getUser(baseUrl: selectedBaseUrl)?.toBasicUser()
         ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: sanitizedTopic, user: user) { result in
-            switch result {
-            case .Success:
-                DispatchQueue.global(qos: .background).async {
-                    subscriptionManager.subscribe(baseUrl: selectedBaseUrl, topic: sanitizedTopic)
-                    resetAndHide()
-                }
-                // Do not reset "loading", because resetAndHide() will do that after everything is done
-            case .Unauthorized:
-                if let user = user {
-                    addError = "User \(user.username) is not authorized to read this topic"
-                } else {
-                    addError = nil // Reset
+            DispatchQueue.main.async {
+                switch result {
+                case .Success:
+                    subscribeAndFinish()
+                case .Unauthorized:
+                    username = user?.username ?? ""
+                    password = ""
+                    addError = nil
                     showLogin = true
+                    loading = false
+                case .Error(let err):
+                    addError = err
+                    loading = false
                 }
-                loading = false
-            case .Error(let err):
-                addError = err
-                loading = false
             }
         }
     }
@@ -181,20 +209,18 @@ struct SubscriptionAddView: View {
         loginError = nil
         let user = BasicUser(username: username, password: password)
         ApiService.shared.checkAuth(baseUrl: selectedBaseUrl, topic: sanitizedTopic, user: user) { result in
-            switch result {
-            case .Success:
-                DispatchQueue.global(qos: .background).async {
+            DispatchQueue.main.async {
+                switch result {
+                case .Success:
                     store.saveUser(baseUrl: selectedBaseUrl, username: username, password: password)
-                    subscriptionManager.subscribe(baseUrl: selectedBaseUrl, topic: sanitizedTopic)
-                    resetAndHide()
+                    subscribeAndFinish()
+                case .Unauthorized:
+                    loginError = "Invalid credentials, or user \(username) is not authorized to read this topic"
+                    loading = false
+                case .Error(let err):
+                    loginError = err
+                    loading = false
                 }
-                // Do not reset "loading", because resetAndHide() will do that after everything is done
-            case .Unauthorized:
-                loginError = "Invalid credentials, or user \(username) is not authorized to read this topic"
-                loading = false
-            case .Error(let err):
-                loginError = err
-                loading = false
             }
         }
     }
@@ -204,11 +230,33 @@ struct SubscriptionAddView: View {
     }
     
     private var selectedBaseUrl: String {
-        return normalizeBaseUrl((useAnother) ? baseUrl : store.getDefaultBaseUrl())
+        if let initialSubscription {
+            return initialSubscription.baseUrl
+        }
+        return normalizeBaseUrl(useAnother ? baseUrl : store.getDefaultBaseUrl())
+    }
+
+    private func subscribeAndFinish() {
+        subscriptionManager.subscribe(
+            baseUrl: selectedBaseUrl,
+            topic: sanitizedTopic,
+            displayName: initialSubscription?.displayName
+        )
+        finishSubscription()
+    }
+
+    private func finishSubscription() {
+        isShowing = false
+        onSubscribed?()
+        resetFormAfterDismissal()
     }
     
     private func resetAndHide() {
         isShowing = false
+        resetFormAfterDismissal()
+    }
+
+    private func resetFormAfterDismissal() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             // Hide first and then reset, otherwise we'll see the text fields change
             addError = nil

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C0DE00010000000000000001 /* NtfyDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00020000000000000002 /* NtfyDeepLink.swift */; };
+		C0DE00030000000000000003 /* NtfyDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00020000000000000002 /* NtfyDeepLink.swift */; };
+		C0DE00130000000000000013 /* NtfyDeepLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00110000000000000011 /* NtfyDeepLinkTests.swift */; };
 		02024E60283D7CBB0064224A /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02024E5F283D7CBB0064224A /* Extensions.swift */; };
 		18A28C5C2FBCF00000A52946 /* AttachmentAutoDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A28C5B2FBCF00000A52946 /* AttachmentAutoDownloadView.swift */; };
 		2939B2162F8F293C00A52946 /* UserRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2132F8F293C00A52946 /* UserRowView.swift */; };
@@ -97,6 +100,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C0DE00020000000000000002 /* NtfyDeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyDeepLink.swift; sourceTree = "<group>"; };
+		C0DE00100000000000000010 /* ntfyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ntfyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0DE00110000000000000011 /* NtfyDeepLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyDeepLinkTests.swift; sourceTree = "<group>"; };
 		02024E5F283D7CBB0064224A /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		18A28C5B2FBCF00000A52946 /* AttachmentAutoDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentAutoDownloadView.swift; sourceTree = "<group>"; };
 		2939B20F2F8F293C00A52946 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -151,6 +157,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		C0DE00150000000000000015 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9474F1BA282F2AA700CDE4DD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -210,6 +223,7 @@
 			children = (
 				9474F1BF282F2AA700CDE4DD /* ntfy */,
 				9474F1E5282F3FFD00CDE4DD /* ntfyNSE */,
+				C0DE00120000000000000012 /* ntfyTests */,
 				9474F1BE282F2AA700CDE4DD /* Products */,
 				9474F1DD282F3A2E00CDE4DD /* Frameworks */,
 			);
@@ -220,6 +234,7 @@
 			children = (
 				9474F1BD282F2AA700CDE4DD /* ntfy.app */,
 				9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */,
+				C0DE00100000000000000010 /* ntfyTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -308,6 +323,7 @@
 				9474F20E283326C500CDE4DD /* ApiService.swift */,
 				94CD1969283E666900973B93 /* EmojiManager.swift */,
 				9474F211283327C200CDE4DD /* Helpers.swift */,
+				C0DE00020000000000000002 /* NtfyDeepLink.swift */,
 				94A3F7C928386B2100C48E79 /* Config.swift */,
 				29E8419D2FB417EA00F927E4 /* AttachmentFileStore.swift */,
 				9474F216283531A200CDE4DD /* Log.swift */,
@@ -330,9 +346,34 @@
 			path = Assets;
 			sourceTree = "<group>";
 		};
+		C0DE00120000000000000012 /* ntfyTests */ = {
+			isa = PBXGroup;
+			children = (
+				C0DE00110000000000000011 /* NtfyDeepLinkTests.swift */,
+			);
+			path = ntfyTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		C0DE00170000000000000017 /* ntfyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0DE00220000000000000022 /* Build configuration list for PBXNativeTarget "ntfyTests" */;
+			buildPhases = (
+				C0DE00140000000000000014 /* Sources */,
+				C0DE00150000000000000015 /* Frameworks */,
+				C0DE00160000000000000016 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ntfyTests;
+			productName = ntfyTests;
+			productReference = C0DE00100000000000000010 /* ntfyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		9474F1BC282F2AA700CDE4DD /* ntfy */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9474F1CB282F2AA800CDE4DD /* Build configuration list for PBXNativeTarget "ntfy" */;
@@ -382,6 +423,9 @@
 				LastSwiftUpdateCheck = 1330;
 				LastUpgradeCheck = 1330;
 				TargetAttributes = {
+					C0DE00170000000000000017 = {
+						CreatedOnToolsVersion = 13.3.1;
+					};
 					9474F1BC282F2AA700CDE4DD = {
 						CreatedOnToolsVersion = 13.3.1;
 					};
@@ -408,11 +452,19 @@
 			targets = (
 				9474F1BC282F2AA700CDE4DD /* ntfy */,
 				9474F1E3282F3FFD00CDE4DD /* ntfyNSE */,
+				C0DE00170000000000000017 /* ntfyTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		C0DE00160000000000000016 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9474F1BB282F2AA700CDE4DD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -435,10 +487,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		C0DE00140000000000000014 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0DE00030000000000000003 /* NtfyDeepLink.swift in Sources */,
+				C0DE00130000000000000013 /* NtfyDeepLinkTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9474F1B9282F2AA700CDE4DD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0DE00010000000000000001 /* NtfyDeepLink.swift in Sources */,
 				2939B2162F8F293C00A52946 /* UserRowView.swift in Sources */,
 				2939B2172F8F293C00A52946 /* UserEditorView.swift in Sources */,
 				2939B2182F8F293C00A52946 /* AboutView.swift in Sources */,
@@ -516,6 +578,32 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		C0DE00200000000000000020 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C0DE00210000000000000021 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		9474F1C9282F2AA800CDE4DD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -759,6 +847,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		C0DE00220000000000000022 /* Build configuration list for PBXNativeTarget "ntfyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0DE00200000000000000020 /* Debug */,
+				C0DE00210000000000000021 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		9474F1B8282F2AA700CDE4DD /* Build configuration list for PBXProject "ntfy" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
