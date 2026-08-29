@@ -4,6 +4,19 @@
 <dict>
 	<key>AppBaseURL</key>
 	<string>$(APP_BASE_URL)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>io.heckel.ntfy</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ntfy</string>
+			</array>
+		</dict>
+	</array>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
 	<key>NSAppTransportSecurity</key>

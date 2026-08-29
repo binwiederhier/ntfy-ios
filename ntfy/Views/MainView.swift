@@ -2,18 +2,22 @@ import Foundation
 import SwiftUI
 
 struct MainView: View {
+    @EnvironmentObject private var delegate: AppDelegate
+
     var body: some View {
-        TabView {
+        TabView(selection: $delegate.selectedTab) {
             SubscriptionListView()
                 .tabItem {
                     Image(systemName: "message.fill")
                     Text("Notifications")
                 }
+                .tag(0)
             SettingsView()
                 .tabItem {
                     Image(systemName: "gearshape.fill")
                     Text("Settings")
                 }
+                .tag(1)
         }
     }
 }

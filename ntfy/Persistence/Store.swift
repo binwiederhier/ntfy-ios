@@ -102,11 +102,13 @@ class Store: ObservableObject {
 
     // MARK: Subscriptions
     
-    func saveSubscription(baseUrl: String, topic: String) -> Subscription {
-        let subscription = Subscription(context: context)
-        subscription.baseUrl = normalizeBaseUrl(baseUrl)
-        subscription.topic = topic
-        DispatchQueue.main.sync {
+    func saveSubscription(baseUrl: String, topic: String, displayName: String? = nil) -> Subscription {
+        var subscription: Subscription!
+        context.performAndWait {
+            subscription = Subscription(context: context)
+            subscription.baseUrl = normalizeBaseUrl(baseUrl)
+            subscription.topic = topic
+            subscription.displayName = displayName
             Log.d(Store.tag, "Storing subscription baseUrl=\(subscription.baseUrl ?? "?"), topic=\(topic)")
             try? context.save()
         }
