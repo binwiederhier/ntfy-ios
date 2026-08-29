@@ -4,6 +4,19 @@
 <dict>
 	<key>AppBaseURL</key>
 	<string>$(APP_BASE_URL)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>io.heckel.ntfy</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ntfy</string>
+			</array>
+		</dict>
+	</array>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
 	<key>NSAppTransportSecurity</key>
@@ -11,6 +24,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Scan QR codes to subscribe to ntfy topics.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

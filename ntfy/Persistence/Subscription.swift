@@ -5,7 +5,10 @@ extension Subscription {
         return topicUrl(baseUrl: baseUrl ?? "?", topic: topic ?? "?")
     }
     
-    func displayName() -> String {
+    func displayTitle() -> String {
+        if let displayName, !displayName.isEmpty {
+            return displayName
+        }
         return topicShortUrl(baseUrl: baseUrl ?? "?", topic: topic ?? "?")
     }
     

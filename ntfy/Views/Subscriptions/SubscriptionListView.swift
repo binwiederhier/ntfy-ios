@@ -7,6 +7,7 @@ struct SubscriptionListView: View {
     let tag = "SubscriptionList"
     
     @EnvironmentObject private var store: Store
+    @EnvironmentObject private var delegate: AppDelegate
     @ObservedObject var subscriptionsModel = SubscriptionsObservable()
     @State private var showingAddDialog = false
     
@@ -76,6 +77,17 @@ struct SubscriptionListView: View {
         })
         .sheet(isPresented: $showingAddDialog) {
             SubscriptionAddView(isShowing: $showingAddDialog)
+        }
+        .sheet(item: $delegate.pendingDeepLink) { deepLink in
+            SubscriptionAddView(
+                isShowing: Binding(
+                    get: { delegate.pendingDeepLink != nil },
+                    set: { if !$0 { delegate.pendingDeepLink = nil } }
+                ),
+                initialSubscription: deepLink,
+                subscribeOnAppear: true,
+                onSubscribed: { delegate.showSubscription(deepLink) }
+            )
         }
         .onAppear {
             // Ensures subscription count stays up to date, so a pull to refresh isn't required
@@ -153,7 +165,7 @@ struct SubscriptionItemRowView: View {
         let totalNotificationCount = subscription.notificationCount()
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text(subscription.displayName())
+                Text(subscription.displayTitle())
                     .font(.headline)
                     .bold()
                     .lineLimit(1)

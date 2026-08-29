@@ -7,7 +7,7 @@ struct SubscriptionManager {
     private let tag = "SubscriptionManager"
     var store: Store
     
-    func subscribe(baseUrl: String, topic: String) {
+    func subscribe(baseUrl: String, topic: String, displayName: String? = nil) {
         let normalizedBaseUrl = normalizeBaseUrl(baseUrl)
         let firebaseTopicName = firebaseTopic(baseUrl: normalizedBaseUrl, topic: topic)
         Log.d(tag, "Subscribing to \(topicUrl(baseUrl: normalizedBaseUrl, topic: topic))")
@@ -18,7 +18,7 @@ struct SubscriptionManager {
                 Log.d(tag, "Firebase subscribe succeeded for \(firebaseTopicName)")
             }
         }
-        let subscription = store.saveSubscription(baseUrl: normalizedBaseUrl, topic: topic)
+        let subscription = store.saveSubscription(baseUrl: normalizedBaseUrl, topic: topic, displayName: displayName)
         poll(subscription)
     }
     
