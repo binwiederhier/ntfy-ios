@@ -16,6 +16,7 @@ struct SubscriptionManager {
                 Log.e(tag, "Firebase subscribe failed for \(firebaseTopicName)", error)
             } else {
                 Log.d(tag, "Firebase subscribe succeeded for \(firebaseTopicName)")
+                Store.addFirebaseTopic(firebaseTopicName)
             }
         }
         let subscription = store.saveSubscription(baseUrl: normalizedBaseUrl, topic: topic)
@@ -32,6 +33,7 @@ struct SubscriptionManager {
                         Log.e(tag, "Firebase unsubscribe failed for \(firebaseTopicName)", error)
                     } else {
                         Log.d(tag, "Firebase unsubscribe succeeded for \(firebaseTopicName)")
+                        Store.removeFirebaseTopic(firebaseTopicName)
                     }
                 }
             }

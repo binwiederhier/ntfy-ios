@@ -9,6 +9,7 @@ import CoreData
 class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     private let tag = "AppDelegate"
     private let pollTopic = "~poll" // See ntfy server if ever changed
+    private let firebaseTopicResubscribeInterval: TimeInterval = 24 * 60 * 60
     
     // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
     @Published var selectedBaseUrl: String? = nil
@@ -28,6 +29,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         
         // Register too receive remote notifications
         application.registerForRemoteNotifications()
+        
+        // Repair lost Firebase topic subscriptions. This is a no-op until the Firebase and APNs tokens are available,
+        // at which point the sync is retried when the app becomes active, or forced from didReceiveRegistrationToken.
+        syncFirebaseTopics()
                 
         return true
     }
@@ -92,6 +97,68 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         }
     }
     
+    /// Subscribes to the "~poll" topic and all locally saved topics, and unsubscribes from topics that no longer have a
+    /// matching subscription.
+    ///
+    /// iOS and Firebase can silently lose the per-topic subscription state of a device, which causes push notifications
+    /// to stop working until the app is reinstalled. Since the Firebase SDK does not let us read its subscription state
+    /// back, we track it ourselves and regularly repair it. See https://github.com/binwiederhier/ntfy/issues/1305
+    ///
+    /// - Parameter force: Re-subscribe to all topics, even if they are already tracked as subscribed. This is needed
+    ///   when the Firebase token changes, because topic subscriptions are tied to the token.
+    func syncFirebaseTopics(force: Bool = false) {
+        // Firebase can only subscribe once an FCM token exists. The token is restored from the keychain, so this is
+        // normally available right away; on a fresh install it is fetched asynchronously, and the forced sync in
+        // didReceiveRegistrationToken takes over at that point.
+        guard Messaging.messaging().fcmToken != nil else {
+            Log.d(tag, "Firebase topic sync deferred, Firebase token not available yet")
+            return
+        }
+        guard let subscriptions = Store.shared.getSubscriptions() else {
+            Log.w(tag, "Firebase topic sync skipped, cannot read subscriptions")
+            return
+        }
+        
+        // Subscribe to ~poll to receive poll requests, plus one topic per subscription
+        let desiredTopics = Set([pollTopic]).union(subscriptions.compactMap { subscription -> String? in
+            guard let baseUrl = subscription.baseUrl, let topic = subscription.topic else {
+                Log.w(tag, "Skipping Firebase subscription with missing baseUrl or topic")
+                return nil
+            }
+            return firebaseTopic(baseUrl: baseUrl, topic: topic)
+        })
+        let trackedTopics = Store.getFirebaseTopics()
+        let fullResubscribe = force || Date().timeIntervalSince(Store.getFirebaseTopicsSyncedAt()) > firebaseTopicResubscribeInterval
+        let topicsToSubscribe = fullResubscribe ? desiredTopics : desiredTopics.subtracting(trackedTopics)
+        let topicsToUnsubscribe = trackedTopics.subtracting(desiredTopics) // Never contains ~poll, it is always desired
+        Log.d(tag, "Syncing Firebase topics, subscribing to \(topicsToSubscribe.count), unsubscribing from \(topicsToUnsubscribe.count), full=\(fullResubscribe)")
+        
+        // Topics are only tracked as subscribed once Firebase confirms, so failed attempts are retried on the next sync
+        topicsToSubscribe.forEach { topic in
+            Messaging.messaging().subscribe(toTopic: topic) { error in
+                if let error {
+                    Log.e(self.tag, "Firebase subscribe failed for \(topic)", error)
+                } else {
+                    Log.d(self.tag, "Firebase subscribe succeeded for \(topic)")
+                    Store.addFirebaseTopic(topic)
+                }
+            }
+        }
+        topicsToUnsubscribe.forEach { topic in
+            Messaging.messaging().unsubscribe(fromTopic: topic) { error in
+                if let error {
+                    Log.e(self.tag, "Firebase unsubscribe failed for \(topic)", error)
+                } else {
+                    Log.d(self.tag, "Firebase unsubscribe succeeded for \(topic)")
+                    Store.removeFirebaseTopic(topic)
+                }
+            }
+        }
+        if fullResubscribe {
+            Store.setFirebaseTopicsSyncedAt(Date())
+        }
+    }
+    
     /// Executed when a background notification arrives on the "~poll" topic. This is used to trigger polling of local topics.
     /// See https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/pushing_background_updates_to_your_app
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
@@ -143,6 +210,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         let token = deviceToken.map { data in String(format: "%02.2hhx", data) }.joined()
         Messaging.messaging().apnsToken = deviceToken
         Log.d(tag, "Registered for remote notifications. Passing APNs token \(token.prefix(12))... to Firebase")
+        
+        // APNs registration completes after launch, so this is the first point where the tokens are known to be good
+        syncFirebaseTopics()
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -245,29 +315,7 @@ extension AppDelegate: MessagingDelegate {
             Log.w(tag, "Firebase token missing")
         }
         
-        // Subscribe to ~poll topic
-        Messaging.messaging().subscribe(toTopic: pollTopic) { error in
-            if let error {
-                Log.e(self.tag, "Firebase subscribe failed for \(self.pollTopic)", error)
-            } else {
-                Log.d(self.tag, "Firebase subscribe succeeded for \(self.pollTopic)")
-            }
-        }
-        
-        // Re-subscribe to Firebase for all topics
-        let store = Store.shared
-        store.getSubscriptions()?.forEach{ subscription in
-            if let baseUrl = subscription.baseUrl, let topic = subscription.topic {
-                let firebaseTopicName = firebaseTopic(baseUrl: baseUrl, topic: topic)
-                Log.d(tag, "Re-subscribing to topic \(baseUrl)/\(topic)")
-                Messaging.messaging().subscribe(toTopic: firebaseTopicName) { error in
-                    if let error {
-                        Log.e(self.tag, "Firebase subscribe failed for \(firebaseTopicName)", error)
-                    } else {
-                        Log.d(self.tag, "Firebase subscribe succeeded for \(firebaseTopicName)")
-                    }
-                }
-            }
-        }
+        // Topic subscriptions are tied to the Firebase token, so re-subscribe to everything when it changes
+        syncFirebaseTopics(force: true)
     }
 }
