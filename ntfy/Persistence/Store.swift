@@ -120,6 +120,13 @@ class Store: ObservableObject {
     }
     
     func getSubscriptions() -> [Subscription]? {
+        // A store that failed to load leaves zero persistent stores, and Core Data then answers a fetch with an empty
+        // result set instead of an error. Report that as unreadable rather than as "no subscriptions", so a failed
+        // store cannot be mistaken for the user having removed every subscription.
+        guard !container.persistentStoreCoordinator.persistentStores.isEmpty else {
+            Log.w(Store.tag, "Cannot read subscriptions, no persistent store is loaded")
+            return nil
+        }
         return try? context.fetch(Subscription.fetchRequest())
     }
 
