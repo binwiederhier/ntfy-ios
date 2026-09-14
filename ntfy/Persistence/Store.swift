@@ -36,6 +36,8 @@ class Store: ObservableObject {
     static let autoDownload50MB = Constants.autoDownload50MB
     private static let sharedDefaults = UserDefaults(suiteName: Store.appGroup)!
     private static let sharedDefaultsKeyCriticalAlertsAuthorized = "criticalAlertsAuthorized"
+    private static let sharedDefaultsKeyFirebaseTopics = "firebaseTopics"
+    private static let sharedDefaultsKeyFirebaseTopicsSyncedAt = "firebaseTopicsSyncedAt"
     private let container: NSPersistentContainer
     var context: NSManagedObjectContext {
         return container.viewContext
@@ -118,6 +120,13 @@ class Store: ObservableObject {
     }
     
     func getSubscriptions() -> [Subscription]? {
+        // A store that failed to load leaves zero persistent stores, and Core Data then answers a fetch with an empty
+        // result set instead of an error. Report that as unreadable rather than as "no subscriptions", so a failed
+        // store cannot be mistaken for the user having removed every subscription.
+        guard !container.persistentStoreCoordinator.persistentStores.isEmpty else {
+            Log.w(Store.tag, "Cannot read subscriptions, no persistent store is loaded")
+            return nil
+        }
         return try? context.fetch(Subscription.fetchRequest())
     }
 
@@ -385,6 +394,50 @@ class Store: ObservableObject {
 
     static func saveCriticalAlertsAuthorized(_ enabled: Bool) {
         sharedDefaults.set(enabled, forKey: sharedDefaultsKeyCriticalAlertsAuthorized)
+    }
+
+    /// Returns the Firebase topics the app believes it is subscribed to. The Firebase SDK does not let us read its
+    /// subscription state back, so we track it ourselves to be able to repair it. See ntfy#1305.
+    static func getFirebaseTopics() -> Set<String> {
+        guard let topics = sharedDefaults.array(forKey: sharedDefaultsKeyFirebaseTopics) as? [String] else {
+            return []
+        }
+        return Set(topics)
+    }
+
+    static func setFirebaseTopics(_ topics: Set<String>) {
+        sharedDefaults.set(Array(topics), forKey: sharedDefaultsKeyFirebaseTopics)
+    }
+
+    static func addFirebaseTopic(_ topic: String) {
+        var topics = getFirebaseTopics()
+        guard !topics.contains(topic) else {
+            return
+        }
+        topics.insert(topic)
+        setFirebaseTopics(topics)
+    }
+
+    static func removeFirebaseTopic(_ topic: String) {
+        var topics = getFirebaseTopics()
+        guard topics.contains(topic) else {
+            return
+        }
+        topics.remove(topic)
+        setFirebaseTopics(topics)
+    }
+
+    /// Returns the time of the last full re-subscription to all Firebase topics, or .distantPast if there never was one.
+    static func getFirebaseTopicsSyncedAt() -> Date {
+        let timestamp = sharedDefaults.double(forKey: sharedDefaultsKeyFirebaseTopicsSyncedAt)
+        guard timestamp > 0 else {
+            return .distantPast
+        }
+        return Date(timeIntervalSince1970: timestamp)
+    }
+
+    static func setFirebaseTopicsSyncedAt(_ date: Date) {
+        sharedDefaults.set(date.timeIntervalSince1970, forKey: sharedDefaultsKeyFirebaseTopicsSyncedAt)
     }
 
     func shouldAutoDownloadAttachment(_ attachment: MessageAttachment) -> Bool {
