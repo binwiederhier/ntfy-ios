@@ -150,11 +150,19 @@ extension UNMutableNotificationContent {
     }
 
     private func attachLocalImage(from localFileUrl: URL) -> Bool {
+        // UNNotificationAttachment moves the file it is given into the system's attachment
+        // store, so attaching the persisted copy directly leaves attachmentLocalPath pointing
+        // at a file that no longer exists. Hand the system a throwaway copy instead.
+        let temporaryUrl = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension(localFileUrl.pathExtension)
         do {
-            let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: localFileUrl)
+            try FileManager.default.copyItem(at: localFileUrl, to: temporaryUrl)
+            let notificationAttachment = try UNNotificationAttachment(identifier: "attachment", url: temporaryUrl)
             attachments = attachments + [notificationAttachment]
             return true
         } catch {
+            try? FileManager.default.removeItem(at: temporaryUrl)
             Log.w("NotificationContent", "Failed to attach local image", error)
             return false
         }
