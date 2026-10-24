@@ -176,10 +176,7 @@ extension UNMutableNotificationContent {
 
         let center = UNUserNotificationCenter.current()
         let category = UNNotificationCategory(identifier: categoryIdentifier, actions: actions, intentIdentifiers: [])
-        center.getNotificationCategories { existingCategories in
-            let preservedCategories = existingCategories.filter { $0.identifier != categoryIdentifier }
-            center.setNotificationCategories(Set(preservedCategories).union([category]))
-        }
+        center.setNotificationCategories([category])
     }
 
     private func completeAttachmentHandling(message: Message, didAttachImage: Bool, completionHandler: @escaping () -> Void) {
