@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A123B0010123456789ABCDEF /* ntfy-ping.caf in Resources */ = {isa = PBXBuildFile; fileRef = A123F0010123456789ABCDEF /* ntfy-ping.caf */; };
+		A123B0020123456789ABCDEF /* ntfy-chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = A123F0020123456789ABCDEF /* ntfy-chime.caf */; };
+		A123B0030123456789ABCDEF /* ntfy-ping.caf in Resources */ = {isa = PBXBuildFile; fileRef = A123F0010123456789ABCDEF /* ntfy-ping.caf */; };
+		A123B0040123456789ABCDEF /* ntfy-chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = A123F0020123456789ABCDEF /* ntfy-chime.caf */; };
 		02024E60283D7CBB0064224A /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02024E5F283D7CBB0064224A /* Extensions.swift */; };
 		18A28C5C2FBCF00000A52946 /* AttachmentAutoDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A28C5B2FBCF00000A52946 /* AttachmentAutoDownloadView.swift */; };
 		2939B2162F8F293C00A52946 /* UserRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2939B2132F8F293C00A52946 /* UserRowView.swift */; };
@@ -97,6 +101,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A123F0010123456789ABCDEF /* ntfy-ping.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Sounds/ntfy-ping.caf"; sourceTree = "<group>"; };
+		A123F0020123456789ABCDEF /* ntfy-chime.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Sounds/ntfy-chime.caf"; sourceTree = "<group>"; };
 		02024E5F283D7CBB0064224A /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		18A28C5B2FBCF00000A52946 /* AttachmentAutoDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentAutoDownloadView.swift; sourceTree = "<group>"; };
 		2939B20F2F8F293C00A52946 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -325,6 +331,8 @@
 				9474F1C6282F2AA800CDE4DD /* Preview Content */,
 				9474F1C4282F2AA800CDE4DD /* Assets.xcassets */,
 				94CD1965283E662900973B93 /* emojis.json */,
+				A123F0010123456789ABCDEF /* ntfy-ping.caf */,
+				A123F0020123456789ABCDEF /* ntfy-chime.caf */,
 				9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */,
 			);
 			path = Assets;
@@ -420,6 +428,8 @@
 				9474F1C8282F2AA800CDE4DD /* Preview Assets.xcassets in Resources */,
 				9474F1C5282F2AA800CDE4DD /* Assets.xcassets in Resources */,
 				94CD1966283E662900973B93 /* emojis.json in Resources */,
+				A123B0010123456789ABCDEF /* ntfy-ping.caf in Resources */,
+				A123B0020123456789ABCDEF /* ntfy-chime.caf in Resources */,
 				9474F1DC282F30B500CDE4DD /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -429,6 +439,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				94CD1967283E662900973B93 /* emojis.json in Resources */,
+				A123B0030123456789ABCDEF /* ntfy-ping.caf in Resources */,
+				A123B0040123456789ABCDEF /* ntfy-chime.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

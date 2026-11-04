@@ -20,6 +20,7 @@ struct SettingsView: View {
                     header: Text("Notifications"),
                     footer: Text("Automatically download attachments up to the selected size. Attachments larger than this limit must be downloaded manually.")
                 ) {
+                    NotificationSoundSettingView()
                     AttachmentAutoDownloadView()
                 }
                 Section(
@@ -66,5 +67,32 @@ struct SettingsView_Previews: PreviewProvider {
             .environment(\.managedObjectContext, store.context)
             .environmentObject(store)
             .environmentObject(AppDelegate())
+    }
+}
+
+
+// The sound preference lives in Core Data, which is shared with the notification
+// service extension. Reading it through a fetch request keeps this view updated.
+private struct NotificationSoundSettingView: View {
+    @EnvironmentObject private var store: Store
+    @FetchRequest(sortDescriptors: []) private var prefs: FetchedResults<Preference>
+
+    private var selectedSound: String {
+        guard let sound = prefs.first(where: { $0.key == Store.prefKeyNotificationSound })?.value,
+              Store.notificationSounds.contains(sound) else {
+            return Store.notificationSoundDefault
+        }
+        return sound
+    }
+
+    var body: some View {
+        Picker("Notification sound", selection: Binding(
+            get: { selectedSound },
+            set: { store.saveNotificationSound($0) }
+        )) {
+            Text("System default").tag(Store.notificationSoundDefault)
+            Text("Ping").tag(Store.notificationSoundPing)
+            Text("Chime").tag(Store.notificationSoundChime)
+        }
     }
 }

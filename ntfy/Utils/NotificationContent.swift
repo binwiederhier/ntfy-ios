@@ -69,6 +69,15 @@ extension UNMutableNotificationContent {
             self.relevanceScore = 0.5
         }
         
+        // Use the app-wide alert sound for regular notifications. Keep the system's
+        // critical sound for authorized critical alerts (priority 5).
+        if self.interruptionLevel != .critical {
+            let sound = Store.shared.getNotificationSound()
+            self.sound = sound == Store.notificationSoundDefault
+                ? .default
+                : UNNotificationSound(named: UNNotificationSoundName(rawValue: sound))
+        }
+
         // Make sure the userInfo matches, so that when the notification is tapped, the AppDelegate
         // can properly navigate to the right topic and re-assemble the message.
         self.userInfo = message.toUserInfo()
