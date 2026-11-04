@@ -26,6 +26,12 @@ class Store: ObservableObject {
     static let prefKeyDefaultBaseUrl = "defaultBaseUrl"
     static let prefKeyAttachmentAutoDownloadMaxSize = "attachmentAutoDownloadMaxSize"
     static let prefKeyCriticalAlertsEnabled = "criticalAlertsEnabled"
+    static let prefKeyNotificationSound = "notificationSound"
+    static let notificationSoundDefault = "default"
+    static let notificationSoundPing = "ntfy-ping.caf"
+    static let notificationSoundChime = "ntfy-chime.caf"
+    static let notificationSounds = [notificationSoundDefault, notificationSoundPing, notificationSoundChime]
+
     static let autoDownloadNever = Constants.autoDownloadNever
     static let autoDownloadAlways = Constants.autoDownloadAlways
     static let autoDownload100KB = Constants.autoDownload100KB
@@ -359,6 +365,27 @@ class Store: ObservableObject {
             try context.save()
         } catch let error {
             Log.w(Store.tag, "Cannot store attachment auto-download preference", error)
+            rollbackAndRefresh()
+        }
+    }
+
+    func getNotificationSound() -> String {
+        guard let sound = getPreference(key: Store.prefKeyNotificationSound)?.value,
+              Store.notificationSounds.contains(sound) else {
+            return Store.notificationSoundDefault
+        }
+        return sound
+    }
+
+    func saveNotificationSound(_ sound: String) {
+        guard Store.notificationSounds.contains(sound) else { return }
+        do {
+            let pref = getPreference(key: Store.prefKeyNotificationSound) ?? Preference(context: context)
+            pref.key = Store.prefKeyNotificationSound
+            pref.value = sound
+            try context.save()
+        } catch let error {
+            Log.w(Store.tag, "Cannot store notification sound preference", error)
             rollbackAndRefresh()
         }
     }
