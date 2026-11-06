@@ -22,6 +22,7 @@ struct NotificationListView: View {
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
     @State private var showCopiedConfirmation = false
+    @State private var showIconSettings = false
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -71,6 +72,9 @@ struct NotificationListView: View {
                         Button("Send test notification") {
                             self.sendTestNotification()
                         }
+                        Button("Notification icon") {
+                            self.showIconSettings = true
+                        }
                         if notificationsModel.notifications.count > 0 {
                             Button("Clear all notifications") {
                                 self.showAlert = true
@@ -98,6 +102,9 @@ struct NotificationListView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showIconSettings) {
+            TopicIconView(baseUrl: subscription.baseUrl ?? "", topic: subscription.topicName())
         }
         .alert(isPresented: $showAlert) {
             switch activeAlert {

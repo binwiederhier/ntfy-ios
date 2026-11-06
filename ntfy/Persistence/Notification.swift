@@ -334,11 +334,12 @@ struct Message: Decodable {
     var tags: [String]?
     var actions: [Action]?
     var click: String?
+    var icon: String?
     var pollId: String?
     var attachment: MessageAttachment?
 
     enum CodingKeys: String, CodingKey {
-        case id, time, event, topic, message, title, priority, tags, actions, click, attachment
+        case id, time, event, topic, message, title, priority, tags, actions, click, icon, attachment
         case pollId = "poll_id"
     }
 
@@ -353,6 +354,7 @@ struct Message: Decodable {
         tags: [String]? = nil,
         actions: [Action]? = nil,
         click: String? = nil,
+        icon: String? = nil,
         pollId: String? = nil,
         attachment: MessageAttachment? = nil
     ) {
@@ -366,6 +368,7 @@ struct Message: Decodable {
         self.tags = tags
         self.actions = actions
         self.click = click
+        self.icon = icon
         self.pollId = pollId
         self.attachment = attachment
     }
@@ -382,6 +385,7 @@ struct Message: Decodable {
         tags = try container.decodeIfPresent([String].self, forKey: .tags)
         actions = try container.decodeIfPresent([Action].self, forKey: .actions)
         click = try container.decodeIfPresent(String.self, forKey: .click)
+        icon = try container.decodeIfPresent(String.self, forKey: .icon)
         pollId = try container.decodeIfPresent(String.self, forKey: .pollId)
         attachment = try container.decodeIfPresent(MessageAttachment.self, forKey: .attachment)
     }
@@ -401,6 +405,7 @@ struct Message: Decodable {
             "tags": tags?.joined(separator: ",") ?? "",
             "actions": Actions.shared.encode(actions),
             "click": click ?? "",
+            "icon": icon ?? "",
             "poll_id": pollId ?? ""
         ]
         if let attachment {
@@ -428,6 +433,7 @@ struct Message: Decodable {
         let tags = (userInfo["tags"] as? String ?? "").components(separatedBy: ",")
         let actions = userInfo["actions"] as? String
         let click = userInfo["click"] as? String
+        let icon = userInfo["icon"] as? String
         let pollId = userInfo["poll_id"] as? String
         let attachmentUrl = userInfo["attachment_url"] as? String
         let attachment: MessageAttachment?
@@ -453,6 +459,7 @@ struct Message: Decodable {
             tags: tags,
             actions: Actions.shared.parse(actions),
             click: click,
+            icon: icon,
             pollId: pollId,
             attachment: attachment
         )
