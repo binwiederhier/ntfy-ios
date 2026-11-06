@@ -28,6 +28,7 @@ struct AppMain: App {
                     Log.d(tag, "App became active, refreshing objects")
                     store.hardRefresh()
                     delegate.refreshNotificationSettings()
+                    LiveActivityManager.processPending() // Starting activities is only allowed in the foreground
                 }
         }
     }

@@ -14,7 +14,21 @@ class NotificationService: UNNotificationServiceExtension {
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     
-    override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+    // Requests being handled by this process, see exitWhenIdle
+    private static let lock = NSLock()
+    private static var activeRequests = 0
+    private static var exitWhenIdle = false
+
+    override func didReceive(_ request: UNNotificationRequest, withContentHandler originalContentHandler: @escaping (UNNotificationContent) -> Void) {
+        NotificationService.requestStarted()
+        var finished = false
+        let contentHandler: (UNNotificationContent) -> Void = { content in
+            originalContentHandler(content)
+            if !finished {
+                finished = true
+                NotificationService.requestFinished()
+            }
+        }
         self.store = Store.shared
         self.contentHandler = contentHandler
         self.bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
@@ -63,8 +77,19 @@ class NotificationService: UNNotificationServiceExtension {
         }
         let user = store?.getBasicUser(baseUrl: baseUrl)
         content.modify(message: message, baseUrl: baseUrl)
+        content.quietIfLiveActivityUpdate(message: message)
         content.attachImageIfNeeded(message: message, user: user) {
-            contentHandler(content)
+            content.applySenderIcon(message: message, baseUrl: baseUrl, user: user) { finalContent in
+                LiveActivityManager.handle(messages: [message], baseUrl: baseUrl, user: user) {
+                    // iOS doesn't let extensions update Live Activities, so wake the app to do it.
+                    // Starting one needs the app in the foreground, so a start can't be handled this way.
+                    if let command = LiveActivityCommand(message: message, baseUrl: baseUrl), command.state != .start, !LiveActivityQueue.pending().isEmpty {
+                        LiveActivityWaker.scheduleWake(baseUrl: baseUrl)
+                        NotificationService.exitWhenIdle = true
+                    }
+                    contentHandler(finalContent)
+                }
+            }
         }
     }
     
@@ -91,6 +116,34 @@ class NotificationService: UNNotificationServiceExtension {
                 return
             }
             self.handleMessage(request, content, subscription.baseUrl, message, contentHandler)
+        }
+    }
+
+    private static func requestStarted() {
+        lock.lock()
+        activeRequests += 1
+        lock.unlock()
+    }
+
+    /// iOS only relaunches the app for the wake-up download if this extension is no longer running when the download
+    /// finishes, otherwise it delivers the result here. iOS keeps extension processes around for reuse, so once
+    /// nothing is in flight, quit. The delay gives the content handler time to hand the notification to the system.
+    private static func requestFinished() {
+        lock.lock()
+        activeRequests -= 1
+        let shouldExit = activeRequests == 0 && exitWhenIdle
+        lock.unlock()
+        guard shouldExit else {
+            return
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            lock.lock()
+            let stillIdle = activeRequests == 0
+            lock.unlock()
+            if stillIdle {
+                Log.d("NotificationService", "Exiting so that iOS relaunches the app for the wake-up download")
+                exit(0)
+            }
         }
     }
 }

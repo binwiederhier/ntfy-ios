@@ -63,6 +63,7 @@ struct SubscriptionManager {
             if !messages.isEmpty {
                 store.save(notificationsFromMessages: messages, withSubscription: subscription)
             }
+            LiveActivityManager.handle(messages: messages, baseUrl: subscription.baseUrl ?? "", user: user) {}
             completionHandler(messages)
         }
     }

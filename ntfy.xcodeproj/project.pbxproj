@@ -70,6 +70,18 @@
 		94E9196C28353E0100F30170 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F216283531A200CDE4DD /* Log.swift */; };
 		E27008102AF0F64B006E33BA /* SubscriptionsObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */; };
 		E27008122AF1030A006E33BA /* NotificationsObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27008112AF1030A006E33BA /* NotificationsObservable.swift */; };
+		A1CE00102FF0000000A1CE00 /* LiveActivityShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00012FF0000000A1CE00 /* LiveActivityShared.swift */; };
+		A1CE00112FF0000000A1CE00 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00022FF0000000A1CE00 /* LiveActivityManager.swift */; };
+		A1CE00122FF0000000A1CE00 /* NotificationIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00032FF0000000A1CE00 /* NotificationIcon.swift */; };
+		A1CE00132FF0000000A1CE00 /* TopicIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00042FF0000000A1CE00 /* TopicIconView.swift */; };
+		A1CE00142FF0000000A1CE00 /* LiveActivityShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00012FF0000000A1CE00 /* LiveActivityShared.swift */; };
+		A1CE00152FF0000000A1CE00 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00022FF0000000A1CE00 /* LiveActivityManager.swift */; };
+		A1CE00162FF0000000A1CE00 /* NotificationIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00032FF0000000A1CE00 /* NotificationIcon.swift */; };
+		A1CE00172FF0000000A1CE00 /* NtfyLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00052FF0000000A1CE00 /* NtfyLiveActivity.swift */; };
+		A1CE00182FF0000000A1CE00 /* LiveActivityShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00012FF0000000A1CE00 /* LiveActivityShared.swift */; };
+		A1CE00192FF0000000A1CE00 /* ntfyLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A1CE00082FF0000000A1CE00 /* ntfyLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A1CE00312FF0000000A1CE00 /* LiveActivityWaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00302FF0000000A1CE00 /* LiveActivityWaker.swift */; };
+		A1CE00322FF0000000A1CE00 /* LiveActivityWaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CE00302FF0000000A1CE00 /* LiveActivityWaker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +91,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 9474F1E3282F3FFD00CDE4DD;
 			remoteInfo = ntfyNSE;
+		};
+		A1CE00222FF0000000A1CE00 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9474F1B5282F2AA700CDE4DD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1CE00202FF0000000A1CE00;
+			remoteInfo = ntfyLiveActivity;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -90,6 +109,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				9474F1EB282F3FFD00CDE4DD /* ntfyNSE.appex in Embed App Extensions */,
+				A1CE00192FF0000000A1CE00 /* ntfyLiveActivity.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -148,6 +168,15 @@
 		94CD1969283E666900973B93 /* EmojiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiManager.swift; sourceTree = "<group>"; };
 		E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsObservable.swift; sourceTree = "<group>"; };
 		E27008112AF1030A006E33BA /* NotificationsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsObservable.swift; sourceTree = "<group>"; };
+		A1CE00012FF0000000A1CE00 /* LiveActivityShared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityShared.swift; sourceTree = "<group>"; };
+		A1CE00022FF0000000A1CE00 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		A1CE00032FF0000000A1CE00 /* NotificationIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationIcon.swift; sourceTree = "<group>"; };
+		A1CE00042FF0000000A1CE00 /* TopicIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicIconView.swift; sourceTree = "<group>"; };
+		A1CE00052FF0000000A1CE00 /* NtfyLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyLiveActivity.swift; sourceTree = "<group>"; };
+		A1CE00062FF0000000A1CE00 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1CE00072FF0000000A1CE00 /* ntfyLiveActivity.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ntfyLiveActivity.entitlements; sourceTree = "<group>"; };
+		A1CE00082FF0000000A1CE00 /* ntfyLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ntfyLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1CE00302FF0000000A1CE00 /* LiveActivityWaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityWaker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,6 +189,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		9474F1E1282F3FFD00CDE4DD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1CE00252FF0000000A1CE00 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -201,6 +237,7 @@
 				29E841A12FB417EA00F927E4 /* NotificationAttachmentSectionView.swift */,
 				29E841A22FB417EA00F927E4 /* NotificationListView.swift */,
 				29E841A32FB417EA00F927E4 /* NotificationRowView.swift */,
+				A1CE00042FF0000000A1CE00 /* TopicIconView.swift */,
 			);
 			path = Notifications;
 			sourceTree = "<group>";
@@ -210,6 +247,7 @@
 			children = (
 				9474F1BF282F2AA700CDE4DD /* ntfy */,
 				9474F1E5282F3FFD00CDE4DD /* ntfyNSE */,
+				A1CE00212FF0000000A1CE00 /* ntfyLiveActivity */,
 				9474F1BE282F2AA700CDE4DD /* Products */,
 				9474F1DD282F3A2E00CDE4DD /* Frameworks */,
 			);
@@ -220,6 +258,7 @@
 			children = (
 				9474F1BD282F2AA700CDE4DD /* ntfy.app */,
 				9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */,
+				A1CE00082FF0000000A1CE00 /* ntfyLiveActivity.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -315,6 +354,10 @@
 				94867142283EC9950093C7A4 /* Actions.swift */,
 				948671462841B0B20093C7A4 /* NotificationContent.swift */,
 				948671492841D0CE0093C7A4 /* ActionExecutor.swift */,
+				A1CE00012FF0000000A1CE00 /* LiveActivityShared.swift */,
+				A1CE00022FF0000000A1CE00 /* LiveActivityManager.swift */,
+				A1CE00302FF0000000A1CE00 /* LiveActivityWaker.swift */,
+				A1CE00032FF0000000A1CE00 /* NotificationIcon.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -328,6 +371,16 @@
 				9474F1DB282F30B500CDE4DD /* GoogleService-Info.plist */,
 			);
 			path = Assets;
+			sourceTree = "<group>";
+		};
+		A1CE00212FF0000000A1CE00 /* ntfyLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				A1CE00072FF0000000A1CE00 /* ntfyLiveActivity.entitlements */,
+				A1CE00052FF0000000A1CE00 /* NtfyLiveActivity.swift */,
+				A1CE00062FF0000000A1CE00 /* Info.plist */,
+			);
+			path = ntfyLiveActivity;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -346,6 +399,7 @@
 			);
 			dependencies = (
 				9474F1EA282F3FFD00CDE4DD /* PBXTargetDependency */,
+				A1CE00232FF0000000A1CE00 /* PBXTargetDependency */,
 			);
 			name = ntfy;
 			packageProductDependencies = (
@@ -372,6 +426,23 @@
 			productReference = 9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		A1CE00202FF0000000A1CE00 /* ntfyLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1CE00272FF0000000A1CE00 /* Build configuration list for PBXNativeTarget "ntfyLiveActivity" */;
+			buildPhases = (
+				A1CE00242FF0000000A1CE00 /* Sources */,
+				A1CE00252FF0000000A1CE00 /* Frameworks */,
+				A1CE00262FF0000000A1CE00 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ntfyLiveActivity;
+			productName = ntfyLiveActivity;
+			productReference = A1CE00082FF0000000A1CE00 /* ntfyLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -387,6 +458,9 @@
 					};
 					9474F1E3282F3FFD00CDE4DD = {
 						CreatedOnToolsVersion = 13.3.1;
+					};
+					A1CE00202FF0000000A1CE00 = {
+						CreatedOnToolsVersion = 27.0;
 					};
 				};
 			};
@@ -408,6 +482,7 @@
 			targets = (
 				9474F1BC282F2AA700CDE4DD /* ntfy */,
 				9474F1E3282F3FFD00CDE4DD /* ntfyNSE */,
+				A1CE00202FF0000000A1CE00 /* ntfyLiveActivity */,
 			);
 		};
 /* End PBXProject section */
@@ -429,6 +504,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				94CD1967283E662900973B93 /* emojis.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1CE00262FF0000000A1CE00 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -479,6 +561,11 @@
 				29E841AA2FB417EA00F927E4 /* NotificationAttachmentSectionView.swift in Sources */,
 				29E841AB2FB417EA00F927E4 /* NotificationListView.swift in Sources */,
 				9407EDDA284ADE1F00C1C334 /* User.swift in Sources */,
+				A1CE00102FF0000000A1CE00 /* LiveActivityShared.swift in Sources */,
+				A1CE00112FF0000000A1CE00 /* LiveActivityManager.swift in Sources */,
+				A1CE00312FF0000000A1CE00 /* LiveActivityWaker.swift in Sources */,
+				A1CE00122FF0000000A1CE00 /* NotificationIcon.swift in Sources */,
+				A1CE00132FF0000000A1CE00 /* TopicIconView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -502,6 +589,19 @@
 				94A3F7CB28386B2100C48E79 /* Config.swift in Sources */,
 				948671482841B1430093C7A4 /* NotificationContent.swift in Sources */,
 				9474F2142834755E00CDE4DD /* Subscription.swift in Sources */,
+				A1CE00142FF0000000A1CE00 /* LiveActivityShared.swift in Sources */,
+				A1CE00152FF0000000A1CE00 /* LiveActivityManager.swift in Sources */,
+				A1CE00322FF0000000A1CE00 /* LiveActivityWaker.swift in Sources */,
+				A1CE00162FF0000000A1CE00 /* NotificationIcon.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1CE00242FF0000000A1CE00 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1CE00172FF0000000A1CE00 /* NtfyLiveActivity.swift in Sources */,
+				A1CE00182FF0000000A1CE00 /* LiveActivityShared.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -512,6 +612,11 @@
 			isa = PBXTargetDependency;
 			target = 9474F1E3282F3FFD00CDE4DD /* ntfyNSE */;
 			targetProxy = 9474F1E9282F3FFD00CDE4DD /* PBXContainerItemProxy */;
+		};
+		A1CE00232FF0000000A1CE00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1CE00202FF0000000A1CE00 /* ntfyLiveActivity */;
+			targetProxy = A1CE00222FF0000000A1CE00 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -659,6 +764,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.8.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-weak_framework",
+					ActivityKit,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -694,6 +804,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.8.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-weak_framework",
+					ActivityKit,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -720,6 +835,11 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.8.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-weak_framework",
+					ActivityKit,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyNSE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -747,7 +867,66 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.8.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-weak_framework",
+					ActivityKit,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyNSE;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A1CE00282FF0000000A1CE00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ntfyLiveActivity/ntfyLiveActivity.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 10;
+				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ntfyLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ntfyLiveActivity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.8.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A1CE00292FF0000000A1CE00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ntfyLiveActivity/ntfyLiveActivity.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 10;
+				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ntfyLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ntfyLiveActivity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.8.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.LiveActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -782,6 +961,15 @@
 			buildConfigurations = (
 				9474F1ED282F3FFD00CDE4DD /* Debug */,
 				9474F1EE282F3FFD00CDE4DD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1CE00272FF0000000A1CE00 /* Build configuration list for PBXNativeTarget "ntfyLiveActivity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1CE00282FF0000000A1CE00 /* Debug */,
+				A1CE00292FF0000000A1CE00 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

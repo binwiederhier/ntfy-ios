@@ -13,6 +13,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
     @Published var selectedBaseUrl: String? = nil
     @Published private(set) var criticalAlertSetting: UNNotificationSetting = .notSupported
+    private let liveActivityWakeHandler = LiveActivityWakeHandler()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Log.d(tag, "Launching AppDelegate")
@@ -104,6 +105,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
             return
         }
 
+        // Retry queued Live Activity updates, since iOS gave us some background time
+        LiveActivityManager.processPending()
+
         // Poll and show new messages as notifications
         let store = Store.shared
         let subscriptionManager = SubscriptionManager(store: store)
@@ -139,6 +143,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         }
     }
     
+    /// Executed when iOS relaunches the app because a download started by the notification service extension finished.
+    /// The extension does this on purpose to get Live Activity updates applied, see LiveActivityWaker.
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
+        guard identifier.hasPrefix(LiveActivityWaker.identifierPrefix) else {
+            completionHandler()
+            return
+        }
+        Log.d(tag, "Woken up by the notification service extension, applying Live Activity updates")
+        LiveActivityManager.processPending()
+        liveActivityWakeHandler.handleEvents(identifier: identifier, completionHandler: completionHandler)
+    }
+
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let token = deviceToken.map { data in String(format: "%02.2hhx", data) }.joined()
         Messaging.messaging().apnsToken = deviceToken
@@ -165,13 +181,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         let user = Store.shared.getUser(baseUrl: baseUrl)?.toBasicUser()
         let content = UNMutableNotificationContent()
         content.modify(message: message, baseUrl: baseUrl)
+        content.quietIfLiveActivityUpdate(message: message)
         content.attachImageIfNeeded(message: message, user: user) {
-            let request = UNNotificationRequest(identifier: message.id, content: content, trigger: nil /* now */)
-            UNUserNotificationCenter.current().add(request) { error in
-                if let error = error {
-                    Log.e(self.tag, "Unable to create notification", error)
+            content.applySenderIcon(message: message, baseUrl: baseUrl, user: user) { finalContent in
+                let request = UNNotificationRequest(identifier: message.id, content: finalContent, trigger: nil /* now */)
+                UNUserNotificationCenter.current().add(request) { error in
+                    if let error = error {
+                        Log.e(self.tag, "Unable to create notification", error)
+                    }
+                    completionHandler?()
                 }
-                completionHandler?()
             }
         }
     }
@@ -201,6 +220,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = notification.request.content.userInfo
         Log.d(tag, "Notification received via userNotificationCenter(willPresent)", userInfo)
+
+        // The app is in the foreground, so this is the moment where queued Live Activities can be started
+        LiveActivityManager.processPending()
+        if let message = Message.from(userInfo: userInfo), let command = LiveActivityCommand(message: message, baseUrl: ""), command.state != .start {
+            completionHandler([.list])
+            return
+        }
         completionHandler([[.banner, .sound]])
     }
     
