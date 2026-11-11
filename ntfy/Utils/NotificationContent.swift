@@ -36,8 +36,7 @@ extension UNMutableNotificationContent {
         // permissions. This is described in https://stackoverflow.com/a/44580916/1440785
         configureNotificationActions(message: message)
         
-        // Group by topic, and only elevate priority 5 alerts to critical when the user opted in
-        // and iOS has granted critical alert permission.
+        // Group by topic
         self.threadIdentifier = topicUrl(baseUrl: baseUrl, topic: message.topic)
         
         // Map priorities to interruption level (light up screen, ...) and relevance (order)
@@ -55,18 +54,22 @@ extension UNMutableNotificationContent {
             self.interruptionLevel = .timeSensitive
             self.relevanceScore = 0.75
         case 5:
-            if Store.shared.getCriticalAlertsEnabled() && Store.getCriticalAlertsAuthorized() {
-                self.sound = .defaultCritical
-                self.interruptionLevel = .critical
-            } else {
-                self.sound = .default
-                self.interruptionLevel = .timeSensitive
-            }
+            self.sound = .default
+            self.interruptionLevel = .timeSensitive
             self.relevanceScore = 1
         default:
             self.sound = .default
             self.interruptionLevel = .active
             self.relevanceScore = 0.5
+        }
+        
+        // Elevate to a critical alert if the publisher asked for it (X-Apple-Critical header, or max
+        // priority if the header is not set), but only when the user opted in and iOS has granted
+        // critical alert permission. This must be decided here (and not left to the APNs payload of
+        // the server), because the sound and interruption level are always overridden above.
+        if message.isCritical && Store.shared.getCriticalAlertsEnabled() && Store.getCriticalAlertsAuthorized() {
+            self.sound = CriticalSound.sound(named: message.apple?.sound, volume: message.apple?.effectiveVolume ?? 1.0)
+            self.interruptionLevel = .critical
         }
         
         // Make sure the userInfo matches, so that when the notification is tapped, the AppDelegate
@@ -207,6 +210,74 @@ extension UNMutableNotificationContent {
         } else {
             body = body + "\n\n" + summary
         }
+    }
+}
+
+/// Resolves the sound of a critical alert from the publisher-provided sound name (X-Apple-Sound header).
+///
+/// There are no custom sounds bundled with the app yet, so every name currently resolves to the default
+/// critical sound. To add custom sounds, add the sound files (.caf, .aiff or .wav, max. 30 seconds) to the
+/// main app target, or place them in the Library/Sounds folder of the app group container. No other code
+/// changes are required: publishers can then reference them with or without file extension.
+enum CriticalSound {
+    private static let tag = "CriticalSound"
+    private static let defaultSoundName = "default" // Used by the server if X-Apple-Sound is not set
+    private static let supportedExtensions = ["caf", "aiff", "wav"]
+
+    static func sound(named name: String?, volume: Float) -> UNNotificationSound {
+        guard let fileName = resolveFileName(name) else {
+            return .defaultCriticalSound(withAudioVolume: volume)
+        }
+        return .criticalSoundNamed(UNNotificationSoundName(rawValue: fileName), withAudioVolume: volume)
+    }
+
+    /// Returns the file name of an existing sound file for the given sound name, or nil if the default
+    /// sound should be used. We check for existence ourselves instead of relying on iOS to fall back,
+    /// so that an unknown sound name is guaranteed to still play the default critical sound.
+    static func resolveFileName(_ name: String?) -> String? {
+        guard let name = name?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !name.isEmpty,
+              name.lowercased() != defaultSoundName else {
+            return nil
+        }
+        // Sound names are plain file names; the server rejects path separators too
+        guard !name.contains("/"), !name.contains("\\"), !name.hasPrefix(".") else {
+            Log.w(tag, "Invalid critical alert sound name, using default sound")
+            return nil
+        }
+        let candidates = (name as NSString).pathExtension.isEmpty
+            ? supportedExtensions.map { "\(name).\($0)" }
+            : [name]
+        let fileManager = FileManager.default
+        for candidate in candidates {
+            for directory in soundDirectories() {
+                if fileManager.fileExists(atPath: directory.appendingPathComponent(candidate).path) {
+                    return candidate
+                }
+            }
+        }
+        Log.w(tag, "Critical alert sound \(name) not found, using default sound")
+        return nil
+    }
+
+    /// Locations in which iOS looks for notification sounds, as far as they are reachable from both
+    /// the app and the notification service extension.
+    private static func soundDirectories() -> [URL] {
+        var directories = [mainAppBundleUrl()]
+        if let groupContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup) {
+            directories.append(groupContainer.appendingPathComponent("Library/Sounds", isDirectory: true))
+        }
+        return directories
+    }
+
+    /// Sounds are always looked up in the main app bundle, even if the notification is created by the
+    /// notification service extension (which lives in ntfy.app/PlugIns/ntfyNSE.appex).
+    private static func mainAppBundleUrl() -> URL {
+        let bundleUrl = Bundle.main.bundleURL
+        if bundleUrl.pathExtension == "appex" {
+            return bundleUrl.deletingLastPathComponent().deletingLastPathComponent()
+        }
+        return bundleUrl
     }
 }
 

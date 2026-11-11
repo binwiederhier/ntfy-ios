@@ -336,9 +336,10 @@ struct Message: Decodable {
     var click: String?
     var pollId: String?
     var attachment: MessageAttachment?
+    var apple: MessageApple?
 
     enum CodingKeys: String, CodingKey {
-        case id, time, event, topic, message, title, priority, tags, actions, click, attachment
+        case id, time, event, topic, message, title, priority, tags, actions, click, attachment, apple
         case pollId = "poll_id"
     }
 
@@ -354,7 +355,8 @@ struct Message: Decodable {
         actions: [Action]? = nil,
         click: String? = nil,
         pollId: String? = nil,
-        attachment: MessageAttachment? = nil
+        attachment: MessageAttachment? = nil,
+        apple: MessageApple? = nil
     ) {
         self.id = id
         self.time = time
@@ -368,6 +370,7 @@ struct Message: Decodable {
         self.click = click
         self.pollId = pollId
         self.attachment = attachment
+        self.apple = apple
     }
 
     init(from decoder: Decoder) throws {
@@ -384,6 +387,8 @@ struct Message: Decodable {
         click = try container.decodeIfPresent(String.self, forKey: .click)
         pollId = try container.decodeIfPresent(String.self, forKey: .pollId)
         attachment = try container.decodeIfPresent(MessageAttachment.self, forKey: .attachment)
+        // Malformed iOS options must never make the entire message undecodable
+        apple = try? container.decodeIfPresent(MessageApple.self, forKey: .apple)
     }
     
     func toUserInfo() -> [AnyHashable: Any] {
@@ -409,6 +414,9 @@ struct Message: Decodable {
             userInfo["attachment_size"] = String(attachment.size ?? 0)
             userInfo["attachment_expires"] = String(attachment.expires ?? 0)
             userInfo["attachment_url"] = attachment.url
+        }
+        if let appleJson = apple?.toJsonString() {
+            userInfo["apple"] = appleJson
         }
         return userInfo
     }
@@ -454,8 +462,71 @@ struct Message: Decodable {
             actions: Actions.shared.parse(actions),
             click: click,
             pollId: pollId,
-            attachment: attachment
+            attachment: attachment,
+            apple: MessageApple.from(jsonString: userInfo["apple"] as? String)
         )
+    }
+}
+
+/// iOS-specific delivery options, set by the publisher via the X-Apple-Critical, X-Apple-Sound and
+/// X-Apple-Volume headers (see "iOS critical alerts" in the ntfy server docs).
+///
+/// The struct is only present if X-Apple-Critical was set explicitly. An explicit value (true or false)
+/// always overrides the priority-based default (max priority means critical), see `Message.isCritical`.
+/// Sound and volume are only used for critical alerts.
+struct MessageApple: Codable, Equatable {
+    var critical: Bool
+    var sound: String?
+    var volume: Float?
+
+    init(critical: Bool, sound: String? = nil, volume: Float? = nil) {
+        self.critical = critical
+        self.sound = sound
+        self.volume = volume
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        critical = try container.decodeIfPresent(Bool.self, forKey: .critical) ?? false
+        sound = try container.decodeIfPresent(String.self, forKey: .sound)
+        volume = try container.decodeIfPresent(Float.self, forKey: .volume)
+    }
+
+    /// Volume for the critical alert sound. The server only accepts values greater than 0.0 and at
+    /// most 1.0, and defaults to 1.0. Anything else is treated as "not set".
+    var effectiveVolume: Float {
+        guard let volume = volume, volume > 0, volume <= 1 else {
+            return 1.0
+        }
+        return volume
+    }
+
+    /// Encodes the options the same way the ntfy server does in the FCM/APNs data ("apple" key, JSON string)
+    func toJsonString() -> String? {
+        guard let data = try? JSONEncoder().encode(self) else {
+            return nil
+        }
+        return String(data: data, encoding: .utf8)
+    }
+
+    /// Parses the "apple" key of the FCM/APNs data (JSON string), see server_firebase.go
+    static func from(jsonString: String?) -> MessageApple? {
+        guard let jsonString = jsonString, !jsonString.isEmpty, let data = jsonString.data(using: .utf8) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(MessageApple.self, from: data)
+    }
+}
+
+extension Message {
+    /// Whether the publisher wants this message delivered as an iOS critical alert. This mirrors
+    /// appleCritical() in the ntfy server: an explicit X-Apple-Critical value always wins; without
+    /// it, max priority messages are critical.
+    var isCritical: Bool {
+        if let apple = apple {
+            return apple.critical
+        }
+        return priority == 5
     }
 }
 
