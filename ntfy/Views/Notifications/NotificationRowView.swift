@@ -16,9 +16,14 @@ struct NotificationRowView: View {
     let onCopyMessage: () -> Void
     @StateObject private var attachmentController = NotificationAttachmentController()
     @State private var attachmentPresentation: AttachmentPresentation?
+    @State private var sharedText: SharedText?
+    @State private var showsClickUrl = false
     
     var body: some View {
         notificationRow
+            .sheet(item: $sharedText) { sharedText in
+                ActivityView(activityItems: [sharedText.text])
+            }
             .swipeActions(edge: .trailing) {
                 Button(role: .destructive) {
                     store.delete(notification: notification)
@@ -50,20 +55,41 @@ struct NotificationRowView: View {
                                 .scaledToFit()
                                 .frame(width: 16, height: 16)
                         }
+                        if clickUrl != nil {
+                            // The click URL is otherwise invisible; tapping the icon reveals where the message leads
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    showsClickUrl.toggle()
+                                }
+                            } label: {
+                                Image(systemName: "link")
+                                    .font(.caption)
+                                    .foregroundColor(showsClickUrl ? .accentColor : .gray)
+                                    .padding(.horizontal, 4)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(showsClickUrl ? "Hide link" : "Show link")
+                        }
                     }
                     Spacer()
-                    if clickUrl != nil {
-                        messageActionsMenu
-                    }
+                    messageActionsMenu
                 }
                 .padding([.bottom], 2)
-                if let title = notification.formatTitle(), title != "" {
+                if #unavailable(iOS 16.0), let title = notification.formatTitle(), title != "" {
                     Text(title)
                         .font(.headline)
                         .bold()
                         .padding([.bottom], 2)
                 }
                 messageText
+                if showsClickUrl, let clickUrl {
+                    Text(clickUrl.absoluteString)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .textSelection(.enabled)
+                        .padding([.top], 2)
+                }
                 if !notification.nonEmojiTags().isEmpty {
                     Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
                         .font(.subheadline)
@@ -110,8 +136,15 @@ struct NotificationRowView: View {
     
     private var messageText: some View {
         Group {
-            Text(notification.linkifiedMessageAttributedString())
-                .font(.body)
+            if #available(iOS 16.0, *) {
+                // UITextView allows selecting part of the message (long press), which SwiftUI Text can't
+                // Title and message share one text view, so a selection can span both
+                SelectableMessageText(title: notification.formatTitle(), message: notification.formatMessage())
+            } else {
+                Text(notification.linkifiedMessageAttributedString())
+                    .font(.body)
+                    .textSelection(.enabled)
+            }
         }
     }
     
@@ -134,9 +167,7 @@ struct NotificationRowView: View {
     
     private var messageActionsMenu: some View {
         Menu {
-            Button("Copy message") {
-                copyMessage()
-            }
+            messageContextMenu
         } label: {
             Image(systemName: "ellipsis.circle")
                 .foregroundColor(.gray)
@@ -144,6 +175,59 @@ struct NotificationRowView: View {
                 .padding(.vertical, 4)
         }
         .menuStyle(.borderlessButton)
+    }
+    
+    @ViewBuilder
+    private var messageContextMenu: some View {
+        Button {
+            copyMessage()
+        } label: {
+            Label("Copy message", systemImage: "doc.on.doc")
+        }
+        if let title = notification.formatTitle(), !title.isEmpty {
+            Button {
+                copyText(title)
+            } label: {
+                Label("Copy title", systemImage: "textformat")
+            }
+        }
+        Button {
+            sharedText = SharedText(text: shareableText)
+        } label: {
+            Label("Share", systemImage: "square.and.arrow.up")
+        }
+        if let clickUrl {
+            Button {
+                openURL(clickUrl)
+            } label: {
+                Label("Open link", systemImage: "safari")
+            }
+            Button {
+                copyText(clickUrl.absoluteString)
+            } label: {
+                Label("Copy link", systemImage: "link")
+            }
+        }
+        Divider()
+        Button(role: .destructive) {
+            store.delete(notification: notification)
+        } label: {
+            Label("Delete", systemImage: "trash")
+        }
+    }
+    
+    private var shareableText: String {
+        let message = notification.formatMessage()
+        guard let title = notification.formatTitle(), !title.isEmpty else {
+            return message
+        }
+        return "\(title)\n\n\(message)"
+    }
+    
+    private func copyText(_ text: String) {
+        UIPasteboard.general.setValue(text, forPasteboardType: UTType.plainText.identifier)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        showCopyFeedback()
     }
     
     private func copyMessage() {
@@ -157,10 +241,9 @@ struct NotificationRowView: View {
     }
     
     private func handleRowTap() {
+        // Copying moved to the "..." menu, so that tapping doesn't interfere with selecting text
         if let clickUrl {
             openURL(clickUrl)
-        } else {
-            copyMessage()
         }
     }
 }
@@ -176,6 +259,11 @@ extension NotificationRowView {
 
         func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
         }
+    }
+
+    private struct SharedText: Identifiable {
+        let id = UUID()
+        let text: String
     }
 
     private struct AttachmentPresentation: Identifiable {
@@ -411,4 +499,56 @@ extension NotificationRowView {
         }
     }
 
+}
+
+/// Read-only, selectable title and message text with tappable links.
+@available(iOS 16.0, *)
+private struct SelectableMessageText: UIViewRepresentable {
+    let title: String?
+    let message: String
+
+    private var attributedText: NSAttributedString {
+        let result = NSMutableAttributedString()
+        if let title, !title.isEmpty {
+            let titleFont = UIFont.preferredFont(forTextStyle: .headline)
+            let paragraph = NSMutableParagraphStyle()
+            paragraph.paragraphSpacing = 2
+            result.append(NSAttributedString(string: title + "\n", attributes: [
+                .font: UIFont(descriptor: titleFont.fontDescriptor.withSymbolicTraits(.traitBold) ?? titleFont.fontDescriptor, size: 0),
+                .foregroundColor: UIColor.label,
+                .paragraphStyle: paragraph
+            ]))
+        }
+        result.append(NSAttributedString(string: message, attributes: [
+            .font: UIFont.preferredFont(forTextStyle: .body),
+            .foregroundColor: UIColor.label
+        ]))
+        return result
+    }
+
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isScrollEnabled = false
+        textView.backgroundColor = .clear
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.dataDetectorTypes = [.link]
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return textView
+    }
+
+    func updateUIView(_ textView: UITextView, context: Context) {
+        let attributedText = attributedText
+        if textView.attributedText.string != attributedText.string {
+            textView.attributedText = attributedText
+        }
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView textView: UITextView, context: Context) -> CGSize? {
+        let width = proposal.width ?? UIScreen.main.bounds.width
+        let size = textView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
+        return CGSize(width: width, height: ceil(size.height))
+    }
 }
