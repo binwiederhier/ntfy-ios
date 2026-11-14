@@ -17,6 +17,7 @@ struct NotificationRowView: View {
     @StateObject private var attachmentController = NotificationAttachmentController()
     @State private var attachmentPresentation: AttachmentPresentation?
     @State private var sharedText: SharedText?
+    @State private var showsClickUrl = false
     
     var body: some View {
         notificationRow
@@ -54,6 +55,22 @@ struct NotificationRowView: View {
                                 .scaledToFit()
                                 .frame(width: 16, height: 16)
                         }
+                        if clickUrl != nil {
+                            // The click URL is otherwise invisible; tapping the icon reveals where the message leads
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    showsClickUrl.toggle()
+                                }
+                            } label: {
+                                Image(systemName: "link")
+                                    .font(.caption)
+                                    .foregroundColor(showsClickUrl ? .accentColor : .gray)
+                                    .padding(.horizontal, 4)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(showsClickUrl ? "Hide link" : "Show link")
+                        }
                     }
                     Spacer()
                     messageActionsMenu
@@ -66,6 +83,13 @@ struct NotificationRowView: View {
                         .padding([.bottom], 2)
                 }
                 messageText
+                if showsClickUrl, let clickUrl {
+                    Text(clickUrl.absoluteString)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .textSelection(.enabled)
+                        .padding([.top], 2)
+                }
                 if !notification.nonEmojiTags().isEmpty {
                     Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
                         .font(.subheadline)
