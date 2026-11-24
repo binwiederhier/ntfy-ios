@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Superseded PR runs are cancelled; runs on main always finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Pinned so a new SwiftLint or Xcode release can't break CI without a code change.
+  SWIFTLINT_VERSION: 0.65.1
+  XCODE_VERSION: "26.6"
+
+jobs:
+  lint:
+    runs-on: macos-26
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install linters
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/swiftlint.zip" \
+            "https://github.com/realm/SwiftLint/releases/download/$SWIFTLINT_VERSION/portable_swiftlint.zip"
+          unzip -q "$RUNNER_TEMP/swiftlint.zip" -d "$RUNNER_TEMP/swiftlint"
+          echo "$RUNNER_TEMP/swiftlint" >> "$GITHUB_PATH"
+          brew install shellcheck actionlint
+      - name: Lint
+        run: |
+          swiftlint version
+          scripts/lint.sh
+
+  test:
+    needs: lint
+    runs-on: macos-26
+    timeout-minutes: 20
+    env:
+      # Ad-hoc signing keeps entitlements (the app group the Store needs) on the
+      # simulator without requiring an Apple developer account.
+      SIGNING: CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER=
+      DESTINATION: platform=iOS Simulator,name=iPhone 17,OS=latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "/Applications/Xcode_$XCODE_VERSION.app"
+          xcodebuild -version
+
+      - name: Write dummy GoogleService-Info.plist
+        run: scripts/dummy-firebase-plist.sh
+
+      - name: Cache Swift packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/SourcePackages
+          key: spm-${{ runner.os }}-${{ hashFiles('ntfy.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Build and test (app, NSE and unit tests)
+        run: |
+          # xcbeautify trims the raw xcodebuild log; the full log is in the uploaded TestResults.xcresult.
+          set -o pipefail
+          command -v xcbeautify >/dev/null || brew install xcbeautify
+          # $SIGNING is intentionally unquoted so it splits into separate build settings.
+          # shellcheck disable=SC2086
+          xcodebuild test \
+            -project ntfy.xcodeproj \
+            -scheme ntfy \
+            -destination "$DESTINATION" \
+            -clonedSourcePackagesDirPath "$RUNNER_TEMP/SourcePackages" \
+            -resultBundlePath TestResults.xcresult \
+            $SIGNING | xcbeautify --renderer github-actions
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestResults
+          path: TestResults.xcresult
