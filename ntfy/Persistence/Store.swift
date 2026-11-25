@@ -38,7 +38,7 @@ class Store: ObservableObject {
     private static let sharedDefaultsKeyCriticalAlertsAuthorized = "criticalAlertsAuthorized"
     // Loaded once and shared, so multiple stores (e.g. in-memory ones for previews and tests)
     // don't register duplicate entity descriptions for the same managed object subclasses.
-    private static let model: NSManagedObjectModel = {
+    static let model: NSManagedObjectModel = {
         guard let url = Bundle.main.url(forResource: Store.modelName, withExtension: "momd"),
               let model = NSManagedObjectModel(contentsOf: url) else {
             fatalError("Cannot load Core Data model \(Store.modelName)")
@@ -133,12 +133,19 @@ class Store: ObservableObject {
 
     func updateSubscription(subscription: Subscription, displayName: String?) {
         let trimmed = displayName?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let trimmed = trimmed, !trimmed.isEmpty {
-            subscription.customDisplayName = String(trimmed.prefix(64))
-        } else {
-            subscription.customDisplayName = nil
+        context.performAndWait {
+            do {
+                if let trimmed = trimmed, !trimmed.isEmpty {
+                    subscription.customDisplayName = String(trimmed.prefix(64))
+                } else {
+                    subscription.customDisplayName = nil
+                }
+                try context.save()
+            } catch let error {
+                Log.w(Store.tag, "Cannot save display name", error)
+                rollbackAndRefresh()
+            }
         }
-        try? context.save()
     }
 
     func completeAttachmentDownload(notificationID: String, localPath: String, resolvedType: String?, resolvedSize: Int64) {

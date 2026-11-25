@@ -79,4 +79,28 @@ struct StoreTests {
         store.saveCriticalAlertsEnabled(false)
         #expect(!store.getCriticalAlertsEnabled())
     }
+
+    @Test(arguments: [
+        ("  Garage  ", "Garage"),
+        (String(repeating: "a", count: 70), String(repeating: "a", count: 64)),
+        ("", nil),
+        ("   ", nil),
+        (nil, nil),
+    ] as [(String?, String?)])
+    func updateSubscriptionNormalizesDisplayName(input: String?, want: String?) {
+        let subscription = store.saveSubscription(baseUrl: "https://example.com", topic: "garage")
+        subscription.customDisplayName = "old"
+        store.updateSubscription(subscription: subscription, displayName: input)
+        #expect(subscription.customDisplayName == want)
+    }
+
+    @Test func updateSubscriptionPersistsDisplayName() throws {
+        let subscription = store.saveSubscription(baseUrl: "https://example.com", topic: "garage")
+        store.updateSubscription(subscription: subscription, displayName: "Garage door")
+        store.context.refreshAllObjects()
+
+        let fetched = try #require(store.getSubscription(baseUrl: "https://example.com", topic: "garage"))
+        #expect(fetched.customDisplayName == "Garage door")
+        #expect(!store.context.hasChanges)
+    }
 }

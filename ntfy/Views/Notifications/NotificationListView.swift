@@ -58,7 +58,7 @@ struct NotificationListView: View {
         .environment(\.editMode, self.$editMode)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text(subscription.topicName())
+                Text(subscription.displayName())
                     .font(.headline)
                     .lineLimit(1)
             }
