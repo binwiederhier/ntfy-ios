@@ -21,6 +21,7 @@ This document is to keep track of the feature parity between the iOS and Android
 | Dark mode                             | :white_check_mark: | :white_check_mark: | Dependent on iOS dark mode, may add override in                                                               |
 | Logging                               | :x:                | :white_check_mark: | Not yet implemented                                                                                           |
 | Share to topic                        | :x:                | :white_check_mark: | Not yet implemented                                                                                           |
+| Display names                         | :white_check_mark: | :white_check_mark: | Rename from the topic menu                                                                                    |
 
 [ios_filtering]: https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_developer_usernotifications_filtering
 [ntfy_ios_instant_notifications]: https://docs.ntfy.sh/config/#ios-instant-notifications
