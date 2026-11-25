@@ -36,6 +36,15 @@ class Store: ObservableObject {
     static let autoDownload50MB = Constants.autoDownload50MB
     private static let sharedDefaults = UserDefaults(suiteName: Store.appGroup)!
     private static let sharedDefaultsKeyCriticalAlertsAuthorized = "criticalAlertsAuthorized"
+    // Loaded once and shared, so multiple stores (e.g. in-memory ones for previews and tests)
+    // don't register duplicate entity descriptions for the same managed object subclasses.
+    private static let model: NSManagedObjectModel = {
+        guard let url = Bundle.main.url(forResource: Store.modelName, withExtension: "momd"),
+              let model = NSManagedObjectModel(contentsOf: url) else {
+            fatalError("Cannot load Core Data model \(Store.modelName)")
+        }
+        return model
+    }()
     private let container: NSPersistentContainer
     var context: NSManagedObjectContext {
         return container.viewContext
@@ -52,7 +61,7 @@ class Store: ObservableObject {
         description.shouldInferMappingModelAutomatically = true
 
         // Set up container and observe changes from app extension
-        container = NSPersistentContainer(name: Store.modelName)
+        container = NSPersistentContainer(name: Store.modelName, managedObjectModel: Store.model)
         container.persistentStoreDescriptions = [description]
         container.loadPersistentStores { description, error in
             if let error = error {
@@ -103,14 +112,15 @@ class Store: ObservableObject {
     // MARK: Subscriptions
     
     func saveSubscription(baseUrl: String, topic: String) -> Subscription {
-        let subscription = Subscription(context: context)
-        subscription.baseUrl = normalizeBaseUrl(baseUrl)
-        subscription.topic = topic
-        DispatchQueue.main.sync {
+        // Callers may be on a background queue. Only touch the returned object on the main queue.
+        context.performAndWait {
+            let subscription = Subscription(context: context)
+            subscription.baseUrl = normalizeBaseUrl(baseUrl)
+            subscription.topic = topic
             Log.d(Store.tag, "Storing subscription baseUrl=\(subscription.baseUrl ?? "?"), topic=\(topic)")
             try? context.save()
+            return subscription
         }
-        return subscription
     }
     
     func getSubscription(baseUrl: String, topic: String) -> Subscription? {
@@ -236,15 +246,18 @@ class Store: ObservableObject {
     // MARK: Users
     
     func saveUser(baseUrl: String, username: String, password: String) {
-        do {
-            let user = getUser(baseUrl: baseUrl) ?? User(context: context)
-            user.baseUrl = normalizeBaseUrl(baseUrl)
-            user.username = username
-            user.password = password
-            try context.save()
-        } catch let error {
-            Log.w(Store.tag, "Cannot store user", error)
-            rollbackAndRefresh()
+        // Called from a background queue when subscribing with a login.
+        context.performAndWait {
+            do {
+                let user = getUser(baseUrl: baseUrl) ?? User(context: context)
+                user.baseUrl = normalizeBaseUrl(baseUrl)
+                user.username = username
+                user.password = password
+                try context.save()
+            } catch let error {
+                Log.w(Store.tag, "Cannot store user", error)
+                rollbackAndRefresh()
+            }
         }
     }
     
