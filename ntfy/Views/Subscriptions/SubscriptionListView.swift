@@ -3,11 +3,33 @@ import CoreData
 import FirebaseMessaging
 import UserNotifications
 
+enum SubscriptionSortOrder: String, CaseIterable, Identifiable {
+    case recent
+    case name
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .recent: return "Recent activity"
+        case .name: return "Name"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .recent: return "clock"
+        case .name: return "textformat"
+        }
+    }
+}
+
 struct SubscriptionListView: View {
     let tag = "SubscriptionList"
     
     @EnvironmentObject private var store: Store
     @ObservedObject var subscriptionsModel = SubscriptionsObservable()
+    @AppStorage("subscriptionSortOrder") private var sortOrder: SubscriptionSortOrder = .recent
     @State private var showingAddDialog = false
     
     private var subscriptionManager: SubscriptionManager {
@@ -39,14 +61,24 @@ struct SubscriptionListView: View {
     
     private var subscriptionList: some View {
         List {
-            ForEach(subscriptionsModel.subscriptions) { subscription in
+            ForEach(sortedSubscriptions) { subscription in
                 SubscriptionItemNavView(subscription: subscription)
             }
         }
         .listStyle(PlainListStyle())
         .navigationTitle("Subscribed topics")
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Menu {
+                    Picker("Sort by", selection: $sortOrder) {
+                        ForEach(SubscriptionSortOrder.allCases) { order in
+                            Label(order.label, systemImage: order.systemImage)
+                                .tag(order)
+                        }
+                    }
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                }
                 Button {
                     self.showingAddDialog = true
                 } label: {
@@ -80,6 +112,24 @@ struct SubscriptionListView: View {
         .onAppear {
             // Ensures subscription count stays up to date, so a pull to refresh isn't required
             pollSubscriptions()
+        }
+    }
+
+    private var sortedSubscriptions: [Subscription] {
+        let subscriptions = subscriptionsModel.subscriptions
+        let byName: (Subscription, Subscription) -> Bool = {
+            $0.displayName().localizedStandardCompare($1.displayName()) == .orderedAscending
+        }
+        switch sortOrder {
+        case .name:
+            return subscriptions.sorted(by: byName)
+        case .recent:
+            let lastTimes = Dictionary(uniqueKeysWithValues: subscriptions.map { ($0.objectID, $0.lastNotificationTime()) })
+            return subscriptions.sorted { a, b in
+                let timeA = lastTimes[a.objectID] ?? 0
+                let timeB = lastTimes[b.objectID] ?? 0
+                return timeA != timeB ? timeA > timeB : byName(a, b)
+            }
         }
     }
 

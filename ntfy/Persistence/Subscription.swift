@@ -30,3 +30,17 @@ extension Subscription {
             .first as? Notification
     }
 }
+
+extension Subscription {
+    /// Time of the newest notification in this topic, or 0 if there is none.
+    func lastNotificationTime() -> Int64 {
+        guard let notifications else {
+            return 0
+        }
+        var newest: Int64 = 0
+        for case let notification as Notification in notifications where notification.time > newest {
+            newest = notification.time
+        }
+        return newest
+    }
+}

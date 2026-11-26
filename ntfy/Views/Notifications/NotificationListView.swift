@@ -22,6 +22,7 @@ struct NotificationListView: View {
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
     @State private var showCopiedConfirmation = false
+    @State private var searchText = ""
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
@@ -37,6 +38,7 @@ struct NotificationListView: View {
             .refreshable {
                 subscriptionManager.poll(subscription)
             }
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search notifications")
     }
     
     private var notificationList: some View {
@@ -131,6 +133,15 @@ struct NotificationListView: View {
             }
         }
         .overlay(Group {
+            if notificationsModel.notifications.count > 0 && filteredNotifications.isEmpty {
+                Text("No notifications match \"\(searchText)\"")
+                    .font(.title3)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding(40)
+            }
+        })
+        .overlay(Group {
             if notificationsModel.notifications.count == 0 {
                 VStack {
                     Text("You haven't received any notifications for this topic yet.")
@@ -171,11 +182,23 @@ struct NotificationListView: View {
     
     @ViewBuilder
     private var notificationRows: some View {
-        ForEach(notificationsModel.notifications, id: \.self) { notification in
+        ForEach(filteredNotifications, id: \.self) { notification in
             NotificationRowView(
                 notification: notification,
                 onCopyMessage: showCopyConfirmation
             )
+        }
+    }
+    
+    private var filteredNotifications: [Notification] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            return notificationsModel.notifications
+        }
+        return notificationsModel.notifications.filter { notification in
+            [notification.title, notification.message, notification.tags, notification.click, notification.attachmentName]
+                .compactMap { $0 }
+                .contains { $0.localizedCaseInsensitiveContains(query) }
         }
     }
     
